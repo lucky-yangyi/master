@@ -1,0 +1,136 @@
+<!-- 认证用户列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .warning_icon {
+        display: inline-block;
+        width: 31px;
+        height: 28px;
+        background: url("/static/img/img_04.png") no-repeat;
+        vertical-align: top;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="身份证号码" name="id_card" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="authTime" placeholder='认证时间' class="input-small" value="{{.authTime}}" type="text" name="auth_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="渠道" name="source" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="is_credit">
+                                        <option value="">选择授信额度</option>
+                                        <option value="1">有额度</option>
+                                        <option value="2">无额度</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="is_invited">
+                                        <option value="0">业务员邀请</option>
+                                        <option value="1">是</option>
+                                        <option value="2">否</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>身份证号</th>
+                                        <th>认证时间</th>
+                                        <th>授信状态</th>
+                                        <th>剩余额度/授信额度</th>
+                                        <th>注册渠道</th>
+                                        <th>是否业务员邀请</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k,$v := .list}}
+                                    <tr class="trs">
+                                        <td>{{mobileFilter $v.Account}}</td>
+                                        <td>{{$v.Verifyrealname}}</td>
+                                        <td>{{idCardFilter $v.IdCard}}</td>
+                                        <td>{{$v.RealNameTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>{{$v.State}}</td>
+                                        <td>{{$v.RemaindBalance}}/{{$v.Balance}}</td>
+                                        <td>{{$v.Source}}</td>
+                                        <td>{{$v.IsSalemanType}}</td>
+                                        <td> <a target='_blank' href='/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}'>查看</a></td>
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                    $(function () {
+                                                        $("#pagination2").my_page("#searchForm2");
+                                                        $("#authTime").dateRangePicker({
+                                                            separator: "~",
+                                                            autoClose: true,
+                                                            shortcuts: null,
+                                                            customShortcuts: [{
+                                                                name: "清空",
+                                                                dates: function(){
+                                                                    return ["", "",""]
+                                                                }
+                                                            }]
+                                                        });
+                                                    });
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

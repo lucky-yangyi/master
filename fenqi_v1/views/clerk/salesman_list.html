@@ -1,0 +1,197 @@
+<!-- 业务员列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+</style>
+
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <select id="district" name="district">
+                                        <option value="">请选择大区</option>
+                                        {{range .regions}}
+                                            {{if eq .Id $.region}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select id="province" name="province">
+                                        <option value="">请选择省份</option>
+                                        {{range .provinces}}
+                                            {{if eq .Id $.province}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select id="office" name="office">
+                                        <option value="">请选择营业部</option>
+                                        {{range .offices}}
+                                            {{if eq .Id $.office}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="{{.saleman}}" placeHolder="业务员姓名" name="name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="{{.account}}" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="authTime" placeholder='注册时间' class="input-small" value="{{.createTime}}" type="text" name="auth_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="{{.invitate}}" placeHolder="邀请码" name="invite_code" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                        <input type="text" class="input-medium" value="" placeHolder="岗位" name="station_name" />&nbsp;&nbsp;
+                                    </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <span data-permission="operation_salesman_add_account">
+                                    <a class="btn btn-green pull-right" href="javascript:void(0);"   onclick="return getpage('/salesman/toaddsaleman')" >+开通账号</a>
+                                </span>
+                            </ul>
+                        </form>
+                    </div>
+                         
+                    
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                <tr>
+                                    <th>省/直辖市</th>
+                                    <th>营业部</th>
+                                    <th>业务员</th>
+                                    <th>手机号</th>
+                                    <th>岗位</th>
+                                    <th>组别</th>
+                                    <th>邀请码</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                {{range $k,$v:= .list}}
+                                <tr class="trs">
+                                    <td>{{$v.Place}}</td>
+                                    <td>{{$v.OperaDep}}</td>
+                                    <td>{{$v.Saleman}}</td>
+                                    <ideo></ideo></td>
+                                    <td>{{$v.Account}}</td>
+                                    <td>{{$v.Name}}</td>
+                                    <td>{{$v.Group}}</td>
+                                    <td>{{$v.InviteCode}}</td>
+                                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                    <td> <a target='_blank' href='/salesman/getsalesmanbyid?id={{IdUidEncrypt $v.Id}}'>查看</a></td>
+                                    <td data-permission="operation_salesman_edit"> <a target='_blank' href='/salesman/toupdatesalesman?id={{IdUidEncrypt $v.Id}}&flag=1'>编辑</a></td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url="/salesman/getsalesmanlist?pushstate=1" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                            <script type="text/javascript" src="../../static/js/permissions.js"></script>
+                                           <script type="text/javascript">
+                                              $(function () {
+                                                Permissions.initBtn("operation_salesman_add_account,operation_salesman_edit");
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                    $("#authTime").dateRangePicker({
+                                                        separator: "~",
+                                                        autoClose: true,
+                                                        shortcuts: null,
+                                                        customShortcuts: [{
+                                                            name: "清空",
+                                                            dates: function(){
+                                                                return ["", "",""]
+                                                            }
+                                                        }]
+                                                    });
+                                                    $("#district").change(function(){
+                                                        var district = $(this).val();
+                                                        $.ajax({
+                                                            url:"/sysorg/getsysorg",
+                                                            type:"post",
+                                                            data:{oId:district},
+                                                            success:function(result){
+                                                                if(result.ret == 200){
+                                                                    console.log(result,111)
+                                                                    var html = '<option value="">请选择省份</option>';
+                                                                    for(var i = 0; i < result.sos.length; i++){
+                                                                     html += '<option value='+result.sos[i].Id+'>'+result.sos[i].Name+'</option>'
+                                                                    }
+                                                                    $('#province').html(html);
+                                                                    $('#office').html(html);
+                                                                }
+                                                            }
+                                                        })
+                                                    })
+                                                    $("#province").change(function(){
+                                                        var province = $(this).val();
+                                                        $.ajax({
+                                                            url:"/sysorg/getsysorg",
+                                                            type:"post",
+                                                            data:{oId:province},
+                                                            success:function(result){
+                                                                if(result.ret == 200){
+                                                                    var html = '<option value="">请选择营业部</option>';
+                                                                    for(var i = 0; i < result.sos.length ; i++){
+                                                                     html += '<option value='+result.sos[i].Id+'>'+result.sos[i].Name+'</option>'
+                                                                    }
+                                                                    $('#office').html(html);
+                                                                }
+                                                            }
+                                                        })
+                                                    })
+                                                });
+                                            </script>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

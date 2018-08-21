@@ -1,0 +1,60 @@
+
+<!-- 岗位管理1 -->
+<div class="wrapper">
+    <div class="panel panel_border post-manage">
+        <div class="panel-body">
+            <h2 class="panel-title" style='border:none;'>角色管理<input type="text" id="nameCotent" style="display:inline-block;width: 150px;margin-left:40px;"  class="form-control"><button id="nameSubmit" class='btn btn-green' style='margin-left:20px;'>搜索</button><a class="btn btn-green pull-right" style="color:#fff" href="javascript:void(0);" onclick="return getpage('/system/roleedit')">添加</a></h2>
+            <div class="task_list col-md-12">
+                {{range $k, $v := .list}}
+                <div class="list_span"><a href="javascript:;" onclick="return getpage('/system/roleedit?rid={{$v.Id}}')">{{$v.Displayname}}</a><i onclick="deletePost('{{$v.Id}}')">删除</i></div>
+                {{end}}
+                <!-- <div class="list_span"><a href="javascript:;" onclick="return getpage('')">客服主管</a><i onclick="deletePost(1)">删除</i></div>
+                <div class="list_span"><a href="javascript:;" onclick="return getpage('')">M1-0催收</a><i onclick="deletePost(1)">删除</i></div> -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(".task_list").on("mouseover",".list_span",function(){
+        $(this).find("i").show();
+    });
+    $(".task_list").on("mouseleave",".list_span",function(){
+        $(this).find("i").hide();
+    });
+//删除岗位
+function deletePost(postId){
+    if(confirm('删除该角色会造成部分岗位无法登陆，是否继续?')){
+        jQuery.zpost("/system/delrole",{rid:postId},function(result){
+            if(!!result&&result.ret==200){//成功
+                return getpage('/system/rolelist');
+            }else {
+                return;
+            }
+        });
+    }
+}
+    $(".task_list").on("click",".hrefBtn",function () {
+    var url = $(this).attr("dataId");
+    url = '/system/roleedit?rid='+url;
+    console.log(url);
+    getpage(url);
+})
+$("#nameSubmit").click(function () {
+    var name = $("#nameCotent").val();
+    $.ajax({
+        url:"/system/selectrolelist",
+        type:"get",
+        data:{DisplayName:name},
+        success:function (result) {
+            if(result.ret==200){
+                console.log(result)
+                var html = "";
+                for(var i= 0;i< result.list.length; i++){
+                    html += '<div class="list_span"><a class="hrefBtn" href="javascript:;" dataId = '+result.list[i].Id+'>'+result.list[i].Displayname+'</a><i onclick="deletePost('+result.list[i].Id+')">删除</i></div>'
+                }
+                $(".task_list").html(html)
+            }
+        }
+    })
+})
+</script>

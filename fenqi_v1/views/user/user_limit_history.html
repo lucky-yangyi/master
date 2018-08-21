@@ -1,0 +1,47 @@
+<!-- 额度历史路由：/usersmetadata/getlimit -->
+<div class="panle" id="login_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 额度历史</div>
+    <form id="searchForm2" action="" method="get">
+    <div class="panle-body">
+        <table class="table table-hover" >
+            <thead>
+                <tr>
+                    <th>获得时间</th>
+                    <th>额度</th>
+                    <th>备注</th>
+                    <th>系统</th>
+                </tr>
+            </thead>
+            <tbody>
+               {{range $k,$v := .Limit}} 
+                <tr>
+                    <td>{{$v.OperatorTime.Format "2006-01-02 15:04:05" }}</td>
+                    <td>{{$v.BalanceMoney}}</td>
+                    <td>{{$v.Remark}}</td>
+                    <td>{{$v.Displayname}}</td>
+                </tr>
+              {{end}}  
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="5">
+                    <div class="fl">
+                        <div class="pagination"> 每页{{.pageSize}}条，共{{.count}}条
+                        </div>
+                    </div>
+                    <div class="fl">
+                        <div class="pagination" id="pagination2" data-url="/usersmetadata/getlimit?uid={{IdUidEncrypt .uid}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("","#login_record");
+    });
+</script>

@@ -1,0 +1,76 @@
+<!-- 学信网路由：/usersmetadata/getzmxyinfo -->
+<div class="panel-title">
+    <b class="panel-line"></b> 学信网信息</div>
+{{if eq .status "auth"}}
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="3">学籍信息</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>学校名称：{{.student_data.SchoolName}}</td>
+                    <td>学习形式：{{.student_data.EduForm}}</td>
+                    <td>入学时间：{{.student_data.EnrollmentTime}}</td>
+                </tr>
+                <tr>
+                    <td>层次：{{.student_data.Level}}</td>
+                    <td>分院：{{.student_data.YardName}}</td>
+                    <td>毕业时间：{{.student_data.LeaveSchoolTime}}</td>
+                </tr>
+                <tr>
+                    <td>专业：{{.student_data.Specialty}}</td>
+                    <td>系(所、函授站)：{{.student_data.Department}}</td>
+                    <td>状态：{{.student_data.Status}}</td>
+                </tr>
+                <tr>
+                    <td>学制：{{.student_data.LengthOfSchooling}}</td>
+                    <td>班级：{{.student_data.ClassName}}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>学历类别：{{.student_data.EduType}}</td>
+                    <td>学号：{{.student_data.StudentId}}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+            <tr>
+                <td colspan="3">学历信息</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>入学时间：{{.education_data.EnrollmentTime}}</td>
+                <td>层次：{{.education_data.EduLevel}}</td>
+                <td>学习形式：{{.education_data.EduForm}}</td>
+            </tr>
+            <tr>
+                <td>毕业时间：{{.education_data.GraduateTime}}</td>
+                <td>学历类别：{{.education_data.EduType}}</td>
+                <td>毕(结)业：{{.education_data.Graduate}}</td>
+            </tr>
+            <tr>
+                <td>学校名称：{{.education_data.GraduateSchool}}</td>
+                <td>专业：{{.education_data.Specialty}}</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{{else if eq .status "noXxwData"}}
+    <div class="panel-body mgb">
+        <p>未获取到学信网信息</p>
+        <p>鹏元授信评分 : {{.data}}</p>
+    </div>
+{{else if eq .status "noAuth"}}
+    <div class="panel-body mgb">
+        <div>学信网未授权</div>
+    </div>
+{{end}}

@@ -1,0 +1,251 @@
+<!-- 授信退回管理 -->
+
+<div class="sticky-header">
+    <div class="wrapper pr">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                    <input type="hidden" class="input-medium" value="1" name="grade" />
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="operator_name">
+                                        <option value="">处理人</option>
+                                        {{range $k,$v := .operators}}
+                                        <option value="{{$v}}">{{$v}}</option>
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <input id="submitTime" placeholder='提交时间' class="input-small" value="{{.submitTime}}" type="text" name="submit_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <input id="dealTime" placeholder='退回时间' class="input-small" value="" type="text" name="deal_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <input id="appointTime" placeholder='预约入列时间' class="input-small" value="" type="text" name="appoint_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <li class="pull-right">
+                                    <div class="btn btn-green inTeam">入列</div>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body" style='overflow-x:auto;'>
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed" >
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class='check_all'>
+                                        </td>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>处理人</th>
+                                        <th>提交时间</th>
+                                        <th>退回时间</th>
+                                        <th>退回备注</th>
+                                        <th>预约入列时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $k,$v := .list}}
+                                    <tr class="trs">
+                                        <td class='checkbox_td' data-id='{{$v.Id}}'>
+                                            <input type="checkbox" class='check_single'>
+                                        </td>
+                                        <td>{{mobileFilter $v.PhoneNo}}</td>
+                                        <td>{{$v.UserName}}</td>
+                                        <td>{{$v.Displayname}}</td>
+                                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>{{$v.HandlingTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>{{$v.Remark}}</td>
+                                        <td>{{if eq ($v.InqueueTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}暂无{{else}}{{$v.InqueueTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                        <td>
+                                            <a target='_blank' href='/workspace/creditlook?uid={{IdUidEncrypt $v.Uid}}&credit_aduit_id={{$v.Id}}'>查看</a>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url=""  pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 订单通过弹窗 -->
+        <div class="g-modal f-hide" style='background-color:rgba(0,0,0,0);'>
+            <div class='g-content' style='box-shadow:0 0 10px #999;'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">选中<span></span>条记录准备入列</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <select name="" id="inTeamType" class='form-control'>
+                        <option value="">入列类型</option>
+                        <option value="2">排队</option>
+                        <option value="1">插队</option>
+                    </select>
+                    <input id="inTeamTime" class="Wdate form-control" value="" placeholder='入列时间' style='margin-top:20px;' type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+                
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green' id='inTeamBtn'>入列</div>
+                    <div class='btn btn-default modal-close' >取消</div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                $("#pagination2").my_page("#searchForm2");
+                $("#submitTime").dateRangePicker({
+                    separator: "~",
+                    autoClose: true,
+                    shortcuts: null,
+                    customShortcuts: [{
+                        name: "清空",
+                        dates: function(){
+                            return ["", "",""]
+                        }
+                    }]
+                });
+                $("#dealTime").dateRangePicker({
+                    separator: "~",
+                    autoClose: true,
+                    shortcuts: null,
+                    customShortcuts: [{
+                        name: "清空",
+                        dates: function(){
+                            return ["", "",""]
+                        }
+                    }]
+                });
+                $("#appointTime").dateRangePicker({
+                    separator: "~",
+                    autoClose: true,
+                    shortcuts: null,
+                    customShortcuts: [{
+                        name: "清空",
+                        dates: function(){
+                            return ["", "",""]
+                        }
+                    },{
+                        name: "今日",
+                        dates: function(){
+                            return [moment().toDate(), moment().toDate()]
+                        }
+                    }, {
+                        name: "昨日",
+                        dates: function(){
+                            return [moment().subtract(1, "days").toDate(), moment().subtract(1, "days").toDate()]
+                        }
+                    }, {
+                        name: "最近一周",
+                        dates: function () {
+                            var start = moment().day(-6).toDate();
+                            var end = moment().day(0).toDate();
+                            return [start, end];
+                        }
+                    }
+                    ] 
+                });
+                $(".modal-close").click(function(){
+                    $(".g-modal").hide();
+                })
+                $(".check_single").change(function(){
+                    var flag = true;
+                    $(".check_single").each(function(){
+                        if(!$(this).is(":checked")){
+                            flag = false;
+                        }else{
+                            flag = true
+                        }
+                    });
+                    if(flag){
+                        $(".check_all").prop("checked","checked");
+                    }else{
+                        $(".check_all").removeAttr("checked");
+                    }
+                });
+                $(".check_all").change(function(){
+                    if($(this).is(":checked")){
+                        $(".check_single").prop("checked","checked");
+                    }else{
+                        $(".check_single").removeAttr("checked");
+                    }
+                });
+                $(".inTeam").click(function(){
+                    
+                    var length = $(".check_single:checked").length;
+                    if(length <= 0){
+                        alert("请选择入列记录")
+                        return;
+                    }
+                    $(".title-text span").html(length)
+                    $(".g-modal").show();
+                })
+
+                $("#inTeamBtn").bind("click",function(){
+                    var arr = [];
+                    $(".check_single").each(function(){
+                        if($(this).is(":checked")){
+                           arr.push($(this).parent().data("id"));
+                        }
+                    });
+                    
+                    var a =$("#inTeamType").val();
+                    var inqueueType = parseInt(a);
+                    var data ={
+                        inqueueType :inqueueType,
+                        inqueueTime : $("#inTeamTime").val(),
+                        Ids :arr
+                    }
+                    if(a == ""){
+                        alert("请选择入列类型");
+                        return;
+                    }else if(data.inqueueTime == ""){
+                        alert("请选择入列时间");
+                        return;
+                    }
+                    $.zpost("/workspace/updateinqueue",JSON.stringify(data),function(rslt){
+                        if(rslt.ret == 200){
+                            location.reload();
+                        }else{
+                            alert(rslt.msg)
+                        }
+                    });
+                });
+            })
+        </script>
+    </div>

@@ -1,0 +1,162 @@
+<!-- 业务员列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <li class="pull-left">
+                                        <input id="startDate" class="Wdate input-small" value="{{.startRegisterTime}}" type="text" onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                                            name="start_register_time" placeholder="起始反馈时间" /> &nbsp;-&nbsp;
+                                        <input id="endDate" class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                                            value="{{.endRegisterTime}}" name="end_register_time" placeholder="截止反馈时间" />&nbsp;&nbsp;
+                                    </li>
+                                </li>
+                                <li class="pull-left">
+                                    <input id="authTime" placeholder='姓名' class="input-small" value="{{.saleman}}" type="text" name="saleman" />
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="{{.account}}" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="{{.invite_code}}" placeHolder="邀请码" name="invite_code" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select id="office" name="is_checked">
+                                        <option value="">状态</option>
+                                        <option value="ok_app">已审核</option>
+                                        <option value="no_app">未审核</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>反馈时间</th>
+                                        <th>姓名</th>
+                                        <th>手机号</th>
+                                        <th>邀请码</th>
+                                        <th>反馈内容</th>
+                                        <th>备注</th>
+                                        <th>操作人</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k, $v := .list}}
+                                    <tr class="trs">
+                                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>{{$v.Saleman}}</td>
+                                        <td>{{$v.Account}}</td>
+                                        <td>{{$v.InviteCode}}</td>
+                                        <td>{{$v.Advise}}</td>
+                                        <td class='remark_td'>
+                                            {{if eq $v.Remark ""}}
+                                                <span class="tag_txt_blue">未审核</span>
+                                            {{else}}
+                                                <span>{{$v.Remark}}</span>
+                                            {{end}}
+                                        </td>
+                                        <td class='displayname'>{{.Displayname}}</td>
+                                        <td>
+                                            <div class="changeStatus mainColor-text" style='cursor: pointer;' data-id='{{IdUidEncrypt $v.Id}}'>修改状态</div>
+                                        </td>
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="/advise/salesmanlist?pushstate=1" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                    $(function () {
+                                                        var num = 1000;
+                                                        $("#pagination2").my_page("#searchForm2");
+                                                        $(".changeStatus").click(function(){
+                                                            var me = this;
+                                                            dialog.init({
+                                                                title : "备注",
+                                                                textarea : {
+                                                                    html : "<textarea class='remark_txt form-control' style='height:130px;' placeholder='请输入备注'></textarea>"
+                                                                },
+                                                                buttons : [{
+                                                                    text : "确定",
+                                                                    style : "green",
+                                                                    func : function(){
+                                                                        var data = {
+                                                                            remark : $(".remark_txt").val(),
+                                                                            id : $(me).data("id")
+                                                                        };
+                                                                        if(isBlank(data.remark)){
+                                                                            $(".remark_txt").addClass("warning-border");
+                                                                        }else{
+                                                                            $(".remark_txt").removeClass("warning-border");
+                                                                        }
+                                                                        if($(".remark_txt").hasClass("warning-border")){
+                                                                            return;
+                                                                        }
+                                                                        $.ajax({
+                                                                            type : "POST",
+                                                                            url : "/advise/updatesalemanadvise",
+                                                                            data : data,
+                                                                            success : function(rslt){
+                                                                                if(rslt.ret == 200){
+                                                                                    $(".J_modal").remove();
+                                                                                    getpage(location.href);
+                                                                                    // $(me).parent().siblings(".remark_td").html('<span>'+data.remark+'</span>').siblings(".displayname").html({{.DisplayName}});
+                                                                                }
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                },{
+                                                                    text : "取消",
+                                                                    style : "default"
+                                                                }]
+                                                            })
+                                                        })
+                                                });
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

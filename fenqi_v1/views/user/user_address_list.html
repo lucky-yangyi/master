@@ -1,0 +1,49 @@
+<!-- 定位路由：/usersmetadata/getaddresslist -->
+<div class="panle" id="address">
+    <div class="panel-title">
+        <b class="panel-line"></b> 定位</div>
+    <form id="searchForm2" action="" method="get">
+    <div class="panle-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>获取时间</th>
+                    <th>GPS定位</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range $k,$v := .data}}
+                <tr>
+                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                    {{if $v.IsGPS}}
+                    <td>{{$v.Province}}-{{$v.City}}-{{$v.District}}-{{$v.Street}}({{$v.Longitude}},{{$v.Latitude}})</td>
+                    {{else}}
+                    <td>未开启GPS定位权限</td>
+                    {{end}}
+                    <td><a target="_blank" href="http://www.baidu.com/s?wd={{$v.Ip}}">{{$v.Ip}}</a>
+                </tr>
+            {{end}}
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="5">
+                    <div class="fl">
+                        <div class="pagination"> 每页{{.pageSize}}条，共{{.count}}条
+                        </div>
+                    </div>
+                    <div class="fl">
+                        <div class="pagination" id="pagination2" data-url="/usersmetadata/getaddresslist?uid={{IdUidEncrypt .uid}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("","#address");
+    });
+</script>

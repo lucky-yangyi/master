@@ -1,0 +1,81 @@
+<!-- 银行卡路由：/usersmetadata/getusersbankcards -->
+<div class="panle" id="login_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 银行卡
+    </div>
+    <div class="panle-body clearfix J_bankcard" style='max-width:1230px;'>
+
+    </div>
+    <div class='u-LoadMore J_bankcardLoadMore'>加载更多</div>
+</div>
+<script type="text/javascript" src="../../static/js/permissions.js"></script>
+<script>
+    $(function () {
+        var currentPage = 1, pagesize = 4, isEnd = false;
+        $(".J_bankcardLoadMore").click(function () {
+            if (isEnd) {
+                return;
+            }
+            isEnd = true;
+            var data = { uid: uid, page: currentPage++ }
+            $.zget("/usersmetadata/getusersbankcards", data, function (rslt) {
+                if (rslt.ret == 200) {
+                    var html = [];
+                    if (rslt.isBind == 2) {
+                        $(".J_bankcard").siblings(".panel-title").append('<div class="btn btn-green u-usersLookBtn J_unbindBankCard" data-permission="operation_usersmetadata_unwarp" style="right:auto;left:100px;">解绑</div>');
+                    }
+                    var len = rslt.data && rslt.data.length;
+                    for (var i = 0; i < len; i++) {
+                        var item = rslt.data[i];
+                        html.push('<div class="g-bankcardBox">');
+                        html.push('<div class="g-cardTop">');
+                        html.push('<img class="u-cardLogo" src="' + item.LogoImage + '" alt="银行卡" width="124" height="28">');
+                        html.push('<span class="u-cardNumber">' + item.BankName + '</span>');
+                        html.push('<span class="u-cardNumber">尾号' + item.CardNumber + '</span>');
+                        if (data.page == 1 && i == 0 && rslt.isBind == 2) {
+                            html.push('<div class="u-cardStatus">绑</div>');
+                        }
+                        html.push('</div>');
+                        html.push('<div class="g-cardBottom">');
+                        html.push('<p>持卡人姓名：' + item.Verifyrealname + '</p>');
+                        html.push('<p>手机号：' + item.BankMobile + '</p>');
+                        html.push('</div>');
+                        html.push(' </div>');
+                    }
+                    $(".J_bankcard").append(html.join(""));
+                    if (currentPage - 1 >= rslt.pageCount) {
+                        $(".J_bankcardLoadMore").html("已经没有更多银行卡了");
+                        isEnd = true;
+                    } else {
+                        isEnd = false;
+                    }
+                    Permissions.initBtn("operation_usersmetadata_unwarp");
+                }
+            })
+        }).click();
+        $("body").delegate(".J_unbindBankCard", "click", function () {
+            dialog.init({
+                title: "解绑银行卡",
+                tips: "当前操作是解绑银行卡，解绑后此银行卡将不在App客户端显示，您确定嘛？",
+                buttons: [{
+                    text: "确定",
+                    style: "green",
+                    func: function () {
+                        $.zpost("/usersmetadata/unwrapbankcard", { uid: uid ,is_check:true,btn_id:"operation_usersmetadata_unwarp"}, function (rslt) {
+                            if (rslt.ret == 200) {
+                                $(".J_modal").remove();
+                                ajaxLoad($(".workplace-nav li").eq(3));
+                            } else {
+                                alert(rslt.msg);
+                            }
+                        })
+                    }
+                }, {
+                    text: "取消",
+                    style: "default modal_close"
+                }]
+            })
+        })
+    })
+
+</script>

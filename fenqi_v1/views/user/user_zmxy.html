@@ -1,0 +1,43 @@
+<!-- 芝麻信用路由：/usersmetadata/getzmxyinfo -->
+<div class="panel" id="zmxy">
+        <div class="panel-title">
+            <b class="panel-line"></b> 芝麻信用</div>
+        <form id="searchForm2" action="" method="get">
+        <div class="panel-body">
+            <table class="table table-green table-bordered table-hover small">
+                <thead>
+                    <tr>
+                        <td>时间</td>
+                        <td>芝麻分</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range $k,$v := .data}}
+                    <tr>
+                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                        <td>{{$v.ZmScore}}</td>
+                    </tr>
+                {{end}}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <div class="fl">
+                                <div class="pagination"> 每页{{.pageSize}}条，共{{.count}}条
+                                </div>
+                            </div>
+                            <div class="fl">
+                                <div class="pagination" id="pagination2" data-url="/usersmetadata/getzmxyinfo?uid={{IdUidEncrypt .uid}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        </form>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $("#pagination2").my_page("","#zmxy");
+        });
+    </script>

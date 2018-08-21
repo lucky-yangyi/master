@@ -1,0 +1,163 @@
+<!-- 注册用户列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .warning_icon {
+        display: inline-block;
+        width: 31px;
+        height: 28px;
+        background: url("/static/img/img_04.png") no-repeat;
+        vertical-align: top;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" id="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" id="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="startDate_submit" class="Wdate input-small" value="{{.startSubmitTime}}" type="text" onFocus="var endDate_submit=$dp.$('endDate_submit');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate_submit.focus();},maxDate:'#F{$dp.$D(\'endDate_submit\')}'})"
+                                           name="start_submit_time" placeholder="起始购买时间" /> &nbsp;-&nbsp;
+                                    <input id="endDate_submit" class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate_submit\')}'})"
+                                           value="{{.endSubmitTime}}" name="end_submit_time" placeholder="截止购买时间" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="credit_card_name" id="credit_card_name">
+                                        <option value="">报告类型</option>
+                                        <option value="白金卡">白金卡</option>
+                                        <option value="铂金卡">铂金卡</option>
+                                        <option value="钻石卡">钻石卡</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="buy_state" id="buy_state">
+                                        <option value="">支付方式</option>
+                                        <option value="1">连连</option>
+                                        <option value="2">支付宝</option>
+                                        <option value="3">预付费</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="state" id="state">
+                                        <option value="">购买结果</option>
+                                        <option value="SUCCESS">成功</option>
+                                        <option value="FAIL">失败</option>
+                                        <option value="CONFIRM">处理中</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green" id="users_search">搜索</button>
+                                </li>
+                                <li class="pull-left" style="margin-left: 10px">
+                                    <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                <tr>
+                                    <th>手机号</th>
+                                    <th>姓名</th>
+                                    <th>订单号</th>
+                                    <th>购买时间</th>
+                                    <th>报告类型</th>
+                                    <th>支付金额</th>
+                                    <th>支付方式</th>
+                                    <th>购买结果</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k,$v := .list}}
+                                <tr class="trs">
+                                    <td>{{$v.Account}}</td>
+                                    <td>{{$v.VerifyRealName}}</td>
+                                    <td>{{$v.OrderNumber}}</td>
+                                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                    <td>{{$v.CreditCardName}}</td>
+                                    <td>{{$v.PayPrice}}</td>
+                                {{if eq $v.PayMethod 1}}
+                                    <td>连连</td>
+                                {{else if eq $v.PayMethod 2}}
+                                    <td>支付宝</td>
+                                {{else if eq $v.PayMethod 3}}
+                                    <td>预付费</td>
+                                {{else}}
+                                    <td>{{$v.PayMethod}}</td>
+                                {{end}}
+                                {{if eq $v.StateStr "成功"}}
+                                    <td>成功</td>
+                                {{else if eq $v.StateStr "失败"}}
+                                    <td><font class='mainred-text'>失败 {{$v.Remark}}</font></td>
+                                {{else if eq $v.StateStr "处理中"}}
+                                    <td><font class='mainColor-text'>确认中</font></td>
+                                {{end}}
+                                    <td> <a target='_blank' href='/usersmanage/usersmetadatalook?index=16&uid={{IdUidEncrypt $v.Uid}}'>查看</a></td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页
+                                                <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                            <script type="text/javascript">
+                                                $(function () {
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                });
+                                            </script>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                    <script>
+                        $('#export').on('click', function () {
+                            var account = $("#account").val();      //手机号
+                            var user_name = $('#user_name').val();      //姓名
+                            var startDate_submit = $('#startDate_submit').val();      //起始购买时间
+                            var endDate_submit = $('#endDate_submit').val();      //截止购买时间
+                            var credit_card_name = $('#credit_card_name').val();      //报告类型
+                            var buy_state = $('#buy_state').val();      //支付方式
+                            var state = $('#state').val();      //购买结果
+                            var url = '/financedata/financedatatoexcel?account=' + account + '&user_name=' + user_name + '&startDate_submit=' + startDate_submit+ '&endDate_submit=' + endDate_submit+ '&credit_card_name=' + credit_card_name+ '&buy_state=' + buy_state+ '&state=' + state;
+                            window.location.href = url;
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

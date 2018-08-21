@@ -1,0 +1,273 @@
+<!-- 通过汇总 -->
+<style>
+    .table.table-noborder tr td{
+        height: 40px;
+        line-height: 40px;
+        font-size:18px;
+        color:#63C4A0;
+        font-weight: bold;
+    }
+    .table.table-noborder{
+        margin-bottom:15px;
+    }
+    .statistics{
+        cursor: pointer;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="/businesspassreport/passtotal" method="get">
+                            <ul class="nav pull-left" style="width: 100%;">
+                                <li class="pull-left">
+                                    <input id="dealTime" placeholder='请选择时间' class="input-small" value="" type="text" name="deal_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <select name="business_type" id="business_type">
+                                        <option value="">业务类型</option>
+                                        <option value="现金分期">现金分期</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="channel" id="channel">
+                                        <option value="">用户来源</option>
+                                        <option value="线下">线下</option>
+                                        <option value="非线下">非线下</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <li class="pull-left" style="margin-left: 10px">
+                                    <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <table class='table table-noborder'>
+                            <tbody>
+                            <tr>
+                                <td>累计注册用户：{{.totalNumRegister}}</td>
+                                <td>累计认证用户：{{.totalNumCert}}</td>
+                                <td>累计授信用户：{{.totalNumCredit}}</td>
+                            </tr>
+                            <tr>
+                                <td>累计借款用户：{{.totalNumLoan}}</td>
+                                <td>累计借款订单：{{.totalOrderLoan}}</td>
+                                <td>累计借款金额：{{f2s .totalMoneyLoan}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <form action="" id="form2" method="post">
+                            <table class='table table-bordered'>
+                                <tbody>
+                                <tr>
+                                    <td>日期</td>
+                                    <td class='statistics' data-number="0">注册用户</td>
+                                    <td class='statistics' data-number="1">认证通过用户</td>
+                                    <td class='statistics' data-number="2">授信通过用户</td>
+                                    <td class='statistics' data-number="3">借款成功用户</td>
+                                    <td class='statistics' data-number="4">借款成功订单</td>
+                                    <td class='statistics' data-number="5">借款成功金额</td>
+                                </tr>
+                                {{range $k,$v := .list}}
+                                <tr>
+                                    <td>{{$v.Createtime.Format "2006-01-02"}}</td>
+                                    <td>{{$v.NumRegister}}</td>
+                                    <td>{{$v.MunCertSucess}}</td>
+                                    <td>{{$v.MunCreditSucess}}</td>
+                                    <td>{{$v.NumLoanSucess}}</td>
+                                    <td>{{$v.OrderLoanSucess}}</td>
+                                    <td>{{f2s $v.MoneyLoanSucess}}</td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页
+                                                <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url="/businesspassreport/passtotal" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="padding: 18px;margin-top: -50px;" class="lineChart hide1">
+        <div style="background-color:white;">
+            <div id="main" style="width: 100%;height:500px;"></div>
+        </div>
+    </div>
+    <script>
+        $("#dealTime").dateRangePicker({
+            separator: "~",
+            autoClose: true,
+            shortcuts: null,
+            endDate : moment().toDate(),
+            customShortcuts: [{
+                name: "清空",
+                dates: function () {
+                    return ["", "", ""]
+                }
+            }, {
+                name: "今日",
+                dates: function () {
+                    return [moment().toDate(), moment().toDate()]
+                }
+            }, {
+                name: "昨日",
+                dates: function () {
+                    return [moment().subtract(1, "days").toDate(), moment().subtract(1, "days").toDate()]
+                }
+            }, {
+                name: "近7日",
+                dates: function () {
+                    var start = moment().subtract(6, "days").toDate();
+                    var end = moment().subtract(0, "days").toDate();
+                    return [start, end];
+                }
+            },{
+                name : "当月",
+                dates : function(){
+                    var start = moment().toDate();
+                    var end = moment(moment()).startOf('month').toDate();
+                    return [start, end];
+                }
+            }]
+        })
+        $("#pagination2").my_page("#searchForm2");
+        //显示折线图
+        $(".statistics").click(function () {
+            var data = {
+                deal_time : $("#dealTime").val(),//日期
+                business_type : $('#business_type').val(),     //业务类型
+                channel : $('#channel').val(),     //用户来源
+                type : $(this).text(),
+                choose_type : $(this).attr("data-number")
+            };
+            var y_name = "";
+            if(data.choose_type <4){
+                y_name = "人数(人)";
+            }else if (data.choose_type == 4){
+                y_name = "笔数(笔)"
+            }else if(data.choose_type == 5){
+                y_name = "金额(元)"
+            }
+            $.ajax({
+                url: '/businesspassreport/passtotallinechart',
+                type: 'post',
+                data: data,
+                success: function (rslt) {
+                    if (rslt.ret == 200) {
+                        $(".lineChart").show();
+                        var times = [];
+                        var datas = [];
+                        for (var i = 0; i < rslt.data.length; i++) {
+                            times.push(rslt.data[i].Createtime);
+                            datas.push(rslt.data[i].Count);
+                        }
+                        var braceLen = rslt.data.length;
+                        drawCharts(times, datas, data.type, y_name, braceLen);
+                    } else {
+                        alert("数据请求失败");
+                    }
+                }
+            })
+        })
+        //导出数据
+        $('#export').on('click', function () {
+            var dealTime = $("#dealTime").val();      //日期
+            var businessType = $('#business_type').val();      //业务类型
+            var channel = $('#channel').val();      //业务类型
+            var url = '/businesspassreport/passtotaltoexcel?deal_time=' + dealTime + '&business_type=' + businessType + '&channel=' + channel;
+            window.location.href = url;
+        });
+
+        function drawCharts(time, data, name, unit, brace) {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('main'));
+            var option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                legend: {
+                    data: [name]
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '7%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: time,
+                    }
+                ],
+                yAxis: [
+                    {
+                        name: unit,
+                        type: 'value',
+                        boundaryGap: false,
+                    }
+                ],
+                series: [
+                    {
+                        name: name,
+                        type: 'line',
+                        //                    areaStyle: {normal: {}},
+                        data: data
+                    },
+                ]
+            };
+            if (brace > 10) {
+                option.dataZoom = [
+                    {
+                        type: 'slider',
+                        xAxisIndex: 0,
+                        filterMode: 'filter',
+                        start: 66,
+                        end: 100,
+                        bottom: 0
+                    },
+                    {
+                        type: 'inside',
+                        xAxisIndex: 0,
+                        filterMode: 'empty'
+                    }
+                ]
+            }
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        }
+    </script>
+</div>

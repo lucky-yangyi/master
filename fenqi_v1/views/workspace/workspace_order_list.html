@@ -1,0 +1,187 @@
+<!-- 订单管理 -->
+
+
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border" style='min-height:auto;'>
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" style='width:100px;' value="" placeHolder="订单金额" name="start_money" />至
+                                    <input type="text" style='width:100px;' value="" placeHolder="订单金额" name="end_money" />
+                                </li>
+                                <li class="pull-left">
+                                    <select name="loan_term_count">
+                                        <option value="">期限</option>
+                                        {{range $k,$v := .termCount}}
+                                        <option value="{{$v}}">{{$v}}</option>
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="operator_name">
+                                        <option value="">处理人</option>
+                                        {{range $k,$v := .operators}}
+                                        <option value="{{$v}}">{{$v}}</option>
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="handle_state">
+                                        <option value="">状态</option>
+                                        <option value="QUEUEING">排队中</option>
+                                        <option value="HANDING">处理中</option>
+                                        <option value="PASS">通过</option>
+                                        <option value="REJECT">驳回</option>
+                                        <option value="OUTQUEUE">出列</option>
+                                        <option value="PAUSE">关闭30天</option>
+                                        <option value="CLOSE">永久关闭</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <input id="submitTime" placeholder='提交时间' class="input-small" value="{{.submitTime}}" type="text" name="submit_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <input id="dealTime" placeholder='处理时间' class="input-small" value="" type="text" name="deal_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>订单金额(元)</th>
+                                        <th>期限(月)</th>
+                                        <th>状态</th>
+                                        <th>处理人</th>
+                                        <th>提交时间</th>
+                                        <th>分配时间</th>
+                                        <th>处理时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $k,$v := .list}}
+                                    <tr class="trs">
+                                        <td>{{mobileFilter $v.Account}}</td>
+                                        <td>{{$v.VerifyRealName}}</td>
+                                        <td>{{f2s $v.Money}}</td>
+                                        <td>{{$v.LoanTermCount}}</td>     
+                                        {{ if eq $v.CurrentLoanState 1}}
+                                        <td>通过</td>
+                                        {{else if eq $v.CurrentLoanState 7}}
+                                        <td>正常关闭</td>
+                                        {{else if eq $v.CurrentLoanState 5}}
+                                        <td>关闭30天</td>
+                                        {{else if eq $v.CurrentLoanState 9}}
+                                        <td>永久关闭</td>
+                                        {{else if eq $v.CurrentLoanState 0}}
+                                        {{if eq $v.OrderState "QUEUEING"}}
+                                        <td>排队中</td>
+                                        {{else if eq $v.OrderState "HANDING"}}
+                                        <td>处理中</td>
+                                        {{else if eq $v.OrderState "OUTQUEUE"}}
+                                        <td>退回</td>
+                                        {{else}}
+                                        <td></td>
+                                        {{end}}
+                                        {{end}}                                   
+                                        <td>{{if eq $v.CreditOperator ""}}暂无{{else}}{{$v.CreditOperator}}{{end}}</td>
+                                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>{{if eq ($v.Atime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}暂无{{else}}{{$v.Atime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                        <td>{{if eq ($v.HandleTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}暂无{{else}}{{$v.HandleTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                        <td>
+                                            <a target="_blank" href='/workspace/orderlook?uid={{IdUidEncrypt $v.Uid}}&loanId={{$v.Id}}&index=3'>查看</a>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                    $(function () {
+
+                                                        $("#pagination2").my_page("#searchForm2");
+                                                        $("#submitTime").dateRangePicker({
+                                                            separator: "~",
+                                                            autoClose: true,
+                                                            shortcuts: null,
+                                                            customShortcuts: [{
+                                                                name: "清空",
+                                                                dates: function(){
+                                                                    return ["", "",""]
+                                                                }
+                                                            }]
+                                                        });
+
+                                                        $("#dealTime").dateRangePicker({
+                                                            separator: "~",
+                                                            autoClose: true,
+                                                            shortcuts: null,
+                                                            customShortcuts: [{
+                                                                name: "清空",
+                                                                dates: function(){
+                                                                    return ["", "",""]
+                                                                }
+                                                            },{
+                                                                name: "今日",
+                                                                dates: function(){
+                                                                    return [moment().toDate(), moment().toDate()]
+                                                                }
+                                                            }, {
+                                                                name: "昨日",
+                                                                dates: function(){
+                                                                    return [moment().subtract(1, "days").toDate(), moment().subtract(1, "days").toDate()]
+                                                                }
+                                                            }, {
+                                                                name: "最近一周",
+                                                                dates: function () {
+                                                                    var start = moment().day(-6).toDate();
+                                                                    var end = moment().day(0).toDate();
+                                                                    return [start, end];
+                                                                }
+                                                            }
+                                                            ] 
+                                                        })
+                                                    });
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

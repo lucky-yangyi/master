@@ -1,0 +1,138 @@
+<!-- 注册用户列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .warning_icon {
+        display: inline-block;
+        width: 31px;
+        height: 28px;
+        background: url("/static/img/img_04.png") no-repeat;
+        vertical-align: top;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="registerTime" placeholder='注册时间' class="input-small"
+                                           value="{{.registerTime}}" type="text" name="register_time"/>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="pkg_type">
+                                        <option value="">平台来源</option>
+                                        <option value="0">有个分期</option>
+                                        <option value="1">有个钱包</option>
+                                        <option value="2">花无忧</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="渠道" name="source"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="is_invited">
+                                        <option value="0">业务员邀请</option>
+                                        <option value="1">是</option>
+                                        <option value="2">否</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green" id="users_search">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                <tr>
+                                    <th>手机号</th>
+                                    <th>注册时间</th>
+                                    <th>平台来源</th>
+                                    <th>注册渠道</th>
+                                    <th>业务员邀请</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k,$v := .list}}
+                                <tr class="trs">
+                                    <td>{{mobileFilter $v.Account}}</td>
+                                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                {{if eq $v.PkgType 0}}
+                                    <td>有个分期</td>
+                                {{else if eq $v.PkgType 1}}
+                                    <td>有个钱包</td>
+                                {{else if eq $v.PkgType 2}}
+                                    <td>花无忧</td>
+                                {{end}}
+                                    <td>{{$v.Source}}</td>
+                                    <td>{{$v.IsSalemanType}}</td>
+                                    <td><a target='_blank' id="users_look"
+                                           href='/usersmanage/userslook?uid={{IdUidEncrypt $v.Id}}'>查看</a></td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页 <select name="" id=""
+                                                                                class='form-control pageSize'
+                                                                                style='display:inline-block;width:auto;'>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url=""
+                                                 pageSize='{{.pageSize}}' currentPage="{{.currPage}}"
+                                                 pageCount="{{.pageCount}}"></div>
+                                            <script type="text/javascript">
+                                                $(function () {
+
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                    $("#registerTime").dateRangePicker({
+                                                        separator: "~",
+                                                        autoClose: true,
+                                                        shortcuts: null,
+                                                        customShortcuts: [{
+                                                            name: "清空",
+                                                            dates: function () {
+                                                                return ["", "", ""]
+                                                            }
+                                                        }]
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

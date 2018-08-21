@@ -1,0 +1,151 @@
+<!-- 认证用户列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .warning_icon {
+        display: inline-block;
+        width: 31px;
+        height: 28px;
+        background: url("/static/img/img_04.png") no-repeat;
+        vertical-align: top;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" id="account"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" id="user_name"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="startDate" class="Wdate input-small" value="{{.startTime}}" type="text"
+                                           onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                                           name="startTime" placeholder="起始放款时间"/> &nbsp;-&nbsp;
+                                    <input id="endDate" class="Wdate input-small" type="text"
+                                           onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                                           value="{{.endTime}}" placeholder="截止放款时间" name="endTime"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="operator" id="operator">
+                                        <option value="">操作人</option>
+                                    {{range $k,$v := .creditUsers}}
+                                        <option value={{$v}}>{{$v}}</option>
+                                    {{end}}
+                                        <option value="1">风控系统</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="state" id="state">
+                                        <option value="CONFIRM">处理中</option>
+                                        <option value="SUCCESS">成功</option>
+                                        <option value="FAIL">失败</option>
+
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="button" class="btn btn-green" style="margin-left: 10px;" onclick="exportData()">导出</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                <tr>
+                                    <th>手机号</th>
+                                    <th>姓名</th>
+                                    <th>放款时间</th>
+                                    <th>订单号</th>
+                                    <th>借款金额</th>
+                                    <th>借款期限</th>
+                                    <th>操作人</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k,$v := .list}}
+                                <tr class="trs">
+                                    <td>{{ $v.Account}}</td>
+                                    <td>{{ $v.Verifyrealname}}</td>
+                                    <td>{{ $v.DtOrderStr}}</td>
+                                    <td>{{ $v.OrderNumber}}</td>
+                                    <td>{{ $v.Money}}</td>
+                                    <td>{{ $v.LoanTermCount}}</td>
+                                    {{if eq $v.Displayname ""}}
+                                    <td>风控系统</td>
+                                    {{else}}
+                                    <td>{{ $v.Displayname}}</td>
+                                    {{end}}
+                                    <td>
+                                        <a target='_blank'
+                                           href='/usersmanage/usersmetadatalook?uid={{$v.Uid}}&index=00'>查看</a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页
+                                                <select name="" id="" class='form-control pageSize'
+                                                        style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url=""
+                                                 pageSize='{{.pageSize}}' currentPage="{{.currPage}}"
+                                                 pageCount="{{.pageCount}}"></div>
+                                            <script type="text/javascript">
+                                                $(function () {
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                });
+                                            </script>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function exportData() {
+        var startDate = $("#startDate").val();
+        var endDate = $("#endDate").val();
+        var account = $("#account").val();
+        var user_name = $("#user_name").val();
+        var operator = $("#operator").val();
+        var state=$("#state").val();
+        window.location.href = "/loan/loanlisttoexcel?account="+account+"&user_name="+user_name+"&startTime="+startDate+"&endTime="+endDate+"&state="+state+"&operator="+operator;
+    }
+</script>

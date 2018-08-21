@@ -1,0 +1,163 @@
+<!-- 还款管理列表 -->
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" id="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" id="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="订单号" name="order_number" id="order_number" />&nbsp;&nbsp;
+                                </li>
+
+                                <li class="pull-left">
+                                    <input id="submitTime" placeholder='还款时间' class="input-small" value="" type="text" name="submit_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <select name="channel" id="channel">
+                                        <option value="">还款渠道</option>
+                                        <option value="1">连连支付</option>
+                                        <option value="2">支付宝支付</option>
+                                        <option value="3">合利宝代扣</option>
+                                        <option value="5">支付宝转账</option>
+                                        <option value="6">银行转账</option>
+                                        <option value="9">费用减免</option>
+                                        <option value="7">融宝代扣</option>
+                                        <option value="8">畅捷代扣</option>
+                                        <option value="10">先锋代扣</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="operator" id="operator">
+                                        <option value="">还款方式</option>
+                                        <option value="0">代扣</option>
+                                        <option value="1">主动还款</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="ret" id="ret">
+                                        <option value="">还款结果</option>
+                                        <option value="SUCCESS">成功</option>
+                                        <option value="FAIL">失败</option>
+                                        <option value="CONFIRM">确认中</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <li class="pull-left" style="margin-left: 10px">
+                                    <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>还款金额</th>
+                                        <th>还款时间</th>
+                                        <th>还款渠道</th>
+                                        <th>订单号</th>
+                                        <th>第三方订单号</th>
+                                        <th>还款方式</th>
+                                        <th>还款结果</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $k,$v := .list}}
+                                    <tr class="trs">
+                                        <td>{{mobileFilter $v.Account}}</td>
+                                        <td>{{$v.VerifyRealName}}</td>
+                                        <td>{{$v.ReturnMoney}}</td>
+                                        <td>{{if eq ($v.CreateTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}暂无{{else}}{{$v.CreateTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                        <td>{{if eq $v.Channel 1}}连连支付
+                                            {{else if eq $v.Channel 2}}支付宝支付
+                                            {{else if eq $v.Channel 3}}合利宝代扣
+                                            {{else if eq $v.Channel 5}}支付宝转账
+                                            {{else if eq $v.Channel 6}}银行转账
+                                            {{else if eq $v.Channel 9}}费用减免
+                                            {{else if eq $v.Channel 7}}融宝代扣
+                                            {{else if eq $v.Channel 8}}畅捷代扣
+                                            {{else if eq $v.Channel 10}}先锋代扣
+                                            {{end}}</td>
+                                        <td>{{$v.OrderNumber}}</td>
+                                        <td>{{$v.OidPayBill}}</td>
+                                        <td>{{if eq $v.OperatorId -1 1}}主动还款{{else}}代扣{{end}}</td>
+                                        <td>{{if eq $v.State "SUCCESS"}}成功
+                                                {{else if eq $v.State "FAIL"}}
+                                                    <font size="2" color="red">失败</font>
+                                                {{else if eq $v.State "CONFIRM"}}
+                                                    <span class="mainColor-text">确认中</span>
+                                            {{end}}</td>
+                                        <td><a target='_blank' href='/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}&index=1'><span class="mainColor-text">查看</span></a></td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                $(function () {
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                    $("#submitTime").dateRangePicker({
+                                                        separator: "~",
+                                                        autoClose: true,
+                                                        shortcuts: null,
+                                                        customShortcuts: [{
+                                                            name: "清空",
+                                                            dates: function(){
+                                                                return ["", "",""]
+                                                            }
+                                                        }]
+                                                    });
+                                                });   
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                    <script>
+                        $('#export').on('click', function () {
+                            var account = $("#account").val();      //手机号
+                            var user_name = $('#user_name').val();      //姓名
+                            var submit_time = $('#submitTime').val();      //还款时间
+                            var channel = $('#channel').val();      //还款渠道
+                            var operator = $('#operator').val();      //还款方式
+                            var ret = $('#ret').val();      //还款结果
+                            var order_number = $('#order_number').val(); 
+                            var url = '/financedata/returnmanagementtoexcel?account=' + account + '&user_name=' + user_name + '&submit_time=' + submit_time + '&channel=' + channel+ '&operator=' + operator+ '&ret=' + ret + '&order_number=' + order_number;
+                            window.location.href = url;
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+<!-- 联系历史路由：/usersmetadata/getconnect -->
+<div class="panle" id="connect_history">
+    <div class="panel-title">
+        <b class="panel-line"></b> 联系历史
+        <div class='u-addConnectHistory u-usersLookBtn btn btn-green'>添加</div>
+    </div>
+    <ul class='panel-tabs clearfix'>
+        <li data-url='/usersmetadata/getconnect' data-type="CHECK" class='panel-item {{if eq .ConnectType "CHECK"}}active{{end}}'>贷前审查</li>
+        <li data-url='/usersmetadata/getconnect' data-type="ENTER" class='panel-item {{if eq .ConnectType "ENTER"}}active{{end}}'>客服登记</li>
+        <li data-url='/collection/connhistory' data-type="COLLECTION" class='panel-item {{if eq .ConnectType "COLLECTION"}}active{{end}}'>贷后催收</li>
+        <li data-url='/collection/complainthandlinglist' data-type="COMPLANIT" class='panel-item {{if eq .ConnectType "COMPLANIT"}}active{{end}}'>投诉处理</li>
+    </ul>
+    <form id="searchForm2" action="" method="get">
+        <div class="panle-body">
+            <table class="table table-hover">
+            {{if eq .ConnectType "COLLECTION"}}
+                 <thead>
+                    <tr>
+                        <th>联系时间</th>
+                        <th>操作人</th>
+                        <th>行动分类</th>
+                        <th>联系内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $k,$v := .connRcds}}
+                    <tr>
+                        <td>{{$v.Create_time.Format "2006-01-02 15:04:05"}}</td>
+                        <td>{{$v.Modify_by_name}}</td>
+                        <td>{{$v.Action_type}}</td>
+                        <td>{{$v.Content}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">
+                            <div class="fl">
+                                <div class="pagination"> 每页
+									<select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+										<option value="15">15</option>
+										<option value="20">20</option>
+										<option value="30">30</option>
+										<option value="50">50</option>
+										<option value="100">100</option>
+									</select> 条，共{{.count}}条
+								</div>
+                            </div>
+                            <div class="fl">
+                                <div class="pagination" id="pagination2" data-url="/collection/connhistory?uid={{IdUidEncrypt .uid}}&connectType={{.ConnectType}}" pageSize="{{.pageSize}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            {{else if eq .ConnectType "CHECK" "ENTER"}}
+                <thead>
+                        <tr>
+                            <th>联系时间</th>
+                            <th>联系对象</th>
+                            <th>联系内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $k,$v := .ConnectRecord}}
+                        <tr>
+                            <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                            <td>{{$v.ConnectObj}}</td>
+                            <td>{{$v.Context}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">
+                                <div class="fl">
+                                    <div class="pagination"> 每页
+                                        <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select> 条，共{{.count}}条
+                                    </div>
+                                </div>
+                                <div class="fl">
+                                    <div class="pagination" id="pagination2" data-url="/usersmetadata/getconnect?uid={{IdUidEncrypt .uid}}&connectType={{.ConnectType}}" pageSize="{{.pageSize}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+            {{else if eq .ConnectType "COMPLANIT"}}
+                <thead>
+                    <tr>
+                        <th>联系时间</th>
+                        <th>操作人</th>
+                        <th>联系内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $k,$v := .list}}
+                    <tr>
+                        <td>{{$v.Create_time.Format "2006-01-02 15:04:05"}}</td>
+                        <td>{{$v.Modify_by_name}}</td>
+                        <td>{{$v.Content}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <div class="fl">
+                                <div class="pagination"> 每页
+									<select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+										<option value="15">15</option>
+										<option value="20">20</option>
+										<option value="30">30</option>
+										<option value="50">50</option>
+										<option value="100">100</option>
+									</select> 条，共{{.count}}条
+								</div>
+                            </div>
+                            <div class="fl">
+                                <div class="pagination" id="pagination2" data-url="/collection/complainthandlinglist?uid={{IdUidEncrypt .uid}}&connectType={{.ConnectType}}" pageSize="{{.pageSize}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            {{end}}
+                
+            </table>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("", "#connect_history");
+        var flag = true;
+        
+        $(".u-addConnectHistory").off().click(function () {
+            dialog.init({
+                title: "联系历史",
+                select: {
+                    html:'<select name="" id="" class="form-control J_creditType"><option value="">请选择联系类型</option><option value="CHECK">贷前审查</option><option value="ENTER">客服登记</option><option value="COMPLANIT">投诉处理</option></select><input type="text" class="form-control J_choseMan" placeholder="联系对象">'
+                },
+                textarea: {
+                    html: '<label class="radio-inline"><input class="quickchooseman" name="quickchooseman" type="radio" value="客户本人">客户本人</label><label class="radio-inline">  <input class="quickchooseman" name="quickchooseman" type="radio" value="紧急联系人1">紧急联系人1</label><label class="radio-inline">  <input class="quickchooseman" name="quickchooseman" type="radio" value="紧急联系人2">紧急联系人2</label><textarea class="modal-textarea form-control J_connectResult" placeholder="填写联系内容及联系结果"></textarea>'
+                },
+                buttons: [{
+                    text: "确定",
+                    style: "green",
+                    func: function () {
+                        var data = {
+                            type: $(".J_creditType").val(),
+                            content: $(".J_connectResult").val(),
+                            uid: uid,
+                            choose : $(".quickchooseman:checked").val(),
+                            man : $(".J_choseMan").val()
+                        };
+                        if (isBlank(data.type)) {
+                            $(".red-text").html("请选择联系类型");
+                            return true;
+                        } else if (isBlank(data.content)) {
+                            $(".J_connectResult").addClass("warning-border");
+                            $(".red-text").html("填写联系内容及联系结果");
+                            return true;
+                        }else if(isBlank(data.man)){
+                            if(isBlank(data.choose)){
+                                $(".red-text").html("请填写或选择联系对象");
+                                return true;
+                            }
+                        } else if (!flag) {
+                            return true;
+                        }
+                        flag = false;
+                        $.ajax({
+                            type: "post",
+                            url: '/usersmetadata/addconnect',
+                            data: data,
+                            success: function (rslt) {
+                                if (rslt.ret == 200) {
+                                    ajaxLoad($(".workplace-nav li.active"));
+                                    $(".g-modal").remove();
+                                } else {
+                                    alert(rslt.msg)
+                                }
+                            },
+                            complete: function (rslt) {
+                                falg = true;
+                            }
+                        })
+                    }
+                }]
+            })
+        });
+        $(".panel-tabs .panel-item").off().click(function(){
+            var url = $(this).data("url");
+            var type = $(this).data("type");
+            var data = {
+                uid : uid,
+                connectType : type
+            }
+            $.zget(url, data, function (rslt) {
+                $(".detail-info").empty().html(rslt);
+            })
+        });
+        $("body").undelegate(".quickchooseman","click").delegate(".quickchooseman","click",function(){
+            if($(this).attr("checked") == "checked"){
+                $(this).removeAttr("checked");
+            }else{
+                $(this).attr("checked","checked")
+            }
+        })
+    });
+</script>

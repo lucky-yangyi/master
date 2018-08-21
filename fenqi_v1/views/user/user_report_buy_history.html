@@ -1,0 +1,110 @@
+<!-- 报告购买记录路由：/usersmetadata/getusersloginrecords -->
+<div class="panle" id="login_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 报告购买记录</div>
+    <form id="searchForm2" action="" method="get">
+        <div class="panle-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>购买时间</th>
+                        <th>报告类型</th>
+                        <th>支付金额</th>
+                        <th>支付方式</th>
+                        <th>支付订单号</th>
+                        <th>购买结果</th>
+                        <th>使用时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range $k,$v := .list}}
+                    <tr>
+                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                        <td>{{$v.CreditCardName}}</td>
+                        <td>{{$v.PayPrice}}</td>
+                        {{if eq $v.PayMethod 1}}
+                            <td>连连</td>
+                        {{else if eq $v.PayMethod 2}}
+                            <td>支付宝</td>
+                        {{else}}
+                            <td>{{$v.PayMethod}}</td>
+                        {{end}}
+                        <td>{{$v.OrderNumber}}</td>
+                        {{if eq $v.StateStr "成功"}}
+                            <td>成功</td>
+                        {{else if eq $v.StateStr "失败"}}
+                            <td><font class='mainred-text'>失败 {{$v.Remark}}</font></td>
+                        {{else if eq $v.StateStr "处理中"}}
+                            <td><font class='mainColor-text'>确认中</font></td>
+                        {{end}}
+                       <td>{{$v.UseTime}}</td>
+                       <td>
+                        {{if eq $v.State "CONFIRM"}}
+                            <a href="javascript:;" data-id='{{IdUidEncrypt $v.Id}}' class='close_order' style='color: #63C4A0;cursor: pointer'>关闭订单</a>
+                        {{end}}
+                       </td>
+                    </tr>
+                {{end}}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7">
+                            <div class="fl">
+                                <div class="pagination"> 每页 
+                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="30">30</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select> 条，共{{.count}}条
+                                </div>
+                            </div>
+                            <div class="fl">
+                                <div class="pagination" id="pagination2" data-url="/usersmetadata/buyrecordlook?uid={{IdUidEncrypt .uid}}" currentPage="{{.currPage}}" pageSize="{{.pageSize}}"
+                                    pageCount="{{.pageCount}}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("", "#login_record");
+        $(".close_order").off().click(function(){
+            var id = $(this).data("id");
+            dialog.init({
+                title : "关闭订单",
+                tips : "请确认用户银行卡未扣款再关闭订单",
+                buttons : [{
+                    text : "确定",
+                    style : "green",
+                    func : function(){
+                        $.ajax({
+                            type : "POST",
+                            url : "/financedata/closepercreditreport",
+                            data : {
+                                id : id
+                            },
+                            success : function(rslt){
+                                if(rslt.ret == 200){
+                                    $(".J_modal").remove();
+                                    getpage(window.sessionStorage.URl)
+                                }else {
+                                    alert(rslt.msg)
+                                }
+                            }
+                        })
+                    }
+                },{
+                    text : "关闭",
+                    style : "default"
+                }]
+            })
+        })
+    });
+</script>

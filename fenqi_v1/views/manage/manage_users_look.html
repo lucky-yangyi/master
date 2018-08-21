@@ -1,0 +1,144 @@
+<!-- 注册用户查看 -->
+<style>
+    .panel {
+        min-height: 405px;
+    }
+
+    .itemContent .item-left {
+        width: 120px;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class='panel col-md-12' style="min-height:405px;">
+            <!-- 基本信息 -->
+            <form class='form-inline'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 基本信息</div>
+                <div class="panel-body" id='basic_body'>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">手机号： </div>
+                        <div class="item-right">{{.user.Account}}
+                            <span class='btn btn-green u-freezeAccount'data-permission="operation_users_look_forzen">{{if eq .user.State 0}}冻结账户{{else}}取消冻结{{end}}</span>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">ID： </div>
+                        <div class="item-right">{{.user.Id}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">注册时间： </div>
+                        <div class="item-right">{{.user.CreateTime.Format "2006-01-02 15:04:05"}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">注册渠道： </div>
+                        <div class="item-right">{{.user.Source}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">注册时手机型号： </div>
+                        <div class="item-right">{{.user.MobileType}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">邀请码22： </div>
+                        <div class="item-right">{{.inviteCode}}</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- 资料详情 -->
+        <div class="panel col-md-12">
+            <ul class='workplace-nav clearfix'>
+                <li class="active" data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                <li data-url='/usersmetadata/getaddresslist'>定位</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+    </div>
+    <!-- 冻结弹窗 -->
+    <div class="g-modal f-hide" id='freeze-account'>
+        <div class='g-content'>
+            <div class='modal-title clearfix green'>
+                <div class="title-text" id="payplan-title">提示</div>
+                <div class="modal-close green">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tips modal-freezeTips"></div>
+            </div>
+            <div class="modal-foot">
+                <div class='btn btn-green' id='J_freezeAccount'>确定</div>
+                <div class='btn btn-default modal-close'>取消</div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../static/js/permissions.js"></script>
+    <script>
+        $(function () {
+            Permissions.initBtn("operation_users_look_forzen");
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+            $(".modal-close").click(function () {
+                $(".g-modal").hide();
+            });
+            $(".u-freezeAccount").click(function () {
+                var text = $(this).text();
+                if (text == "冻结账户") {
+                    $(".modal-freezeTips").text("冻结后账户将无法使用，是否继续?");
+                } else if (text == "取消冻结") {
+                    $(".modal-freezeTips").text("取消冻结后账户将正常使用，是否继续？");
+                }
+                $("#freeze-account").show();
+            });
+            $("#J_freezeAccount").click(function () {
+                var uid = {{ IdUidEncrypt .user.Id }};
+                var text = $(".u-freezeAccount").text();
+                var state = 0;
+                if (text == "冻结账户") {
+                    state = 1;
+                } else if (text == "取消冻结") {
+                    state = 0;
+                }
+                $.ajax({
+                    type: "post",
+                    url : "/usersmanage/updateusersforzenstate",
+                    data: {uid:uid,state:state,is_check:true,btn_id:"operation_users_look_forzen"},
+                    success: function (rslt) {
+                        if (rslt.ret == 200) {
+                            if (state == 1) {
+                                $(".u-freezeAccount").text("取消冻结");
+                            } else if (state == 0) {
+                                $(".u-freezeAccount").text("冻结账户");
+                            }
+                            $("#freeze-account").hide();
+                        } else {
+                            alert(rslt.msg);
+                        }
+                    }
+                })
+            })
+        });
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var uid = {{ IdUidEncrypt .user.Id }};
+        if (url == "/usersmetadata/getusersloginrecords") {
+            data = { uid: uid, is_manage: true };
+        } else {
+            data = { uid: uid };
+        }
+        $.zget(url, data, function (rslt) {
+            $(".workplace-nav li").removeClass("active");
+            ele.addClass("active");
+            $(".detail-info").empty().html(rslt);
+        })
+        }
+    </script>
+</div>

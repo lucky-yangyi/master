@@ -1,0 +1,520 @@
+<!-- 待处理借款  处理（借款审核） -->
+
+<style>
+    div.panel{
+        min-height:280px;
+    }
+</style>
+<div class="sticky-header"> 
+    <!-- 订单状态 -->
+    <div class="wrapper f-hide" id='creditManage'>
+        <div class='panel col-md-4'>
+            <!-- 基本信息 -->
+            <form class='form-inline'>
+                    <div class="panel-title">
+                        <b class='panel-line'></b> 基本信息</div>
+                    <div class="panel-body" id='basic_body'>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">姓名： </div>
+                            <div class="item-right">{{.ubi.Verifyrealname}} 【{{.ubi.Source}}】</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">ID号： </div>
+                            <div class="item-right">{{.ubi.Uid}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">手机号： </div>
+                            <div class="item-right">{{.ubi.Account}} 【{{.phone_info}}】</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">身份证号： </div>
+                            <div class="item-right">{{.ubi.IdCard}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">授信额度： </div>
+                            <div class="item-right">{{.ubi.Balance}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">授信时间： </div>
+                            <div class="item-right">{{.ubi.AssessTime.Format "2006-01-02 15:04:05"}}</div>
+                        </div>
+                        <!-- <div class='itemContent clearfix f-hide' id='submitBtn'>
+                            <div class="item-left"></div>
+                            <div class="item-right">
+                                <button class='btn btn-green' id='save_basic'>重检</button>
+                            </div>
+                        </div> -->
+                    </div>
+                </form>
+                <div class='edit-btn' >
+                    <i class='icon-edit' aria-hidden="true" id='basic_btn'></i>重检
+                </div>
+            </div>
+            <!-- 订单信息 -->
+            <div class='panel col-md-4'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 订单信息</div>
+                <div class="panel-body">
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">借款金额： </div>
+                        <div class="item-right">{{.oc.Money}}  <a onclick="payplan()" href='javascript:;'>还款计划</a></div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">期数： </div>
+                        <div class="item-right">{{.oc.LoanTermCount}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">银行卡： </div>
+                        <div class="item-right">{{.oc.CardNumber}}（{{.oc.BankName}}）</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">预留手机号： </div>
+                        <div class="item-right">{{.oc.BankMobile}}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 审批历史 -->
+            <div class="panel col-md-4">
+                <div class="panel-title">
+                    <b class='panel-line'></b> 审批历史 <span style='float:right;' id='orderCountDown'></span></div>
+                <div class="panel-body" style='height:240px;overflow-y:auto;'>
+                    <div class='pr timeShaftBox'>
+                        {{range $k, $v := .list}}
+                        <div class='clearfix timeShaft' style='max-height: 210px;overflow: auto;'>
+                            {{if eq $k 0}}
+                            <i class='littleCircle'>
+                                <i class='activeShadow'>
+                                    <i class='circle active'></i>
+                                </i>
+                            </i>
+                            <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                            {{else}}
+                            <i class='littleCircle'>
+                                <i class='circle'></i>
+                            </i>
+                            <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                            {{end}}
+                        </div>
+                        {{end}}
+                        <div class='timeShaftLine'></div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- 资料详情 -->
+        <div class="panel col-md-8">
+            <ul class='workplace-nav clearfix'>
+                <li class='active' data-url='/usersmetadata/getrealnameauthinfo'>实名认证 </li>
+                <li data-url='/usersmetadata/getzmxyinfo'>芝麻信用</li>
+                <li data-url='/usersmetadata/getlinkmanlist'>常用联系人</li>
+                <li data-url='/usersmetadata/getusersloanrecords'>借款记录</li>
+                <li data-url='/usersmetadata/getcollectionrecord'>催收记录</li>
+                <li data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                <li data-url='/usersmetadata/getaddresslist'>定位</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+     <!-- 审批意见 -->
+     <div class="panel col-md-4">
+        <div class="panel-title">
+            <b class="panel-line"></b> 风控系统审批意见</div>
+        <div class="panel-body">
+            <div class="pr opinionBox">
+                
+            </div>
+        </div>
+    </div>
+        <!-- 还款计划弹窗 -->
+        <div class="g-modal f-hide" id='order-payplan'>
+            <div class='g-content'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text" id="payplan-title">还款计划</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead class='modal_payPlan_thead'>
+                        </thead>
+                        <tbody class='modal_payPlan_tbody'>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green modal-close'>知道了</div>
+                </div>
+            </div>
+        </div>
+        <!-- 订单通过弹窗 -->
+        <div class="g-modal f-hide" id='order-gothrough'>
+            <div class='g-content'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">订单通过</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <div class='modal-tips' style='height:30px;line-height:30px;font-size:14px;'>确定通过订单？</div>
+                    <textarea class='modal-textarea' style='height:66px;' placeholder="填写通过备注"></textarea>
+                    <div class='red-text'></div>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green' onclick="gothroughOrder(this)">确定</div>
+                    <div class='btn btn-default modal-close' >取消</div>
+                </div>
+            </div>
+        </div>
+        <!-- 订单关闭弹窗 -->
+        <div class="g-modal f-hide" id='order-close'>
+            <div class='g-content'>
+                <div class='modal-title clearfix red'>
+                    <div class="title-text">订单关闭</div>
+                    <div class="modal-close red">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <textarea class='modal-textarea warning-border' placeholder="填写关闭备注"></textarea>
+                    <div class='red-text'></div>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-red' data-type='CANCEL' onclick='closeOrder(this)'>正常关闭</div>
+                    <div class="btn btn-red" data-type='PAUSE' onclick='closeOrder(this)'>关闭30天</div>
+                    <div class='btn btn-red' data-type='CLOSE' onclick='closeOrder(this)'>永久关闭</div>
+                </div>
+            </div>
+        </div>
+        <!-- 订单退回弹窗 -->
+        <div class="g-modal f-hide" id='order-back'>
+            <div class='g-content'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">订单退回</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <input id="phoneTime"  class="Wdate form-control" value="" placeholder='入列时间' style='margin-bottom:10px;' type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d'})"/>
+                    <textarea class='modal-textarea form-control' placeholder="填写退回备注"></textarea>
+                    <div class='red-text'></div>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green' onclick="backOrder(this)">退回</div>
+                    <div class='btn btn-default modal-close'>取消</div>
+                </div>
+            </div>
+        </div>
+        <div class='fixed-box'>
+            <button data-modal='#order-gothrough' class='btn btn-green risk-btn'>通过</button>
+            <button data-modal='#order-close' class='btn btn-danger risk-btn'>关闭</button>
+            <button data-modal='#order-back' class='btn btn-default risk-btn'>退回</button>
+        </div>
+    </div>
+    <!-- 无订单状态 -->
+    <div class="wrapper pr f-hide" id='outOrderModal' style='z-index:99;'>
+        <div class="outline-box">
+            <div class='box-middle clearfix'>
+                <img src="../../static/img/noorder.jpg" alt="无订单" class='fl'>
+                <div class='box-text'>
+                    <h1>当前没有要审核的订单</h1>
+                    <h2>那你真是好棒棒哦</h2>
+                    <h3>10秒之后自动刷新，迫不及待我要 <a href="">手动刷新</a></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 离线状态 -->
+    <div class="wrapper pr f-hide" id='outlineModal' style='z-index:99;'>
+        <div class="outline-box">
+            <div class='box-middle clearfix'>
+                <img src="../../static/img/outline.png" alt="无订单" class='fl'>
+                <div class='box-text'>
+                    <h1>离线状态中</h1>
+                    <h2>因过竹院逢僧话，偷得浮生半日闲</h2>
+                    <button class='btn btn-green' onclick="changeOnline()" id='changeOnlineBtn'>在线</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var uid = {{IdUidEncrypt .ubi.Uid}};//uid
+        $(function () {
+            //QUEUEING-排队中 HANDING-处理中 PASS-通过 REJECT-驳回 OUTQUEUE-出列 PAUSE-关闭30天 CLOSE-永久关闭
+            var lineState = {{.loginState}};//在线状态
+            var orderState = {{.is_order}};//订单状态
+            var timeDiff = {{.timeDiff}} //时间
+            var main = {{.loanId}}
+            if(timeDiff<=0){
+                orderState = false;
+            }
+            if(orderState){//有订单情况下，都会显示订单，无论是否在线
+                if(lineState == "ONLINE"){
+                    var orderTimeOut = setTimeout(function(){//44分57秒后自动离线
+                        changeOffline();
+                    },2699000);
+                    orderTimeOut_Arr.push(orderTimeOut)
+                }
+                $("#creditManage").show();
+                var orderCountDownTimer = setInterval(function(){//订单剩余时间显示
+                    timeDiff--;
+                    if(timeDiff>=0){
+                        $("#orderCountDown").html("订单剩余处理时间:"+Math.floor(timeDiff/60)+"分"+parseInt(timeDiff%60)+"秒")
+                    }else{
+                        $("#orderCountDown").html("该订单已超时");
+                        $("input,textarea,select,button:not(#changeOnlineBtn)").prop("disabled","disabled");
+                        clearInterval(orderCountDownTimer);
+                        changeOffline();
+                    }
+                },1000);
+                orderCountDownTimer_Arr.push(orderCountDownTimer)
+            }else if(lineState == "OFFLINE"){//离线状态，且无订单状态下， 显示离线状态
+                $("#outlineModal").show();
+                // $("html").css("overflow","hidden");
+            }else{//在线， 无订单情况下， 显示无订单
+                $("#outOrderModal").show();
+                // $("html").css("overflow","hidden");
+                var orderTimeOut = setTimeout(function(){//无订单状态  10秒自动刷新
+                   // location.reload();
+
+                    getpage(location.href);
+                },10000);
+                orderTimeOut_Arr.push(orderTimeOut)
+            }
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+            $(".modal-close").click(function () {
+                $(".g-modal").hide()
+            });
+            $(".risk-btn").click(function(){
+                 var modal = $(this).data("modal");
+                 $(".modal-textarea,.Wdate").val("");
+                 $(".red-text").html("");
+                 $(modal).show();
+            });
+            $("#basic_btn").click(function () {//保存编辑基本信息
+                var data = {
+                    ubi_id : {{.ubi.Uid}},
+                    mainId : {{.oc.Id}},
+                };
+                var modal = '<div class="countdown-modal"><div class="countdown-time">重检中...</div></div>';
+                $("body").append(modal);
+                $.zget("/usersmetadata/orderreview",data,function(rslt){
+                    if(rslt.ret == 200){
+                        if (typeof refreshOpinion == "function") {
+                                // $(".countdown-modal").remove();
+                                // refreshOpinion();
+                                location.reload()
+                            }
+                    }else {
+                        alert(rslt.err);
+                    }
+                });
+            });
+        });
+        var passFlag = true;
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var uid = {{IdUidEncrypt .ubi.Uid}};
+            var data;
+            if(url == "/usersmetadata/getlinkmanlist" ) {
+                data = {uid:uid,is_edit:true,riskRecordType:2};
+            }else{
+                data = {uid:uid};
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+        function closeOrder(ele){//关闭订单
+            if(passFlag == false){
+                return;
+            }
+            var _this = $(ele);
+            var orderState = _this.data("type");
+            var text = _this.parent().siblings(".modal-body").find("textarea").val();
+            if(text == "" || text == undefined){
+                _this.parent().siblings(".modal-body").find("textarea").addClass("warning-border").next(".red-text").html("请填写关闭备注");
+                return;
+            }else{
+                _this.parent().siblings(".modal-body").find("textarea").removeClass("warning-border").next(".red-text").html("");
+            }
+            var data = {
+                userId : {{.ubi.Uid}},
+                loanId : {{.oc.Id}},
+                orderState : orderState,
+                remark : text,
+            }
+            passFlag = false;
+            $.ajax({
+                type : "POST",
+                url : "loanoperation",
+                data : data,
+                success : function(rslt){
+                    passFlag = true;
+                    if(rslt.ret == 200){
+                        countdownanimation(3,rslt.msg,function(){
+                            location.reload();
+                        })
+                    }else{
+                        alert(rslt.msg);
+                    }
+                    
+                }
+            })
+        }
+        function gothroughOrder(ele){//通过订单 
+            if(passFlag == false){
+                return;
+            }
+            var _this = $(ele);
+            var text = _this.parent().siblings(".modal-body").find("textarea").val();
+            if(text == "" || text == undefined){
+                _this.parent().siblings(".modal-body").find("textarea").addClass("warning-border").next(".red-text").html("请填写通过备注");
+                return;
+            }else{
+                _this.parent().siblings(".modal-body").find("textarea").removeClass("warning-border").next(".red-text").html("");
+            }
+            var data = {
+                loanId : {{.oc.Id}},
+                userId : {{.ubi.Uid}},
+                orderState : "PASS",
+                remark : text
+            }
+            passFlag = false;
+            $.ajax({
+                type : "POST",
+                url : "loanoperation",
+                data : data,
+                success : function(rslt){
+                    passFlag = true;
+                    if(rslt.ret == 200){
+                        countdownanimation(3,rslt.msg,function(){
+                            location.reload();
+                        })
+                    }else{
+                        alert(rslt.msg)
+                    }
+                }
+            })
+        }
+        function backOrder(ele){
+            var _this = $(ele);
+            var text = _this.parent().siblings(".modal-body").find("textarea").val();
+            //var time = _this.siblings(".Wdate").val();
+            var time = $('#phoneTime').val();
+            var inqueueType = 0;
+            if(text == "" || text == undefined){
+                _this.parent().siblings(".modal-body").find("textarea").addClass("warning-border").next(".red-text").html("请填写退回备注");
+                return;
+            }else{
+                _this.parent().siblings(".modal-body").find("textarea").removeClass("warning-border").next(".red-text").html("");
+            }
+            if(isBlank(time)){
+                inqueueType = 0;
+            }else{
+                inqueueType = 1;
+            }
+            passFlag = false;
+            var data = {
+                userId : {{.ubi.Uid}},
+                inqueueType : inqueueType ,
+                loanId : {{.oc.Id}},
+                orderState : "OUTQUEUE",
+                remark : text,
+                inqueueTime : time
+            }
+            $.ajax({
+                type : "POST",
+                url : "loanoperation",
+                data : data,
+                success : function(rslt){
+                    if(rslt.ret == 200){
+                        countdownanimation(3,rslt.msg,function(){
+                            location.reload();
+                        })
+                    }else{
+                        alert(rslt.msg)
+                    }
+                }
+            })
+        }
+        function payplan(){
+            $.ajax({
+                type : "get",
+                url : "queryloanplan",
+                data : {
+                    loanId : {{.oc.Id}},
+                },
+                success : function(rslt){
+                    if(rslt.ret == 200){
+                        var html = [];
+                        $("#payplan-title").html("还款计划");
+                        if(rslt.data != null) {
+                            for(var i = 0;i<rslt.data.length;i++){
+                                idx = (i + 1)+"期" 
+                                var item = rslt.data[i]   
+                                html.push("<tr>");
+                                html.push("<td>"+idx+"</td>");
+                                html.push("<td>"+item.LoanReturnDate.replace("T"," ").substring(0,10)+"</td>");
+                                html.push("<td>"+item.CapitalAmount+"</td>");
+                                html.push("<td>"+item.TaxAmount+"</td>");                         
+                                html.push("<td>"+item.Amount+"</td>");
+                                html.push("</tr>");
+                            }
+                        }
+                        $(".modal_payPlan_tbody").html(html.join(""))
+                        var thead = " <tr><td>期数</td><td>还款日期</td><td>本金</td><td>利息</td><td>合计</td></tr>"
+                        $(".modal_payPlan_thead").html(thead);
+                        $("#order-payplan").show();
+                    }else{
+                        alert(rslt.msg)
+                    }
+                }
+            })
+        } 
+        $(function () {
+            refreshOpinion();
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+        });
+        
+        function refreshOpinion(){
+            var uid = {{IdUidEncrypt .ubi.Uid}};
+            $.get("/riskadvise/getriskadvise",{uid : uid,business_type:0},function(rslt){
+                var html = [];
+                html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='activeShadow'><i class='circle active'></i></i></i><div class='timeShaftText'>"+rslt.data.AuditAdvice+"</div></div>")               
+                var len = rslt.data.RiseItems&&rslt.data.RiseItems.length || 0
+                for (var i = 0; i < len; i++) {
+                    var item = rslt.data.RiseItems[i];
+                    if (item.State != 1) {
+                        html.push("<div class='clearfix timeShaft' style='overflow:auto;padding-left:0;text-indext:0;'><i class='littleCircle'><i class='circle'></i></i><div class='timeShaftText'>" + item.RiskAdvise + "</div></div>")
+                    }
+                };
+                html.push("<div class='timeShaftLine'></div>");
+                $(".opinionBox").html(html.join(""));
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            })
+        }  
+    </script>
+</div>

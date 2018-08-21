@@ -1,0 +1,44 @@
+<div class="panle" id="invitaion_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 邀请记录 </div>
+    <form id="searchForm2" action="" method="get">
+    <div class="panle-body">
+        <table class="table table-hover" >
+            <thead>
+                <tr>
+                    <th>邀请时间</th>
+                    <th>被邀请人手机号</th>
+                    <th>奖励</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range $k,$v:= .data}}
+                <tr>
+                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{$v.NewAccount}}</td>
+                    <td>{{if eq $v.RewardType 0}}30元话费奖励{{else if eq $v.RewardType 1}}10元抵用券奖励{{end}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="3">
+                    <div class="fl">
+                        <div class="pagination"> 每页{{.pageSize}}条，共{{.count}}条
+                        </div>
+                    </div>
+                    <div class="fl">
+                        <div class="pagination" id="pagination2" data-url="/usersmetadata/getusersinvitationrecords?uid={{IdUidEncrypt .uid}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("","#invitaion_record");
+    });
+</script>

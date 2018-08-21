@@ -1,0 +1,63 @@
+<!-- 优惠券路由：/usersmetadata/getusersloginrecords -->
+<div class="panle" id="">
+    <div class="panel-title">
+        <b class="panel-line"></b> 优惠券 </div>
+    <div class="panel-body">
+        <div class='g-couponBox'>
+        </div>
+        <div class='u-LoadMore J_couponLoadMore'>加载更多</div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var currentPage = 1, pagesize = 4, isEnd = false;
+        $(".J_couponLoadMore").click(function () {
+            if (isEnd) {
+                return;
+            }
+            isEnd = true;
+            $.ajax({
+                url: "/usersmetadata/getuserscoupons",
+                type: "get",
+                data: {
+                    uid: uid,
+                    page: currentPage++
+                },
+                success: function (rslt) {
+                    if (rslt.ret == 200) {
+                        var couponHtml = [];
+                        var len = rslt.data&&rslt.data.length;
+                        for (var i = 0; i < len; i++) {
+                            var item = rslt.data[i];
+                            couponHtml.push('<div class="u-coupon ' + (item.IsUsed == "可用的"?"":"dark") + '">');
+                            couponHtml.push('<div class="u-couponTop">');
+                            couponHtml.push('<h2>');
+                            couponHtml.push('<sup>&yen;</sup>');
+                            couponHtml.push('<span>' + item.FavorMoney + '</span>');
+                            couponHtml.push('<sub>减免券</sub>');
+                            couponHtml.push('</h2>');
+                            couponHtml.push('<p>' + item.BeginTime + '-' + item.EndTime + '</p>');
+                            couponHtml.push('<div class="u-counponStatus">' + (item.IsUsed == "可用的"?"":item.IsUsed) + '</div>');
+                            couponHtml.push('</div>');
+                            couponHtml.push('<div class="u-couponBottom">');
+                            couponHtml.push('<p>获得原因：' + item.ApplyExplain + '</p>');
+                            couponHtml.push('<p>获得时间：' + item.GetTime + '</p>');
+                            couponHtml.push('<p>使用说明：满' + item.Monetary + '可用</p>');
+                            couponHtml.push('</div>');
+                            couponHtml.push('</div>');
+                        }
+                        $(".g-couponBox").append(couponHtml.join(""));
+                        if (currentPage-1 >= rslt.pageCount) {
+                            $(".J_couponLoadMore").html("已经没有更多优惠券了");
+                            isEnd = true;
+                        } else {
+                            isEnd = false;
+                        }
+                    } else {
+                        alert(rslt.msg);
+                    }
+                }
+            })
+        }).click();
+    })
+</script>

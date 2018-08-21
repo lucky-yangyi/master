@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="lock">
+    <meta name="keywords" content="现金贷">
+    <meta name="description" content="现金贷">
+    <link href="../static/css/index.css" rel="stylesheet">
+    <script src="../static/js/WdatePicker.js" type="text/javascript"></script>
+    <script src="../static/js/page.js" type="text/javascript"></script>
+    <title>费用减免</title>
+    <style>
+        .hide1{
+            display: none;
+        }
+        .pull-left a:hover{
+            background-color: #599ef4 !important;
+        }
+
+    </style>
+</head>
+<body  class="sticky-header">
+
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                    <form id="searchForm3" action="/costapprove/queryapprove" method="post">
+                        <ul class="nav pull-left" style="width: 100%">
+                            <li class="pull-left">
+                                <input id="startDate" class="Wdate input-small" value="{{.start_time}}" type="text" onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})" name="beginTime" />&nbsp;&nbsp;
+                                <input id="endDate" class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})" value="{{.end_time}}" name="endTime" />&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <select name="state" id="handleType">
+                                    <option value="">状态</option>
+                                    <option value="NONE">审批中</option>
+                                    <option value="AGREE">待处理</option>
+                                    <option value="REFUSE">已退回</option>
+                                    <option value="DONE">处理完成</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入减免账号" name="account" id="account"/>
+                            </li>
+
+                            <li class="pull-left">
+                                <select name="collectionPhase" id="handleType">
+                                   <option value="">催收阶段</option>
+                                   <option value="M0">M0</option>
+                                   <option value="S1">S1</option>
+                                   <option value="S2">S2</option>
+                                   <option value="S3">S3</option>
+                                   <option value="M2">M2</option>
+                                   <option value="M3">M3</option>
+                                </select>
+                            </li>
+
+                            <li class="pull-left">
+                                <button type="submit" class="btn btn-green">搜索</button>
+                            </li>
+                            {{if .displayExeclButton}}
+                            <li class="pull-left" style="margin-left: 10px">
+                                <button type="button" id="export" class="btn btn-green">导出数据</button>
+                            </li>
+                            {{end}}
+                            <li class="pull-left" style='float: right !important;margin-right: 40px'>
+                                <a href="/costapprove/getadd"  data-permission="operation_add_approval" class="btn btn-green skip1" style='padding: 0'>提交审批</a>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <form action="" id="form2" method="post">
+                        <table class="table table-hover table-striped table_thead_fixed">
+                            <thead>
+                            <tr>
+                                <th>发起人</th>
+                                <th>发起时间</th>
+                                <th>减免账号</th>
+                                <th>催收阶段</th>
+                                <th>减免金额</th>
+                                <th>状态</th>
+                                <th>审批人</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $k,$v:=.list}}
+                            <tr>
+                                <td>{{$v.RequestSysName}}</td>
+                                <td>{{$v.CreateTime}}</td>
+                                <td>{{$v.Phone}}</td>
+                                <td>{{$v.CollectionPhase}}</td>
+                                <td>{{f2s $v.Money}}元</td>
+                                <td>{{if eq $v.State "NONE"}}审核中{{else if eq $v.State "AGREE"}}待处理{{else if eq $v.State "REFUSE"}}已退回{{else if eq $v.State "REFUSEDONE"}}已退回{{else if eq $v.State "FAIL"}} 处理失败{{else}}处理完成{{end}}</td>
+                                <td>{{if eq $v.State "NONE"}}{{$v.Displayname}}{{else}}{{end}}</td>
+                                <td>
+                                <a class='skip1' href='/costapprove/detail?id={{IdUidEncrypt $v.Id}}&uid={{IdUidEncrypt $v.Uid}}&loanId={{$v.LoanId}}&isDisplayApplove={{ $.isDisplayApplove}}'>查看</a>
+                                 {{if $.isDisplayApplove}}
+                                {{if eq $.loginSysId $v.ApproveSysId}}
+                                &nbsp;&nbsp; {{if eq $v.State "NONE"}}<span style='color: #398dee;cursor: pointer' onclick='send_back({{IdUidEncrypt $v.Id}})'> 退回</span>
+                                {{end}}{{end}}
+                                {{end}}
+                                </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="14">
+                                    <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条&nbsp;&nbsp;
+                                                </div>
+                                            </div>
+                                    <div class="fl">
+                                        <div class="pagination" id="pagination2" data-url="/costapprove/queryapprove" currentPage="{{.currpage}}" pageCount="{{.pagecount}}" pageSize='{{.pageSize}}'></div>
+                                        <script type="text/javascript">
+                                            $(function(){
+                                                $("#pagination2").my_page("#searchForm3");
+                                            });
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sendBack boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header"><span class="pop_header_txt">退回</span><span class="pop_close" onclick="closePopup($('.sendBack'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <div class="pop_con_inner">
+                        <textarea class='send_txt' placeholder='请填写退回原因'></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn allow_btn hintBtn1" onclick="closePopup($('.sendBack'))">取消</a>
+                <a class="btn allow_btn hintBtn2" id='send_back'>确认</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript" src="../../static/js/permissions.js"></script>
+<script>
+    Permissions.initBtn("operation_add_approval");
+    if(window.sessionStorage.time){
+        $('#startDate').val(window.sessionStorage.time);
+    }
+    if(window.sessionStorage.aa){
+        $('#endDate').val(window.sessionStorage.aa);
+    }
+    if(window.sessionStorage.dd){
+        $('#handleType').val(window.sessionStorage.dd);
+    }
+    function send_back(id) {
+        $('.sendBack').show();
+        $('.send_txt').val('');
+        $('#send_back').off().click(function () {
+            var result = $('.sendBack .send_txt').val();
+            if(result==''){
+                alert('请填写退回原因')
+                return false;
+            }else {
+                $.ajax({
+                    url:'/costapprove/costapprove',
+                    type:'post',
+                    data:{result:result,id:id,state:'REFUSE',isBack:true},
+                    success:function (result) {
+                        if(result.ret==200){
+                            window.location.reload();
+                        }else {
+                            alert('处理失败');
+                            return false;
+                        }
+                    }
+                })
+            }
+        })
+    }
+    //导出数据
+    $('#export').on('click', function () {
+        var beginTime = $('#startDate').val();      //开始日期
+        var endTime = $('#endDate').val();          //结束日期
+        var state = $('#handleType').val();         //状态
+        var account = $('#account').val();          //手机号
+        var url = '/costapprove/costapprovedatatoexcel?beginTime=' + beginTime + '&endTime=' + endTime + '&state=' + state + '&account=' + account;
+        window.location.href = url;
+    });
+</script>
+</body>
+</html>

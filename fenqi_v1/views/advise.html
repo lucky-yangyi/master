@@ -1,0 +1,333 @@
+<!-- 意见反馈 -->
+<style>
+    .imgContent{width: 900px;height: 800px;background-color: white;position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);display: inline-block;text-align: center;}
+    .imgContent .imgList{height: 680px;display: inline-block;line-height: 680px;text-align: center;}
+    .img_box .btnBox{border-top: 1px solid #eee;margin-top: 20px;text-align: center;}
+    .img_box button{display: inline-block;border: 1px solid #599ef4;color: #599ef4;background-color: white;border-radius: 3px;width: 80px;height: 36px;padding: 0;margin-top: 12px;margin-right: 10px;z-index: 1000;}
+    .img_box button:hover{color: black;}
+    .img_box .img_title{height: 40px;text-align: center;line-height: 40px;color: black;font-size: 17px;}
+    .img_box .imgList img{max-height: 680px;max-width: 680px;}
+    .reminderBox{position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 150px;height: 35px;border: 1px solid #333;background-color: #333;color: white;z-index: 2000;border-radius: 8px;text-align: center;line-height: 35px;}
+    li.li_status{margin-bottom: 10px;}
+</style>
+
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border panel_anthen">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="feedbackTime" placeholder='反馈时间' class="input-small" value="{{.feedbackTime}}" type="text" name="feedback_time"/>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="is_checked" id="is_checked" class=''>
+                                        <option value="">状态</option>
+                                        <option value="0">未审核</option>
+                                        <option value="1">已审核</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="searchForm2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>反馈时间</th>
+                                        <th>手机号</th>
+                                        <th>手机型号</th>
+                                        <th>App版本号</th>
+                                        <th style="width:30%;max-width:600px;">反馈内容</th>
+                                        <th>备注</th>
+                                        <th>操作人</th>
+                                        <th style="width: 150px;">操作</th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    {{range $k, $v := .list}}
+                                    <tr>
+                                        <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>
+                                            <a data-status='{{$v.Status}}' data-id="{{IdUidEncrypt $v.Uid}}" class='openNewDetail' target="_blank" style="cursor: pointer">{{mobileFilter $v.Account}}</a>
+                                        </td>
+                                        <td>{{$v.MobileType}}</td>
+                                        <td>{{$v.AppVersion}}</td>
+                                        <td>
+                                            <p style="word-break: break-all; word-wrap: break-word;">{{$v.Content}}</p>
+                                        </td>
+                                        <td class='table-status'>
+                                            {{if eq $v.IsChecked 0}}
+                                            <span class="tag_txt_blue">未审核</span>
+                                            {{else}}
+                                            <span>{{$v.Remarks}}</span>
+                                            {{end}}
+                                        </td>
+                                        <td class='table-deal'>{{$v.Dealpeople}}</td>
+                                        <td style="width: 150px;">
+                                            <a class="hand_on" data-adviceid='{{$v.Id}}'>修改状态</a>
+                                            {{if ne $v.Screenshot ""}}
+                                            <a class="look_img" style="margin-left: 10px;cursor: pointer" onclick="lookImg('{{$v.Screenshot}}')">查看图片</a>
+                                            {{end}}
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="/advise/list" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 添加备注弹窗 -->
+        <div class="g-modal f-hide" id='add-remark'>
+            <div class='g-content'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">备注</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id='advise_id'>
+                    <ul class='remark-fragment' style='padding:0'>
+                        <li class="btn btn-default li_status">已联系</li>
+                        <li class="btn btn-default li_status">已处理</li>
+                        <li class="btn btn-default li_status">0额度</li>
+                        <li class="btn btn-default li_status">无人接听</li>
+                        <li class="btn btn-default li_status">挂断</li>
+                        <li class="btn btn-default li_status">拒接</li>
+                        <li class="btn btn-default li_status">来电提醒</li>
+                        <li class="btn btn-default li_status">命中黑名单</li>
+                    </ul>
+                    <textarea class='modal-textarea form-control J_remark' placeholder="填写备注（必填）" style='width:100%;min-width:246px;'></textarea>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green' onclick="FeedbackModify()">确定</div>
+                    <div class='btn btn-default modal-close'>取消</div>
+                </div>
+            </div>
+        </div>
+        <!-- 手机号未认证弹窗 -->
+        <div class="g-modal f-hide" id='wrong-phone'>
+            <div class='g-content' style='min-width:254px;'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">温馨提示</div>
+                    <div class="modal-close green">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <div class='modal-tips' style='text-align:center;'>该手机号未认证！</div>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green modal-close'>知道了</div>
+                </div>
+            </div>
+        </div>
+
+        <!--查看图片-->
+        <div class="img_box boxShade hide1" onclick="closePopup($('.img_box'))" style='position:fixed;top:0;left:0;right:0;bottom:0;z-index:199;background-color: rgba(0,0,0,.5);'>
+            <div class="imgContent">
+                <div class="img_title">
+                    <span class="currentImg">1</span>
+                    <span>/</span>
+                    <span class="imgCount">3</span>
+                </div>
+                <div class="imgList">
+                </div>
+                <div class="btnBox">
+                    <button class="upImg">上一张</button>
+                    <button class="rotate">顺时针旋转</button>
+                    <button class="nextImg">下一张</button>
+                </div>
+            </div>
+        </div>
+        <div class="reminderBox hide1">
+
+        </div>
+        <script>
+
+            //查看图片
+            var currents = 0;
+            var index = 0;
+            var imgLength = 0;
+            $(function () {
+                $(".pageSize").val({{.pageSize}});
+                $("#pagination2").my_page("#searchForm2");
+                $("#feedbackTime").dateRangePicker({
+                    separator: "~",
+                    autoClose: true,
+                    shortcuts: null,
+                    customShortcuts: [{
+                        name: "清空",
+                        dates: function(){
+                            return ["", "",""]
+                        }
+                    }]
+                });
+                $(".img_box .rotate").click(function (e) {
+                    e.stopPropagation();
+                    currents = (currents + 90) % 360;
+                    $(".img_box img").eq(index).css("transform", "rotate(" + currents + "deg)");
+                })
+                $(".img_box .upImg").click(function (e) {
+                    e.stopPropagation();
+                    if (index == 0) {
+                        $(".reminderBox").html("已经是第一张了");
+                        $(".reminderBox").show();
+                        $(".reminderBox").fadeOut(1000);
+                        return;
+                    }
+                    $(".img_box img").eq(index - 1).show().siblings().hide();
+                    index = index - 1;
+                    $(".img_box .currentImg").html(index + 1);
+                });
+                $(".modal-close").click(function () {
+                    $(".g-modal").hide();
+                })
+                $(".img_box .nextImg").click(function (e) {
+                    e.stopPropagation();
+                    if (index == imgLength - 1) {
+                        $(".reminderBox").html("已经是最后一张了");
+                        $(".reminderBox").show();
+                        $(".reminderBox").fadeOut(1000);
+                        return;
+                    }
+                    $(".img_box img").eq(index + 1).show().siblings().hide();
+                    index = index + 1;
+                    $(".img_box .currentImg").html(index + 1);
+                });
+                $(".hand_on").click(function () {
+                    var id = $(this).data("adviceid");
+                    $.get("/advise/getadvise", { advise_id: id }, function (rslt) {
+                        if (rslt.ret == 200) {
+                            $("#advise_id").val(id);
+                            $(".J_remark").val(rslt.advise.Remarks);
+                            if (rslt.advise.IsChecked - 1 >= 0) {
+                                $(".li_status").eq(rslt.advise.IsChecked - 1).addClass("btn-green").removeClass("btn-default");
+                            }
+                            $("#add-remark").show();
+                        } else {
+                            alert(rslt.msg);
+                        }
+                    })
+                });
+                var deleteText = "", delete_length = 0;
+                $(".li_status").click(function () {
+                    $(".li_status").removeClass("btn-green").addClass("btn-default");
+                    $(this).addClass("btn-green").removeClass("btn-default");
+                    if (isBlank($(".J_remark").val())) {
+                        $(".J_remark").val($(this).text());
+                        deleteText = $(this).text(), delete_length = $(this).text().length;
+                    } else {
+                        if (deleteText == "" && delete_length == 0) {
+                            $(".J_remark").val($(".J_remark").val() + "," + $(this).text());
+                        } else {
+                            if ($(".J_remark").val().indexOf(",") >= 0) {
+                                $(".J_remark").val($(".J_remark").val().substring(0, $(".J_remark").val().length - delete_length - 1) + "," + $(this).text());
+                            } else {
+                                $(".J_remark").val($(this).text());
+                            }
+                        }
+                        deleteText = $(this).text(), delete_length = $(this).text().length;
+                    }
+                });
+                $(".openNewDetail").on("click", function (e) {
+                    e.preventDefault();
+                    var id = $(this).data("id");
+                    $.zpost("/advise/checkusersisauth", { uid: id }, function (rslt) {
+                        if (rslt.ret == 200) {
+                            if (rslt.count == 0) {
+                                //注册用户详情
+                                window.open("/usersmanage/userslook?uid=" + id);
+                                // $("#wrong-phone").show();
+                            } else {
+                                //认证用户详情
+                                window.open("/usersmanage/usersmetadatalook?uid=" + id);
+                            }
+                        } else {
+                            alert(rslt.msg);
+                        }
+                    });
+                });
+            })
+            function FeedbackModify() {
+                var feedback_txt = $(".J_remark").val();
+                var advise_id = $("#advise_id").val();
+                var change_status = $(".li_status.btn-green").index() + 1;
+                if (feedback_txt == "" || feedback_txt == undefined) {
+                    alert("请输入备注内容");
+                    return
+                }
+                $.zpost("/advise/updateadvise", { advise_id: advise_id, remark: feedback_txt, change_status: change_status }, function (result) {
+                    if (result.ret == 200) {
+                        $(".g-modal").hide();
+                        getpage(location.href)
+                    } else {
+                        alert(result.msg);
+                    }
+                });
+
+            }
+            function lookImg(pngs) {
+                $(".img_box .imgList").html("");
+                currents = 0;
+                index = 0;
+                imgLength = 0;
+                $(".img_box .currentImg").html("1");
+                $(".img_box .imgCount").html("");
+                var htmls = "";
+                if (pngs != "") {
+                    var arr = pngs.split(";")
+                    $.each(arr, function (key, val) {
+                        if (val != "") {
+                            var imgpath = "https://fqstatic.5ujr.cn/";
+                            imgLength = imgLength + 1;
+                            imgpath = imgpath + val;
+                            htmls += '<img class="hide1" src="' + imgpath + '" alt="">'
+                        }
+                    })
+                    $(".img_box .imgList").html(htmls);
+                    $(".img_box").removeClass("hide1");
+                    $(".img_box img").eq(0).show();
+                    $(".img_box .imgCount").html(imgLength);
+                    if (imgLength == 1) {
+                        $(".img_box .nextImg").hide();
+                        $(".img_box .upImg").hide();
+                    } else {
+                        $(".img_box .nextImg").show();
+                        $(".img_box .upImg").show();
+                    }
+                }
+            }
+
+        </script>
+    </div>
+</div>

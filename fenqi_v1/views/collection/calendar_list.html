@@ -1,0 +1,333 @@
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .main-content {
+        overflow-x: scroll;
+    }
+
+    select {
+        appearance: none;
+        -ms-progress-appearance: none;
+        -webkit-appearance: none;
+        width: 50px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 5px;
+        padding-left: 10px;
+    }
+
+    select:focus {
+        outline: none;
+    }
+
+    select.dark.xiu {
+        border-color: #666;
+        color: #333;
+        background: url("/static/img/slide.png") no-repeat;
+        background-position: center right;
+    }
+
+    select.dark.ban {
+        border-color: #ccc;
+        color: #999;
+        background: url("/static/img/slide.png") no-repeat;
+        background-position: center right;
+    }
+
+    select.ban {
+        border-color: #4C9DF2;
+        color: #4C9DF2;
+        background: url("/static/img/slide-blue.png") no-repeat;
+        background-position: center right;
+    }
+
+    select.xiu {
+        border-color: #F96868;
+        color: #F96868;
+        background: url("/static/img/slide-orange.png") no-repeat;
+        background-position: center right;
+    }
+
+    .save {
+        width: 80px;
+        height: 34px;
+        line-height: 34px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #4C9DF2;
+        margin: 10px auto;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+</style>
+<style>
+    .height400 {
+        width: 100%;
+        /* height:800px; */
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .fancyTable td,
+    .fancyTable th {
+        padding: 5px;
+    }
+
+    .fancyTable tbody tr td {
+        background-color: #fff;
+    }
+
+    .fancyTable thead tr th,
+    .fancyTable thead tr td,
+    .fancyTable tfoot tr th,
+    .fancyTable tfoot tr td,
+    .fancyTable tbody tr td {
+        background-color: #fff;
+        text-align: center
+    }
+
+    .fht-table,
+    .fht-table thead,
+    .fht-table tfoot,
+    .fht-table tbody,
+    .fht-table tr,
+    .fht-table th,
+    .fht-table td {
+        margin: 0;
+        padding: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: top;
+    }
+
+    .fht-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .fht-table-wrapper,
+    .fht-table-wrapper .fht-thead,
+    .fht-table-wrapper .fht-tfoot,
+    .fht-table-wrapper .fht-fixed-column .fht-tbody,
+    .fht-table-wrapper .fht-fixed-body .fht-tbody,
+    .fht-table-wrapper .fht-tbody {
+        overflow: hidden;
+        position: relative;
+    }
+
+    .fht-table-wrapper .fht-fixed-body .fht-tbody,
+    .fht-table-wrapper .fht-tbody {
+        overflow: auto;
+    }
+
+    .fht-table-wrapper .fht-table .fht-cell {
+        overflow: hidden;
+        height: 1px;
+    }
+
+    .fht-table-wrapper .fht-fixed-column,
+    .fht-table-wrapper .fht-fixed-body {
+        top: 0;
+        left: 0;
+        position: absolute;
+    }
+
+    .fht-table-wrapper .fht-fixed-column {
+        z-index: 1;
+    }
+
+    .table thead>tr>th,
+    .table tbody>tr>th,
+    .table tfoot>tr>th,
+    .table thead>tr>td,
+    .table tbody>tr>td,
+    .table tfoot>tr>td {
+        padding: 5px;
+    }
+
+    .ths,
+    .tbs {
+        white-space: nowrap
+    }
+</style>
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                <form id="searchForm2" action="/collectionschedule/getcollectionscheduledetail" method="get">
+                    <ul class="nav pull-left" style="width: 100%">
+                        <li class="pull-left">
+                            <input id="startDate" class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM'})" name="beginTime" />
+                        </li>
+                        <li class="pull-left">
+                            <select name="type" id="action_type" style='width:160px;'>
+                                    <option value="11,12,13,14,15,16">全部</option>
+                                    <option value="11">M0</option>
+                                    <option value="12">S1</option>
+                                    <option value="13">S2</option>
+                                    <option value="14">S3</option>
+                                    <option value="15">M2</option>
+                                    <option value="16">M3</option>
+                                </select>
+                        </li>
+                        <li class="pull-left">
+                            <input type="text" class="input-medium" value="" placeHolder="请输入催收人员姓名"
+                                   name="collectionName" id="collectionName"/>&nbsp;&nbsp;
+                        </li>
+                        <li class="pull-left">
+                            <button type="submit" class="btn btn-green">搜索</button>
+                        </li>
+                    </ul>
+                </form>
+            </div>
+            <div class="panel-body">
+                <form action="" id="form2" method="post">
+                    <div class='height400'>
+                        <table class="table table-hover table-striped table_thead_fixed fancyTable" id="frozentable">
+                            <thead>
+                                <tr>
+                                    <th class="ths">姓名</th>
+                                    {{range $k,$v := .oneMonth}}
+                                    <th>{{$v}}</th>
+                                    {{end}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range $k,$v := .collectionScheduleRecords}}
+                                <tr>
+                                    <td class='tbs' data-id="{{$v.SysUid}}" data-group="{{$v.Type}}" data-robot="{{$v.AccountType}}">{{$v.Name}}</td>
+                                    {{range $a,$b := $v.Days}} {{if le $a $.monthLength}} {{if eq $b 1}}
+                                    <td class="numeric" title="">
+                                        <select class="">
+                                            <option value="1">休</option>
+                                            <option value="0">班</option>
+                                        </select>
+                                    </td>
+                                    {{else}}
+                                    <td class="numeric" title="">
+                                        <select class="">
+                                            <option value="0">班</option>
+                                            <option value="1">休</option>
+                                        </select>
+                                    </td>
+                                    {{end}} {{end}} {{end}}
+                                </tr>
+                                {{end}}
+                            </tbody>
+
+                        </table>
+                    </div>
+
+
+                </form>
+            </div>
+    </div>
+    </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var group = {{.group}}
+        $("#action_type").val(group);
+        var heights = $("table tbody tr").length>18?800:41*($("table tbody tr").length+2);
+        $('#frozentable').fixedHeaderTable({ fixedColumns: 1,height : heights });
+        var thead = $(".fht-fixed-body .fht-thead thead th");
+        var x = 0;
+        var timeStamp = Date.parse(new Date());//{{.nowTime }}        //获取服务器时间
+        var today = new Date(timeStamp).format("dd");//格式化时间，获取“月份-日期”格式时间
+        var fullToday = new Date(timeStamp);
+        var year = fullToday.getFullYear();//获取服务器年份时间
+        var month = fullToday.getMonth() + 1;//获取服务器月份时间
+        var searchMonth = $("#startDate").val();//获取搜索参数
+        var search_year = searchMonth.substring(0, 4);//获取搜索年份
+        var search_month = searchMonth.substring(5,7);//获取搜索月份
+        if (!isBlank(searchMonth)) {
+            if (parseInt(search_year) < parseInt(year)) {//代表搜索年份小于今年，全暗
+                x = 99;
+            } else if (parseInt(search_year) > parseInt(year)) {//大于今年 ，全亮
+                x = 0;
+            } else {//代表搜索今年数据
+                if (parseInt(search_month) < parseInt(month)) {//代表搜索月份小于月份，全暗
+                    x = 99;
+                } else if (parseInt(search_month) > parseInt(month)) {//代表搜索月份大于于月份，全亮
+                    x = 0;
+                } else {//代表搜索本月数据
+                    for (x = 0; x < thead.length; x++) {//
+                        if (thead.eq(x).text().substring(0,2)=== today) {
+                            break;// 遍历到这里x即代表当前天数和
+                        }
+                    }
+                }
+            }
+        } else {//否则就是当月
+            $("#startDate").val(new Date(timeStamp).format("yyyy-MM"));
+            searchMonth = new Date(timeStamp).format("yyyy-MM");
+            search_year = searchMonth.substring(0, 4);//获取搜索年份
+            search_month = searchMonth.substring(5,7);//获取搜索月份
+            for (x = 0; x < thead.length; x++) {//
+                if (thead.eq(x).text().substring(0,2) === today) {
+                    break;// 遍历到这里x即代表当前天数和
+                }
+            }
+        }
+        $("tbody select").each(function (i, n) {//初始化给各option增加颜色外框等
+            if ($(this).parent().index() <= x) {//获取当前select父元素td在tr中的index下标，如果小于外面的x，则为当天之前的日期（包括当天）
+                $(this).addClass("dark").attr("disabled", "disabled");
+                if ($(this).val() == 0) {//能走到这里，必定是当天之后的日期， 0代表上班 1代表休息
+                    $(this).addClass("ban")
+                } else if ($(this).val() == 1) {
+                    $(this).addClass("xiu")
+                }
+            } else if ($(this).val() == 0) {//能走到这里，必定是当天之后的日期， 0代表上班 1代表休息
+                $(this).addClass("ban")
+            } else if ($(this).val() == 1) {
+                $(this).addClass("xiu")
+            }
+        }).change(function () {
+            var type = 0;
+            var _that = $(this);
+            var index = $(this).parent().index();
+            if (_that.val() == 1) {
+                type = 1;
+            } else if (_that.val() == 0) {
+                type = 0;
+            }
+            $.ajax({
+                type: "post",
+                url: "/collectionschedule/updatecollectionschedule",
+                data:{
+                    accountType: _that.parent().siblings("td.tbs").data("robot"),
+                    sysUid: _that.parent().siblings("td.tbs").data("id"),
+                    date: search_year+"-"+search_month+"-"+thead.eq(index).text().substring(0,2),
+                    state: type,
+                    type: _that.parent().siblings("td.tbs").data("group")
+                },
+                success: function (result) {
+                    if (result.ret == 200) {
+                        if (_that.val() == 1) {
+                            _that.removeClass().addClass("xiu");
+                        } else if (_that.val() == 0) {
+                            _that.removeClass().addClass("ban");
+                        }
+                    } else {
+                        alert(result.err);
+                    }
+                }
+            })
+        });
+        $("tbody td").each(function () {
+            var index = $(this).index();
+            $(this).attr("title", thead.eq(index).text())
+        })
+    });
+
+</script>

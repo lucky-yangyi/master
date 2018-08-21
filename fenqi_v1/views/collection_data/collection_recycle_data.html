@@ -1,0 +1,241 @@
+<!-- 通过汇总 -->
+<style>
+        .table.table-noborder tr td {
+            height: 40px;
+            line-height: 40px;
+            font-size: 18px;
+            color: #63C4A0;
+            font-weight: bold;
+        }
+    
+        .table.table-noborder {
+            margin-bottom: 15px;
+        }
+    
+        .statistics {
+            cursor: pointer;
+        }
+    
+        th {
+            text-align: center;
+        }
+        
+        .pull-left{
+            margin-right:30px;
+        }
+        .pull-left select{
+            width:120px;
+        }
+    </style>
+    <div class="sticky-header">
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel_border">
+                        <div class="panel_heading">
+                            <form id="searchForm2" action="/collection/afterloangroupdatanew" method="get">
+                                <ul class="nav pull-left" style="width: 100%;">
+                                    <li class="pull-left">
+                                        <select name="collectionType" id="business_type">
+                                            <option value="全部">全部</option>
+                                            <option value="内催组">内催组</option>
+                                            <option value="坐席组">坐席组</option>
+                                            <option value="委外组">委外组</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        查看期限
+                                        <select name="timeType" id="timeLimit">
+                                            <option value="day">按日查看</option>
+                                            <option value="month">按月查看</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left" id='dateContainer'>
+                                        <input id="startDate" class="Wdate input-small" type="text"  onFocus="WdatePicker({dateFmt:'yyyy-MM-dd'})" name="beginTime" value={{.beginTime}} placeholder='请选择日期' />
+                                    </li>
+                                    <li class="pull-left">
+                                        <button type="submit" class="btn btn-green">搜索</button>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                        <div class="panel-body">
+                            <form action="" id="form2" method="post">
+                                <table class='table table-bordered text-center'>
+                                    <thead>
+                                        <tr>
+                                            <th>公司名称</th>
+                                            <th>分配户数</th>
+                                            <th>分配金额</th>
+                                            <th>分配本金金额</th>
+                                            <th>分配滞纳金</th>
+                                            <th>回收本金</th>
+                                            <th>回收滞纳金</th>
+                                            <th>本金金额回收率</th>
+                                            <th>滞纳金回收率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {{if eq .collectionType "内催组"}}
+                                        {{if eq .timeType "day"}}
+                                            {{if gt .innerList.CapitalOnFile 0.00}}
+                                                <tr>
+                                                    <td>内催组</td>
+                                                    <td>{{.innerList.AmountOnFile}}</td>
+                                                    <td>{{f2s .innerList.MoneyOnFile}}</td>
+                                                    <td>{{f2s .innerList.CapitalOnFile}}</td>
+                                                    <td>{{f2s .innerList.LateFeeOnFile}}</td>
+                                                    <td>{{f2s .innerList.ReturnCapital}}</td>
+                                                    <td>{{f2s .innerList.ReturnLateFee}}</td>
+                                                    <td>{{percent .innerList.ReturnCapital .innerList.CapitalOnFile}}</td>
+                                                    <td>{{percent .innerList.ReturnLateFee .innerList.LateFeeOnFile}}</td>
+                                                </tr>
+                                            {{end}}
+                                        {{else}}
+                                             {{if gt .innerList.CapitalOnFileMonth 0.00}}
+                                                <tr>
+                                                    <td>内催组</td>
+                                                    <td>{{.innerList.AmountOnFile}}</td>
+                                                    <td>{{f2s .innerList.MoneyOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.CapitalOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.LateFeeOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.ReturnCapitalMonth}}</td>
+                                                    <td>{{f2s .innerList.ReturnLateFeeMonth}}</td>
+                                                    <td>{{percent .innerList.ReturnCapitalMonth .innerList.CapitalOnFileMonth}}</td>
+                                                    <td>{{percent .innerList.ReturnLateFeeMonth .innerList.LateFeeOnFileMonth}}</td>
+                                                </tr>
+                                            {{end}}
+                                        {{end}}
+                                    {{else if eq .collectionType "委外组"}}
+                                        {{if .flag}}
+                                            {{if eq .timeType "day"}}
+                                                    <tr>
+                                                        <td>委外组</td>
+                                                        <td>{{.outList.AmountOnFile}}</td>
+                                                        <td>{{f2s .outList.MoneyOnFile}}</td>
+                                                        <td>{{f2s .outList.CapitalOnFile}}</td>
+                                                        <td>{{f2s .outList.LateFeeOnFile}}</td>
+                                                        <td>{{f2s .outList.ReturnCapital}}</td>
+                                                        <td>{{f2s .outList.ReturnLateFee}}</td>
+                                                        <td>{{percent .outList.ReturnCapital .outList.CapitalOnFile}}</td>
+                                                        <td>{{percent .outList.ReturnLateFee .outList.LateFeeOnFile}}</td>
+                                                    </tr>
+                                            {{else}}
+                                                    <tr>
+                                                        <td>委外组</td>
+                                                        <td>{{.outList.AmountOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.MoneyOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.CapitalOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.LateFeeOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.ReturnCapitalMonth}}</td>
+                                                        <td>{{f2s .outList.ReturnLateFeeMonth}}</td>
+                                                        <td>{{percent .outList.ReturnCapitalMonth .outList.CapitalOnFileMonth}}</td>
+                                                        <td>{{percent .outList.ReturnLateFeeMonth .outList.LateFeeOnFileMonth}}</td>
+                                                    </tr>
+                                            {{end}}
+                                        {{end}}
+                                    {{else if eq .collectionType "坐席组"}}
+                                    {{else}}
+                                        {{if eq .timeType "day"}}
+                                            {{if gt .sumList.CapitalOnFile 0.00}}
+                                                <tr>
+                                                    <td>内催组</td>
+                                                    <td>{{.innerList.AmountOnFile}}</td>
+                                                    <td>{{f2s .innerList.MoneyOnFile}}</td>
+                                                    <td>{{f2s .innerList.CapitalOnFile}}</td>
+                                                    <td>{{f2s .innerList.LateFeeOnFile}}</td>
+                                                    <td>{{f2s .innerList.ReturnCapital}}</td>
+                                                    <td>{{f2s .innerList.ReturnLateFee}}</td>
+                                                    <td>{{percent .innerList.ReturnCapital .innerList.CapitalOnFile}}</td>
+                                                    <td>{{percent .innerList.ReturnLateFee .innerList.LateFeeOnFile}}</td>
+                                                </tr>
+                                                {{if .flag}}
+                                                    <tr>
+                                                        <td>委外组</td>
+                                                        <td>{{.outList.AmountOnFile}}</td>
+                                                        <td>{{f2s .outList.MoneyOnFile}}</td>
+                                                        <td>{{f2s .outList.CapitalOnFile}}</td>
+                                                        <td>{{f2s .outList.LateFeeOnFile}}</td>
+                                                        <td>{{f2s .outList.ReturnCapital}}</td>
+                                                        <td>{{f2s .outList.ReturnLateFee}}</td>
+                                                        <td>{{percent .outList.ReturnCapital .outList.CapitalOnFile}}</td>
+                                                        <td>{{percent .outList.ReturnLateFee .outList.LateFeeOnFile}}</td>
+                                                    </tr>
+                                                {{end}}
+                                                <tr>
+                                                    <td>总计</td>
+                                                    <td>{{.sumList.AmountOnFile}}</td>
+                                                    <td>{{f2s .sumList.MoneyOnFile}}</td>
+                                                    <td>{{f2s .sumList.CapitalOnFile}}</td>
+                                                    <td>{{f2s .sumList.LateFeeOnFile}}</td>
+                                                    <td>{{f2s .sumList.ReturnCapital}}</td>
+                                                    <td>{{f2s .sumList.ReturnLateFee}}</td>
+                                                    <td>{{percent .sumList.ReturnCapital .sumList.CapitalOnFile}}</td>
+                                                    <td>{{percent .sumList.ReturnLateFee .sumList.LateFeeOnFile}}</td>
+                                                </tr>  
+                                            {{end}}
+                                        {{else}}
+                                            {{if gt .sumList.CapitalOnFileMonth 0.00}}
+                                                <tr>
+                                                    <td>内催组</td>
+                                                    <td>{{.innerList.AmountOnFile}}</td>
+                                                    <td>{{f2s .innerList.MoneyOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.CapitalOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.LateFeeOnFileMonth}}</td>
+                                                    <td>{{f2s .innerList.ReturnCapitalMonth}}</td>
+                                                    <td>{{f2s .innerList.ReturnLateFeeMonth}}</td>
+                                                    <td>{{percent .innerList.ReturnCapitalMonth .innerList.CapitalOnFileMonth}}</td>
+                                                    <td>{{percent .innerList.ReturnLateFeeMonth .innerList.LateFeeOnFileMonth}}</td>
+                                                </tr>
+                                                {{if .flag}}
+                                                    <tr>
+                                                        <td>委外组</td>
+                                                        <td>{{.outList.AmountOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.MoneyOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.CapitalOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.LateFeeOnFileMonth}}</td>
+                                                        <td>{{f2s .outList.ReturnCapitalMonth}}</td>
+                                                        <td>{{f2s .outList.ReturnLateFeeMonth}}</td>
+                                                        <td>{{percent .outList.ReturnCapitalMonth .outList.CapitalOnFileMonth}}</td>
+                                                        <td>{{percent .outList.ReturnLateFeeMonth .outList.LateFeeOnFileMonth}}</td>
+                                                    </tr>
+                                                {{end}}
+                                                <tr>
+                                                    <td>总计</td>
+                                                    <td>{{.sumList.AmountOnFileMonth}}</td>
+                                                    <td>{{f2s .sumList.MoneyOnFileMonth}}</td>
+                                                    <td>{{f2s .sumList.CapitalOnFileMonth}}</td>
+                                                    <td>{{f2s .sumList.LateFeeOnFileMonth}}</td>
+                                                    <td>{{f2s .sumList.ReturnCapitalMonth}}</td>
+                                                    <td>{{f2s .sumList.ReturnLateFeeMonth}}</td>
+                                                    <td>{{percent .sumList.ReturnCapitalMonth .sumList.CapitalOnFileMonth}}</td>
+                                                    <td>{{percent .sumList.ReturnLateFeeMonth .sumList.LateFeeOnFileMonth}}</td>
+                                                </tr>
+                                            {{end}} 
+                                        {{end}}
+                                    {{end}}  
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var day = {{.day}};
+        var month = {{.month}};
+        $(function () {
+            $("#timeLimit").change(function () {
+                var value = $(this).val();
+                if (value == "month") {
+                    $("#dateContainer").empty().html('<input id="startDate" class="Wdate input-small" type="text"  onFocus="WdatePicker({dateFmt:\'yyyy-MM\'})" name="beginTime" placeholder="请选择日期" />')
+                    $("#startDate").val(month);
+                } else if (value == "day") {
+                    $("#dateContainer").empty().html('<input id="startDate" class="Wdate input-small" type="text"  onFocus="WdatePicker({dateFmt:\'yyyy-MM-dd\'})" name="beginTime" placeholder="请选择日期" />')
+                    $("#startDate").val(day);
+                }
+            }).change();
+        })
+    </script>

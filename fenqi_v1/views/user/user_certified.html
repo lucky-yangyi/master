@@ -1,0 +1,68 @@
+<!-- 已认证客户-->
+<div class="panle" id="user_repayment_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 客户列表
+    </div>
+    <form id="searchForm2" action="" method="get">
+        <div class="panle-body">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>注册时间</th>
+                    <th>认证时间</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>借款金额</th>
+                    <th>期数</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range $k,$v := .users}}
+                <tr>
+                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{$v.SubmitTime.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{$v.Verifyrealname}}</td>
+                    <td>{{$v.InviteAccount}}</td>
+                    <td>{{$v.Money}}</td>
+                    <td>{{$v.LoanTermCount}}</td>
+                    <td>{{$v.State}}</td>
+                    <td><a target='_blank' href='/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}'>查看</a></td>
+                </tr>
+                {{end}}
+
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="9">
+                        <div class="fl">
+                            <div class="pagination"> 每页
+                                <select name="" id="" class='form-control pageSize'
+                                        style='display:inline-block;width:auto;'>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select> 条，共{{.count}}条
+                            </div>
+                        </div>
+                        <div class="fl">
+                            <div class="pagination" id="pagination2" data-url="/salesman/getusersisauth?id={{IdUidEncrypt .sid}}"
+                                 pageSize="{{.pageSize}}"
+                                 currentPage="{{.page}}"
+                                 pageCount="{{.pageCount}}"></div>
+                        </div>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("", "#user_repayment_record");
+    });
+</script>

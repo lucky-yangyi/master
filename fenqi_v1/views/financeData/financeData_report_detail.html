@@ -1,0 +1,326 @@
+<!-- 认证用户查看 -->
+<style>
+    .panel{min-height: 405px;}
+    .table-noborder tbody tr td{border: none;padding: 5px;}
+    .table-noHorizontalBorder{border: none;}
+    .table-noHorizontalBorder td, .table-noHorizontalBorder th{text-align: center}
+    .table-noHorizontalBorder tbody tr td:first-child, .table-noHorizontalBorder thead tr th:first-child{border-left: none;}
+    .table-noHorizontalBorder tbody tr td:last-child, .table-noHorizontalBorder thead tr th:last-child{border-right: none;}
+    .no-loanOrder{text-align: center;padding-top:50px;}
+    .no-loanOrder span:first-child{line-height: 60px;font-size:18px;color:#5e5e5e;font-weight: bold;}
+    .no-loanOrder span:last-child{color:#5e5e5e;}
+</style>
+<div class="sticky-header">
+    <!-- 订单状态 -->
+    <div class="wrapper pr">
+        <div id="gaode_container"></div>
+        <div class='panel col-md-8' style='min-height:405px;' id='basic_info'>
+            <!-- 基本信息 -->
+            <form class='form-inline'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 基本信息
+                    <div class='btn btn-green u-usersLookBtn J_freezeAccount' data-permission="operation_usersmetadata_look_forzen">{{if eq .user.State 0}}冻结账户{{else}}取消冻结{{end}}</div>
+                </div>
+                <div class="panel-body" id='basic_body'>
+                    <table class='table table-noborder'>
+                        <tbody>
+                            <tr>
+                                <td>手机号：</td>
+                                <td>{{.user.Account}} 【{{.user.Source}}】</td>
+                                <td>剩余额度</td>
+                                <td><span class="mainColor-text">{{fsub .user.Balance .user.UseBalance}}</span>/{{.user.Balance}}</td>
+                            </tr>
+                            <tr>
+                                <td>用户ID：</td>
+                                <td>{{.user.Uid}}</td>
+                                <td>用户类型：</td>
+                                <td>{{if gt .loanCount 0}}老用户{{else}}新用户{{end}}</td>
+                            </tr>
+                            <tr>
+                                <td>姓名：</td>
+                                <td>{{.user.Verifyrealname}}</td>
+                                <td>最近使用机型：</td>
+                                <td>{{.user.MobileTypeRecent}}</td>
+                            </tr>
+                            <tr>
+                                <td>身份证号：</td>
+                                <td>{{idCardFilter .user.IdCard}}</td>
+                                <td>备注：</td>
+                                {{if eq .user.Remark ""}}
+                                <td> 
+                                    <div class="J_remarkSpan"></div><div class="btn btn-green J_addRemark" data-title="添加备注">添加备注</div>
+                                </td>
+                                {{else}}
+                                <td>
+                                    <div class="J_remarkSpan">{{.user.Remark}}</div><div class="btn btn-green J_addRemark" data-title="修改备注">修改备注</div>
+                                </td>
+                                {{end}}
+                            </tr>
+                            <tr>
+                                <td>性别：</td>
+                                <td>{{.user.Sex}}</td>
+                            </tr>
+                            <tr>
+                                <td>学历：</td>
+                                <td>{{.user.Education}}</td>
+                            </tr>
+                            <tr>
+                                <td>婚姻状况：</td>
+                                <td>{{.user.Marriage}}</td>
+                            </tr>
+                            <tr>
+                                <td>现居住地址：</td>
+                                <td class='pr'>{{.user.Province}} {{.user.City}} {{.user.District}} <span class="mainColor-text location_gaode" style='cursor:pointer;'>经纬度({{.user.Longitude}},{{.user.Latitude}})</span></td>
+                            </tr>
+                            <tr>
+                                <td>详细地址：</td>
+                                <td>{{.user.LiveDetailAddress}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <!-- 当前借款 -->
+        <div class="panel col-md-4" id='present_credit'>
+            <div class="panel-title">
+                <b class='panel-line'></b> 当前借款
+            </div>
+            <div class="panel-body" style='height:298px;overflow:auto;'>
+                {{if gt (.loans | len) 0}}
+                <table class='table table-bordered table-noHorizontalBorder'>
+                    <thead>
+                        <tr>
+                            <th>借款金额</th>
+                            <th>期数</th>
+                            <th>应还日期</th>
+                            <th>逾期天数</th>
+                            <th>待还金额</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{range $k,$v := .loans}}
+                        <tr>
+                            <td>{{$v.Money}}</td>
+                            <td>{{$v.TermNo}}</td>
+                            <td>{{$v.LoanReturnDate}}</td>
+                            <td>{{$v.OverdueDays}}</td>
+                            <td>{{if eq $v.State "FINISH"}}0{{else}}{{sumMoney 5 $v.CapitalAmount $v.TaxAmount $v.OverdueBreachOfAmount $v.OverdueMoneyAmount $v.RemainMoneyChargeUpAmount}}{{end}}</td>
+                            <td>{{if eq $v.State "BACKING"}}<span class="mainColor-text">还款中{{else if eq $v.State "OVERDUE"}}逾期{{else if eq $v.State "FINISH"}}结清{{end}}</td>
+                        </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class='no-loanOrder'>
+                    <img src="../../static/img/mayun.jpg" alt="">
+                    <div style='display:inline-block;'>
+                        <span>没有未结清的借款</span><br>
+                        <span>此人比较富有，并没有欠我们钱</span>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+        <!-- 资料详情 -->
+        <div class="panel col-md-12">
+            <ul class='workplace-nav clearfix'>
+                <li class='active' data-url='/usersmetadata/getusersmanageloanrecords'>借款记录</li>
+                <li data-url='/usersmetadata/getusersrepaymentrecords'>还款记录</li>
+                <li data-url='/usersmetadata/getrealnameauthinfo'>购买报告记录 </li>
+                <li data-url='/usersmetadata/getrealnameauthinfo'>实名认证 </li>
+                <li data-url='/usersmetadata/jumptobankcards'>银行卡</li>
+                <li data-url='/usersmetadata/getusersinvitationrecords'>邀请记录</li>
+                <li data-url='/usersmetadata/jumptocoupons'>优惠券</li>
+                <li data-url='/usersmetadata/getconnect?connectType=CHECK'>联系历史</li>
+                <li data-url='/usersmetadata/getlimit'>额度历史</li>
+                <li data-url='/usersmetadata/getzmxyinfo'>芝麻信用</li>
+                <li data-url='/usersmetadata/getlinkmanlist'>常用联系人</li>
+                <li data-url='/usersmetadata/getusersgjjinfo'>公积金</li>
+                <li data-url='/usersmetadata/getuserszfbinfo'>支付宝</li>
+                <li data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                <li data-url='/usersmetadata/getaddresslist'>定位</li>
+                <li data-url='/usersmetadata/jumptomessagecenter'>消息中心</li>
+                <li data-url='/usersmetadata/getmessrecord'>短信记录</li>
+                <li data-url='/usersmetadata/buyrecordlook'>报告购买记录</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../static/js/permissions.js"></script>
+    <script>
+        var index = {{.index}};
+        var uid = {{ IdUidEncrypt  .user.Uid }};
+        var Longitude = {{.user.Longitude}};
+        var Latitude = {{.user.Latitude}};
+        var user_position = [{{.user.Longitude }}, {{.user.Latitude }}]
+        if(!isBlank(Longitude) || !isBlank(Latitude)){
+            var map = new AMap.Map('gaode_container', {
+                resizeEnable: true,
+                zoom: 14,
+                center: user_position
+            });
+            var marker = new AMap.Marker({
+                map: map,
+                position: user_position
+            });
+            marker.setLabel({
+                offset: new AMap.Pixel(20, 20),//修改label相对于maker的位置
+                content: "点击标记打开高德地图"
+            });
+            marker.on('click', function (e) {
+                marker.markOnAMAP({
+                    position: marker.getPosition()
+                })
+            });
+            map.plugin(["AMap.ToolBar"], function() {
+                map.addControl(new AMap.ToolBar());
+            });
+            if(location.href.indexOf('&guide=1')!==-1){
+                map.setStatus({scrollWheel:false})
+            }
+        }
+        
+        $(function () {
+            Permissions.initBtn("operation_usersmetadata_look_forzen");
+            $("#present_credit,#basic_info").click(function(e){
+                e.stopPropagation();
+                $("#gaode_container").hide();
+            });
+            $(".location_gaode").click(function (e) {
+                e.stopPropagation()
+                $("#gaode_container").show();
+            });
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(index));
+            $(".J_freezeAccount").click(function () {//解冻 冻结账户
+                var text = $(this).text();
+                if (text == "冻结账户") {
+                    dialog.init({
+                        title: text,
+                        tips: "冻结后账户将无法使用，是否继续?",
+                        buttons: [{
+                            text: "确定",
+                            style: "green",
+                            func: function () {
+                                $.ajax({
+                                    type: "post",
+                                    url: "/usersmanage/updateusersforzenstate",
+                                    data: { uid: uid, state: 1,is_check:true,btn_id:"operation_usersmetadata_look_forzen" },
+                                    success: function (rslt) {
+                                        if (rslt.ret == 200) {
+                                            $(".J_freezeAccount").text("取消冻结");
+                                            $(".J_modal").remove();
+                                        } else {
+                                            alert(rslt.msg);
+                                        }
+                                    }
+                                })
+                            }
+                        }, {
+                            text: "取消",
+                            style: "default modal-close"
+                        }]
+                    });
+                } else if (text == "取消冻结") {
+                    dialog.init({
+                        title: text,
+                        tips: "取消冻结后账户将正常使用，是否继续？",
+                        buttons: [{
+                            text: "确定",
+                            style: "green",
+                            func: function () {
+                                $.ajax({
+                                    type: "post",
+                                    url: "/usersmanage/updateusersforzenstate",
+                                    data: { uid: uid, state: 0,is_check:true,btn_id:"operation_usersmetadata_look_forzen" },
+                                    success: function (rslt) {
+                                        if (rslt.ret == 200) {
+                                            $(".J_freezeAccount").text("冻结账户");
+                                            $(".J_modal").remove();
+                                        } else {
+                                            alert(rslt.msg);
+                                        }
+                                    }
+                                })
+                            }
+                        }, {
+                            text: "取消",
+                            style: "default modal-close"
+                        }]
+                    })
+                }
+            });
+            var remarkFlag = true;
+            $(".J_addRemark").click(function () {// 修改 新增备注
+                var title = $(this).data("title");
+                var remark = $(this).siblings(".J_remarkSpan").text();
+                dialog.init({
+                    title: title,
+                    textarea: {
+                        html: "<textarea class='modal-textarea form-control J_remark' placeholder='请输入备注信息' >"+remark+"</textarea>"
+                    },
+                    buttons: [{
+                        text: "确定",
+                        style: "green",
+                        func: function () {
+                            var data = {
+                                uid: uid,
+                                content: $(".J_remark").val()
+                            };
+                            if (isBlank(data.content)) {
+                                $(".J_remark").addClass("warning-border");
+                                $(".red-text").text($(".J_remark").attr("placeholder"));
+                                return false;
+                            } else if (!remarkFlag) {
+                                return;
+                            }
+                            remarkFlag = false;
+                            $.ajax({
+                                type: "post",
+                                url: '/usersmetadata/updateuserssign',
+                                data: data,
+                                success: function (rslt) {
+                                    if (rslt.ret == 200) {
+                                        $(".J_remarkSpan").text(data.content);
+                                        $('.J_modal').remove();
+                                    } else {
+                                        alert(rslt.msg)
+                                    }
+                                },
+                                complete: function (rslt) {
+                                    remarkFlag = true
+                                }
+                            })
+                        }
+                    }, {
+                        text: "取消",
+                        style: "default modal-close"
+                    }]
+                })
+
+            })
+        });
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var data;
+            if (url == "/usersmetadata/getlinkmanlist") {
+                data = { uid: uid, is_edit: false };
+            } else if (url == "/usersmetadata/getusersloginrecords") {
+                data = { uid: uid, is_manage: true };
+            } else {
+                data = { uid: uid };
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+    </script>
+</div>

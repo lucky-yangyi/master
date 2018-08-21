@@ -1,0 +1,258 @@
+<!-- 待处理借款  处理（借款审核） -->
+
+<link rel="stylesheet" href="../../static/css/city-picker.css">
+<script src='../../static/js/city-picker.data.js'></script>
+<script src='../../static/js/city-picker.js'></script>
+<style>
+    .panel{
+        min-height:280px;
+    }
+</style>
+<div class="sticky-header"> 
+    <!-- 订单状态 -->
+    <div class="wrapper">
+        <div class='panel col-md-4'>
+            <!-- 基本信息 -->
+                <form class='form-inline'>
+                    <div class="panel-title">
+                        <b class='panel-line'></b> 基本信息</div>
+                    <div class="panel-body" id='basic_body'>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">姓名： </div>
+                            <div class="item-right">{{.ubi.Verifyrealname}} 【{{.ubi.Source}}】</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">ID号： </div>
+                            <div class="item-right">{{.ubi.Uid}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">手机号： </div>
+                            <div class="item-right">{{.ubi.Account}}【{{querylocating .ubi.Account}}】</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">身份证号： </div>
+                            <div class="item-right">{{idCardFilter .ubi.IdCard}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">授信额度： </div>
+                            <div class="item-right">{{.ubi.Balance}}</div>
+                        </div>
+                        <div class='itemContent clearfix'>
+                            <div class="item-left">授信时间： </div>
+                            <div class="item-right">{{.ubi.AssessTime.Format "2006-01-02 15:04:05"}}</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- 订单信息 -->
+            <div class='panel col-md-4'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 订单信息</div>
+                <div class="panel-body">
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">借款金额： </div>
+                        <div class="item-right">{{.oc.Money}}  <a onclick="payplan()" href='javascript:;'>还款计划</a></div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">期数： </div>
+                        <div class="item-right">{{.oc.LoanTermCount}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">银行卡： </div>
+                        <div class="item-right">{{.oc.CardNumber}}（{{.oc.BankName}}）</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">预留手机号： </div>
+                        <div class="item-right">{{.oc.BankMobile}}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 审批历史 -->
+            <div class="panel col-md-4">
+                <div class="panel-title">
+                    <b class='panel-line'></b> 审批历史</div>
+                <div class="panel-body" style='height:240px;overflow-y:auto;'>
+                    <div class='pr timeShaftBox'>
+                        {{range $k, $v := .list}}
+                        <div class='clearfix timeShaft' style='max-height: 210px;overflow: auto;'>
+                            {{if eq $k 0}}
+                            <i class='littleCircle'>
+                                <i class='activeShadow'>
+                                    <i class='circle active'></i>
+                                </i>
+                            </i>
+                            <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                            {{else}}
+                            <i class='littleCircle'>
+                                <i class='circle'></i>
+                            </i>
+                            <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                            {{end}}
+                        </div>
+                        {{end}}
+                        <div class='timeShaftLine'></div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- 资料详情 -->
+        <div class="panel col-md-8">
+            <ul class='workplace-nav clearfix'>
+                <li class='active' data-url='/usersmetadata/getrealnameauthinfo'>实名认证 </li>
+                <li data-url='/usersmetadata/getzmxyinfo'>芝麻信用</li>
+                <li data-url='/usersmetadata/getlinkmanlist'>常用联系人</li>
+                <li data-url='/usersmetadata/getusersloanrecords'>借款记录</li>
+                <li data-url='/usersmetadata/getcollectionrecord'>催收记录</li>
+                <li data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                <li data-url='/usersmetadata/getaddresslist'>定位</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+      <!-- 审批意见 -->
+      <div class='col-md-4' style='padding:0;'>
+        <div class="panel col-md-12" style='margin-bottom:10px;'>
+            <div class="panel-title">
+                <b class="panel-line"></b> 风控系统审批意见</div>
+            <div class="panel-body">
+                <div class="pr opinionBox">                        
+                    <div class='timeShaftLine'></div>
+                </div>
+            </div>
+        </div> 
+    </div>
+<!-- 还款计划弹窗 -->
+               <div class="g-modal f-hide" id='order-payplan'>
+                <div class='g-content'>
+                    <div class='modal-title clearfix green'>
+                        <div class="title-text" id="payplan-title">还款计划</div>
+                        <div class="modal-close green">&times;</div>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover table-bordered table-striped">
+                            <thead class='modal_payPlan_thead'>
+                            </thead>
+                            <tbody class='modal_payPlan_tbody'>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-foot">
+                        <div class='btn btn-green modal-close'>知道了</div>
+                    </div>
+                </div>
+            </div>
+    </div>
+     <script>
+        var index = {{.index}};
+        var uid = {{IdUidEncrypt .oc.Uid}};
+        $(function () {
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(index));
+            $(".modal-close").click(function () {
+                $(".g-modal").hide()
+            });
+            $(".risk-btn").click(function(){
+                 var modal = $(this).data("modal");
+                 $(".modal-textarea,.Wdate").val("");
+                 $(".red-text").html("");
+                 $(modal).show();
+            });
+        });
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var data;
+            if(url == "/usersmetadata/getlinkmanlist") {
+                data = {uid:uid,is_edit:false};
+            }else{
+                data = {uid:uid};
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+        function payplan(){
+            $.ajax({
+                type : "get",
+                url : "queryloanplan",             
+                data : {
+                    loanId :  {{.oc.Id}},
+                },
+                success : function(rslt){
+                    console.log(rslt)
+                    if(rslt.ret == 200){
+                        $("#payplan-title").html("还款计划");
+                        var html = [];
+                        if(rslt.data != null) {
+                            for(var i = 0;i<rslt.data.length;i++){
+                                idx = (i + 1)+"期" 
+                                var item = rslt.data[i]   
+                                html.push("<tr>");
+                                html.push("<td>"+idx+"</td>");
+                                html.push("<td>"+item.LoanReturnDate.replace("T"," ").substring(0,10)+"</td>");
+                                html.push("<td>"+item.CapitalAmount+"</td>");
+                                html.push("<td>"+item.TaxAmount+"</td>");                         
+                                html.push("<td>"+item.Amount+"</td>");
+                                html.push("</tr>");
+                            }
+                        }
+                        $(".modal_payPlan_tbody").html(html.join(""))
+                        var thead = " <tr><td>期数</td><td>还款日期</td><td>本金</td><td>利息</td><td>合计</td></tr>"
+                        $(".modal_payPlan_thead").html(thead);
+                        $("#order-payplan").show();
+                    }else{
+                        alert(rslt.msg)
+                    }
+                }
+            })
+        } 
+        $(function () {
+            refreshOpinion();
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+        });
+        
+        function refreshOpinion(){
+            var uid = {{IdUidEncrypt .ubi.Uid}};
+            $.get("/riskadvise/getriskadvise",{uid : uid,business_type:0},function(rslt){
+                var html = [];
+                html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='activeShadow'><i class='circle active'></i></i></i><div class='timeShaftText'>"+rslt.data.AuditAdvice+"</div></div>")               
+                var len = rslt.data.RiseItems&&rslt.data.RiseItems.length || 0
+                for (var i = 0; i < len; i++) {
+                    var item = rslt.data.RiseItems[i];
+                    if (item.State != 1) {
+                        html.push("<div class='clearfix timeShaft' style='overflow:auto;padding-left:0;text-indext:0;'><i class='littleCircle'><i class='circle'></i></i><div class='timeShaftText'>" + item.RiskAdvise + "</div></div>")
+                    }
+                };
+                html.push("<div class='timeShaftLine'></div>");
+                $(".opinionBox").html(html.join(""));
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            })
+        }    
+    </script>
+</div>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="lock">
+    <meta name="keywords" content="分期">
+    <meta name="description" content="分期">
+    <link href="../static/css/index.css" rel="stylesheet">
+    <script src="../static/js/WdatePicker.js" type="text/javascript"></script>
+    <script src="../static/js/page.js" type="text/javascript"></script>
+    <title>催收查询</title>
+    <style>
+        .f-left {
+            float: right;
+            margin: 0 20px 0 0;
+        }
+        #box{
+            position: fixed;
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1511;
+            width: 400px;
+            height: 200px;
+            background-color: rgba(255, 255, 255, 1);
+            border: 1px solid #ccc;
+        }
+        #box_t{
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #cccccc;
+            background-color: #1B9FF7;
+            color: white;
+        }
+        #box_t span {
+            float: left;
+            padding-left: 20px;
+            font-family: '微软雅黑 Bold', '微软雅黑';
+            font-weight: 700;
+            font-style: normal;
+        }
+        #box_t p {
+            height: 25px;
+            width: 25px;
+            line-height: 24px;
+            border: 1px solid #cccccc;
+            float: right;
+            margin: 10px 15px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #box_b #sub,#btn{
+            font-size: 14px;
+            width: 70px;
+            height: 30px;
+
+        }
+        .hide1{
+            display: none;
+        }
+    </style>
+</head>
+<body class="sticky-header">
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                    <form id="searchForm2" action="/collection/msearch" method="get">
+                        <ul class="nav pull-left" style="width: 100%">
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入手机号" name="account"/>&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入用户姓名" name="verifyRealName"/>&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入用户ID" name="userId"/>&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <button type="submit" class="btn btn-green">搜索</button>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <form action="" id="form2" method="post">
+                        <table class="table table-hover table-striped table_thead_fixed">
+                            <thead>
+                            <tr>
+                                <th>手机号</th>
+                                <th>姓名</th>
+                                <th>借款金额</th>
+                                <th>逾期天数</th>
+                                <th>逾期待还</th>
+                                <th>行动分类</th>
+                                <th>最后催记时间</th>
+                                <th>复核时间</th>
+                                <th>催收员</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $k, $v := .list}}
+                            <tr class="trs">
+                                    <td class="tel">{{$v.Account}}</td>
+                                    <td>{{$v.VerifyRealName}}</td>
+                                    <td>{{$v.Money}}</td>
+                                    <td>{{$v.MaxOverdueDays}}</td>
+                                    <td class="stillMoeny">{{$v.ReturnMoney}}</td>
+                                    <td>{{$v.Actiontype}}</td>
+                                    <td>{{$v.HandleTime}}</td>
+                                    {{if le $v.CompositeDate "1990-01-01 08:00:00" }}
+                                         <td></td>
+                                    {{else}}
+                                        <td>{{$v.CompositeDate}}</td>
+                                    {{end}}
+                                    <td>{{$v.CollectionName}}</td>
+                                    <td>
+                                            <a class='skip1' href='/collection/mhandle?mtype={{$v.Mtype}}&id={{IdUidEncrypt $v.LoanId}}'>处理</a>
+                                        </td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot style='display: none'>
+                            <tr>
+                                <td colspan="14">
+                                    <div class="fl">
+                                        <div class="pagination" id="pagination2" data-url="" currentPage="{{.currpage}}" pageCount="{{.pagecount}}"></div>
+                                        <script type="text/javascript">
+                                            $(function(){
+                                                $("#pagination2").my_page("#searchForm2");
+                                            });
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

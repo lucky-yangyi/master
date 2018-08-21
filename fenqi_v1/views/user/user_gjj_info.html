@@ -1,0 +1,310 @@
+<!-- 公积金路由：/usersmetadata/getusersgjjinfo -->
+
+<div class="panle">
+    <div class="panel-title">
+        <b class="panel-line"></b> 基本信息 </div>
+    <div class="panel-body mgb">
+        {{if .isGJJShow}}
+            <ul class="linkmanbox clearfix">
+                <li class="linkbox">
+                    <p>姓名：</p>
+                    <div>{{.data.MXGJJData.User_Info.Real_Name}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>客户号：</p>
+                    <div>{{.data.MXGJJData.User_Info.Customer_Number}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>证件类型：</p>
+                    <div>{{if eq .data.MXGJJData.User_Info.Card_Type "ID_CARD"}}身份证{{else if eq .data.MXGJJData.User_Info.Card_Type "PASSPORT"}}护照{{end}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>公积金账号：</p>
+                    <div>{{.data.MXGJJData.User_Info.Gjj_Number}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>证件号：</p>
+                    <div>{{.data.MXGJJData.User_Info.ID_Card}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>账户余额：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Balance 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>手机号：</p>
+                    <div>{{.data.MXGJJData.User_Info.Mobile}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>公积金余额：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Fund_Balance 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>邮箱：</p>
+                    <div>{{.data.MXGJJData.User_Info.Email}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>补贴余额：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Subsidy_Balance 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>当前存缴企业：</p>
+                    <div>{{.data.MXGJJData.User_Info.Corporation_Name}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>缴存状态：</p>
+                    <div>{{if eq .data.MXGJJData.User_Info.Pay_Status "NONE"}}未缴纳
+                        {{else if eq .data.MXGJJData.User_Info.Pay_Status "NORMAL"}}正常
+                        {{else if eq .data.MXGJJData.User_Info.Pay_Status "SUSPENSE"}}停缴
+                        {{else if eq .data.MXGJJData.User_Info.Pay_Status "CLOSED"}}注销{{end}}
+                    </div>
+                </li>
+                <li class="linkbox">
+                    <p>通讯地址：</p>
+                    <div>{{.data.MXGJJData.User_Info.Home_Address}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>企业月度存缴：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Monthly_Corporation_Income 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>企业账户号码：</p>
+                    <div>{{.data.MXGJJData.User_Info.Corporation_Number}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>个人月度存缴：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Monthly_Customer_Income 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>缴存基数：</p>
+                    <div>{{divide .data.MXGJJData.User_Info.Base_Number 100}}元</div>
+                </li>
+                <li class="linkbox">
+                    <p>最新缴存日期：</p>
+                    <div>{{.data.MXGJJData.User_Info.Last_Pay_Date}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>企业存缴比例：</p>
+                    <div>{{.data.MXGJJData.User_Info.Corporation_Ratio}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>开户日期：</p>
+                    <div>{{.data.MXGJJData.User_Info.Begin_Date}}</div>
+                </li>
+                <li class="linkbox">
+                    <p>个人存缴比例：</p>
+                    <div>{{.data.MXGJJData.User_Info.Customer_Ratio}}</div>
+                </li>
+            </ul>
+         {{else}}
+            <p>暂未获取到公积金基本信息</p>
+         {{end}}
+    </div>
+    <div class="panel-title">
+        <b class="panel-line"></b> 账单信息 </div>
+    <div class="panel-body mgb" style='overflow-x:auto;'>
+        {{if .isGJJShow}}
+            <table class="table table-hover" style='min-width:1100px;'>
+                <thead>
+                    <tr>
+                        <th>缴纳时间</th>
+                        <th>缴存公司</th>
+                        <th>个人缴存(元)</th>
+                        <th>企业缴存(元)</th>
+                        <th>补缴(元)</th>
+                        <th>出账(元)</th>
+                        <th>入账(元)</th>
+                        <th>余额(元)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $k,$v := .data.MXGJJData.Bill_Record}}
+                    <tr>
+                        <td>{{$v.Deal_Time}}</td>
+                        <td>{{$v.Corporation_Name}}</td>
+                        <td>{{divide $v.Customer_Income 100}}</td>
+                        <td>{{divide $v.Corporation_Income 100}}</td>
+                        <td>{{divide $v.Additional_Income 100}}</td>
+                        <td>{{divide $v.Outcome 100}}</td>
+                        <td>{{divide $v.Income 100}}</td>
+                        <td>{{divide $v.Balance 100}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        {{else}}
+            <p>暂未获取到公积金账单信息</p>
+        {{end}}
+    </div>
+    <div class="panel-title">
+        <b class="panel-line"></b> 贷款信息 </div>
+    <div class="panel-body mgb creditInfo" style='overflow-x:auto;'>
+        <table class="table table-green table-bordered" style='min-width:1700px;'>
+            {{if .isGJJShow}}
+                <thead>
+                    <tr>
+                        <td>姓名</td>
+                        <td>电话号码</td>
+                        <td>银行</td>
+                        <td>通讯地址</td>
+                        <td>贷款金额</td>
+                        <td>购房地址</td>
+                        <td>开始日期</td>
+                        <td>结束日期</td>
+                        <td>还款方式</td>
+                        <td>每月还款日</td>
+                        <td>银行账户</td>
+                        <td>商业贷款金额</td>
+                        <td>贷款余额</td>
+                        <td>逾期本金</td>
+                        <td>逾期利息</td>
+                        <td>逾期罚息</td>
+                    </tr>
+                </thead>
+            {{end}}
+            <tbody class='loan_tbody'>
+                
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="17">
+                        <!-- <div class="fl">
+                            <div class="pagination"> 每页15条，共40条
+                            </div>
+                        </div> -->
+                        <div class="fl">
+                            <div class="pagination" id="pagination2" data-url="/usersmetadata/getgjjloaninfo?uid={{IdUidEncrypt .uid}}" currentPage="1" pageCount="3"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+
+    <div class="panel-title">
+        <b class="panel-line"></b> 还款信息 </div>
+    <div class="panel-body mgb repayInfo">
+        <table class="table table-green table-bordered">
+            {{if .isGJJShow}}
+            <thead>
+                <tr>
+                    <td>贷款合同号</td>
+                    <td>还款日期</td>
+                    <td>记账日期</td>
+                    <td>还款金额</td>
+                    <td>还款本金</td>
+                    <td>还款利息</td>
+                    <td>还款罚息</td>
+                </tr>
+            </thead>
+            {{end}}
+            <tbody class='repay_tbody'>
+               
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7">
+                        <!-- <div class="fl">
+                            <div class="pagination"> 每页10条，共20条
+                            </div>
+                        </div> -->
+                        <div class="fl">
+                            <div class="pagination" id="pagination3" data-url="/usersmetadata/getgjjrepayinfo?uid={{IdUidEncrypt .uid}}" currentPage="1" pageCount="3"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+
+    <script>
+        var isGJJShow = {{.isGJJShow}};
+        function renderPage2(data){
+            var html = [];
+            var len = data.data&&data.data.length;
+            for (var i = 0; i < len; i++) {
+                var item = data.data[i];
+                html.push("<tr>");
+                html.push("<td>" + item.contract_number + "</td>");
+                html.push("<td>" + item.repay_date + "</td>");
+                html.push("<td>" + item.accounting_date + "</td>");
+                html.push("<td>" + item.repay_amount / 100 + "</td>");
+                html.push("<td>" + item.repay_capital / 100 + "</td>");
+                html.push("<td>" + item.repay_interest / 100 + "</td>");
+                html.push("<td>" + item.repay_penalty / 100 + "</td>");
+                html.push("</tr>")
+            }
+            $(".repay_tbody").html(html.join(""));
+            $("#pagination3").attr("currentPage" , data.currPage).attr("pageCount" ,data.pageCount);
+            $("#pagination3").my_page("",null,renderPage2)
+        }
+        function renderPage1(data){
+            var html = [];
+            var len = data.data&&data.data.length;
+            for (var i = 0; i < len; i++) {
+                var item = data.data[i];
+                html.push("<tr>");
+                html.push("<td>" + item.name + "</td>");
+                html.push("<td>" + item.phone + "</td>");
+                html.push("<td>" + item.bank + "</td>");
+                html.push("<td>" + item.mailing_address + "</td>");
+                html.push("<td>" + item.loan_amount / 100 + "</td>");
+                html.push("<td>" + item.house_address + "</td>");
+                html.push("<td>" + item.start_date + "</td>");
+                html.push("<td>" + item.end_date + "</td>");
+                html.push("<td>" + item.repay_type + "</td>");
+                html.push("<td>" + item.deduct_day + "</td>");
+                html.push("<td>" + item.bank_account + "</td>");
+                html.push("<td>" + item.commercial_amount / 100 + "</td>");
+                html.push("<td>" + item.remain_amount / 100 + "</td>");
+                html.push("<td>" + item.overdue_capital / 100 + "</td>");
+                html.push("<td>" + item.overdue_interest / 100 + "</td>");
+                html.push("<td>" + item.overdue_penalty / 100 + "</td>");
+                html.push("</tr>")
+            }
+            $(".loan_tbody").html(html.join(""));
+            $("#pagination2").attr("currentPage" , data.currPage).attr("pageCount" ,data.pageCount);
+            $("#pagination2").my_page("",null,renderPage1)
+        }
+        if (isGJJShow) {
+            $.ajax({
+                type : "get",
+                url : "/usersmetadata/getgjjloaninfo",
+                data : {
+                    uid : {{IdUidEncrypt .uid}}
+                },
+                success : function(rslt){
+                    if(rslt.ret == 200) {
+                        renderPage1(rslt);
+                    }
+                }
+            });
+            $.ajax({
+                type : "get",
+                url : "/usersmetadata/getgjjrepayinfo",
+                data : {
+                    uid : {{IdUidEncrypt .uid}}
+                },
+                success : function(rslt){
+                    if(rslt.ret == 200) {
+                        renderPage2(rslt);
+                    }
+                }
+            })
+        }else {
+            var loan_tbody_html = [];
+            loan_tbody_html.push("<tr>");
+            loan_tbody_html.push("<td>暂未获取到公积金贷款信息</td>");
+            loan_tbody_html.push("</tr>")
+            $(".loan_tbody").html(loan_tbody_html.join(""));
+
+            var repay_tbody_html = [];
+            repay_tbody_html.push("<tr>");
+            repay_tbody_html.push("<td>暂未获取到公积金还款信息</td>");
+            repay_tbody_html.push("</tr>")
+            $(".repay_tbody").html(repay_tbody_html.join(""));
+        }
+
+    </script>
+</div>

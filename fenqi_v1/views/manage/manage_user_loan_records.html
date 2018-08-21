@@ -1,0 +1,277 @@
+<div class="panle" id="manage_loan_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 借款记录 </div>
+    <form id="searchForm2" action="" method="get">
+        <div class="panle-body">
+            <table class="table table-hover" >
+                <thead>
+                    <tr>
+                        <th>申请时间</th>
+                        <th>合同号</th>
+                        <th>借款金额</th>
+                        <th>信审数据费</th>
+                        <th>到账金额</th>
+                        <th>总利息</th>
+                        <th>借款期限</th>
+                        <th>状态</th>
+                        <th>备注</th>
+                        <th>起止时间</th>
+                        <th>结束时间</th>
+                        <th>操作人</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range $k,$v := .data}}
+                <tr>
+                    <td>{{$v.LoanDate.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{$v.ContractCode}}</td>
+                    <td>{{$v.Money}}</td>
+                    <td>{{$v.AuthFee}}</td>
+                    <td>{{$v.RealMoney}}</td>
+                    <td>{{$v.TotalLoanTax}}</td>
+                    <td>{{$v.LoanTermCount}}个月</td>
+                    <td>
+                        {{if eq $v.OrderState "CANCEL"}}审核不通过（正常关闭）
+                        {{else if eq $v.OrderState "PAUSE"}}审核不通过（关闭30天）
+                        {{else if eq $v.OrderState "CLOSE"}}审核不通过（永久关闭）
+                        {{else if eq $v.State "FINISH"}}结清
+                        {{else if eq $v.State "BACKING"}}<span class="mainColor-text">还款中</span>
+                        {{else if eq $v.State "PAYING"}}打款中
+                        {{else if eq $v.State "REFUSE"}}拒绝
+                        {{else if eq $v.State "FAIL"}}打款失败
+                        {{else if eq $v.State "RECONFIRM"}}暂未通过
+                        {{else if eq $v.State "CONFIRM"}}<span class="mainColor-text">审核中</span>
+                        {{end}}
+                    </td>
+                    <td>{{$v.Mark}}</td>
+                    <td>
+                        {{if eq $v.State "BACKING" "FINISH"}}
+                            {{$v.ReplyTime.Format "2006-01-02"}}至{{$v.EndDate.Format "2006-01-02"}}
+                        {{end}}
+                    </td>
+                    <td>{{if eq $v.State "FINISH"}}{{$v.FinishDate.Format "2006-01-02"}}{{end}}</td>
+                    <td>{{if eq $v.AuditType 1}}系统{{else}}{{$v.OperatorName}}{{end}}</td>
+                    <td data-loanId='{{$v.Id}}' data-mark='{{$v.Mark}}'>
+                        {{if eq $v.State "REFUSE"}}
+                            <a href='javascript:;' class="J_closeReason" data-reason='{{$v.Mark}}'>关闭原因</a>
+                        {{else if eq $v.State "BACKING"}}
+                            <a href='javascript:;' class="J_repayPlan">还款计划</a>
+                            <a href='javascript:;' class="issue_records">发放记录</a>
+                            <a href='javascript:;' class="J_repayLinks">还款链接</a>
+                            <a target='_blank' href='{{$v.LoanAgreementUrl}}' class="">借款协议</a>
+                            <a target='_blank' href='{{$v.ServiceAgreementUrl}}' class="">服务协议</a>
+                            {{if eq $.return_money 1}}
+                                <a href='javascript:;' data-rsid='{{$v.RepaymentScheduleId}}'  class="J_repaybtn">还款</a>
+                            {{end}}
+                        {{else if eq $v.State "FINISH"}}
+                            <a href='javascript:;' class=" J_repayPlan">还款计划</a>
+                            <a href='javascript:;' class="issue_records">发放记录</a>
+                            <a target='_blank' href='{{$v.LoanAgreementUrl}}' class="">借款协议</a>
+                            <a target='_blank' href='{{$v.ServiceAgreementUrl}}' class="">服务协议</a>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="13">
+                        <div class="fl">
+                            <div class="pagination"> 每页
+                                <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select> 条，共{{.count}}条
+                            </div>
+                        </div>
+                        <div class="fl">
+                            <div class="pagination" id="pagination2" data-url="/usersmetadata/getusersmanageloanrecords?uid={{IdUidEncrypt .uid}}" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                        </div>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("","#manage_loan_record");
+        $(".J_repayPlan").off().click(function(){//还款计划
+            var loan_id = $(this).parent().data("loanid");
+            $.ajax({
+                type : "get",
+                data : {
+                    loan_id : loan_id
+                },
+                url : "/usersmetadata/getusersrepaymentschedules",
+                success : function(rslt){
+                    if(rslt.ret == 200){
+                        var html = [];
+                        html.push('<table class="table table-hover table-bordered table-noHorizontalBorder"><thead><tr><th>期数</th><th>本金</th><th>利息</th><th>信审数据费</th><th>应还日期</th><th>逾期天数</th><th>违约金</th><th>滞纳金</th><th>应还合计</th><th>已还金额</th><th>待还金额</th><th>状态</th></tr></thead><tbody>');
+                        var len = rslt.data&&rslt.data.length;
+                        for(var i = 0;i<len;i++){
+                            var item = rslt.data[i];
+                            var alreadyReturnMoney = 0;
+                            var waitReturnMoney = 0;
+                            if (item.State == "结清"){
+                                alreadyReturnMoney = item.CapitalAmount+item.TaxAmount+item.OverdueBreachOfAmount+item.OverdueMoneyAmount + item.DataServiceFee
+                                waitReturnMoney = 0
+                            }else {
+                                alreadyReturnMoney = item.RemainMoneyChargeUpAmount;
+                                waitReturnMoney = item.CapitalAmount+item.TaxAmount+item.OverdueBreachOfAmount+item.OverdueMoneyAmount + item.DataServiceFee - item.RemainMoneyChargeUpAmount;
+                            }
+                            html.push("<tr>");
+                            html.push("<td>" + item.TermNo + "</td>");
+                            html.push("<td>" + item.CapitalAmount + "</td>");
+                            html.push("<td>" + item.TaxAmount + "</td>");
+                            html.push("<td>" + item.DataServiceFee + "</td>");
+                            html.push("<td>" + item.LoanReturnDate + "</td>");
+                            html.push("<td>" + item.OverdueDays + "</td>");
+                            html.push("<td>" + item.OverdueBreachOfAmount + "</td>");
+                            html.push("<td>" + item.OverdueMoneyAmount + "</td>");
+                            html.push("<td>" + (item.CapitalAmount+item.TaxAmount+item.OverdueBreachOfAmount+item.OverdueMoneyAmount+ item.DataServiceFee).toFixed(2) + "</td>");
+                            html.push("<td>"+  alreadyReturnMoney+"</td>")
+                            html.push("<td>" + waitReturnMoney.toFixed(2) + "</td>");
+                            html.push("<td>" + item.State + "</td>");
+                            html.push("</tr>");
+                        }
+                        html.push('</tbody></table>');
+                        dialog.init({
+                            title : "还款计划",
+                            others : {
+                                html :  html.join("")
+                            }
+                        })
+                    }
+                }
+            })
+        });
+        $(".issue_records").off().click(function(){//发放记录
+            var loanId = $(this).parent().data("loanid");
+            $.ajax({
+                type : "get",
+                url : "/usersmetadata/gettraderecordwithloanid",
+                data : {
+                    loan_id : loanId
+                },
+                success : function(rslt){
+                    if(rslt.ret == 200){
+                        var data = rslt.data;
+                        var html = [];
+                        html.push('<table class="table table-hover table-bordered table-noHorizontalBorder">');
+                        html.push('<tbody>');
+                        html.push('<tr>');
+                        html.push('<td>发放订单号</td>');
+                        html.push('<td>'+data.OrderNumber+'</td>');
+                        html.push('<td>放款状态</td>');
+                        html.push('<td>'+data.State+'</td>');
+                        html.push('</tr>');
+                        html.push('<tr>');
+                        html.push('<td>放款金额</td>');
+                        html.push('<td>'+data.CapitalAmount+'</td>');
+                        html.push('<td>放款时间</td>');
+                        html.push('<td>'+data.CreateTime+'</td>');
+                        html.push('</tr>');
+                        html.push('<tr>');
+                        html.push('<td>放款卡号</td>');
+                        html.push('<td>'+data.UserCardNumber+'</td>');
+                        html.push('<td>回调时间</td>');
+                        html.push('<td>'+data.DtOrder+'</td>');
+                        html.push('</tr></tbody></table>');
+
+                        dialog.init({
+                           title :  "发放记录",
+                           others : {
+                               html : html.join("")
+                           }
+                        });
+                    }
+                }
+            })
+        });
+        $(".J_repayLinks").off().click(function(){//还款链接
+            var url = "www.baidu.com";//data("url");
+            dialog.init({
+                title : "还款链接",
+                tips : url
+            })
+        });
+        $(".J_closeReason").off().click(function(){//关闭原因
+            var reason = $(this).parent().data("mark");
+            dialog.init({
+                title : "关闭原因",
+                tips : reason
+            })
+        });
+        $(".J_repaybtn").off().click(function(){//还款
+            var rsId = $(this).data("rsid");
+            dialog.init({
+                title : "还款",
+                input : {
+                    html : "<div class='form-inline'><input type='text' style='margin-right:50px;' placeholder='还款金额' class='form-control J_repayMoney'/>"
+                },
+                select :{
+                    html : "<select class='form-control J_repayChannel'><option>还款渠道</option><option  value='8'>代扣</option><option value='5'>支付宝转账</option><option value='6'>银行卡转账</option><option value='9'>费用减免</option></select></div>"
+                },
+                textarea: {
+                    html: "<input type='text' placeholder='交易订单号' class='form-control J_orderNumber f-hide'/><select class='form-control J_delayDays f-hide'><option value=''>延期处理天数(选填)</option><option value='0'>0</option><option value='1'>1</option><option value='2'>2</option><option value='3'>3</option><option value='4'>4</option><option value='5'>5</option><option value='6'>6</option><option value='7'>7</option></select><textarea class='modal-textarea form-control J_repayRemark' placeholder='备注' ></textarea>"
+                },
+                buttons : [{
+                    text : "确定",
+                    style : "green",
+                    func : function(){
+                        var data = {
+                            uid : uid,
+                            rs_id : rsId,
+                            repay_money : $(".J_repayMoney").val(),
+                            channel : $(".J_repayChannel").val(),
+                            trade_number : $(".J_orderNumber").val(),
+                            adjourn_handling_day : $(".J_delayDays").val(),
+                            remark : $(".J_repayRemark").val()
+                        };
+                        if(isBlank(data.repay_money)){
+                            $(".red-text").html("请输入还款金额");
+                            return true;
+                        }
+                        if(isBlank(data.channel)){
+                            $(".red-text").html("请选择还款渠道");
+                            return true;
+                        }else if(data.channel == "支付宝转账" || data.channel == "银行卡转账"){
+                            if(isBlank(data.trade_number)){
+                                $(".red-text").html("请输入交易订单号");
+                                return true;
+                            }
+                        }
+                        if(isBlank(data.remark)){
+                            $(".red-text").html("请填写备注");
+                            return true;
+                        }
+                        $.zpost("/usersmetadata/repaymentpost",data,function(rslt){
+                            if(rslt.ret == 200){
+                                $(".J_modal").remove();
+                            }else {
+                                alert(rslt.msg);
+                            }
+                        })
+                    }
+                },{
+                    text : "取消",
+                    style : "default modal-close"
+                }]
+            });
+        });
+        $("body").delegate(".J_repayChannel","change",function(){
+            var value = $(this).val();
+            if(value == "5" || value == "6"){
+                $(".J_orderNumber,.J_delayDays").val("").show();
+            }else{
+                $(".J_orderNumber,.J_delayDays").val("").hide();
+            }
+        });
+    });
+</script>

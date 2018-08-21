@@ -1,0 +1,241 @@
+<!-- 授信查看 -->
+
+<link rel="stylesheet" href="../../static/css/city-picker.css">
+<script src='../../static/js/city-picker.data.js'></script>
+<script src='../../static/js/city-picker.js'></script>
+<style>
+    .panel{
+        min-height:405px;
+    }
+</style>
+<div class="sticky-header">
+    <!-- 订单状态 -->
+    <div class="wrapper">
+        <div class='panel col-md-4'>
+            <!-- 基本信息 -->
+            <form class='form-inline'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 基本信息</div>
+                <div class="panel-body" id='basic_body'>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">姓名： </div>
+                        <div class="item-right">{{.user.Verifyrealname}} 【{{.user.Source}}】</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">ID号： </div>
+                        <div class="item-right">{{.user.Uid}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">手机号： </div>
+                        <div class="item-right">{{.user.Account}} 【{{querylocating .user.Account}}】</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">身份证号： </div>
+                        <div class="item-right">{{idCardFilter .user.IdCard}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">学历： </div>
+                        <div class="item-right">{{.user.Education}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">婚姻： </div>
+                        <div class="item-right">{{.user.Marriage}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">现居住地址： </div>
+                        <div class="item-right" style='float:left;overflow:visible;'>
+                            <p class='item-info'>{{.user.Province}} {{.user.City}} {{.user.District}}</p>
+                            <p class='item-info'>{{.user.LiveDetailAddress}}</p>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">经纬度： </div>
+                        <div class="item-right" style='float:left;overflow:visible;'>
+                            <p class='item-info'>({{.user.Longitude}},{{.user.Latitude}})</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- 风控信息审批 -->
+        <div class='panel col-md-4'>
+            <div class="panel-title">
+                <b class='panel-line'></b> 风控信息</div>
+            <div class="panel-body">
+                <div class='itemContent clearfix'>
+                    <div class="item-left">建议额度： </div>
+                    <div class="item-right" id = 'riskLimit'></div>
+                </div>
+                <div class='itemContent clearfix'>
+                    <div class="item-left">审批额度： </div>
+                    <div class="item-right fl">
+                        <input type="text" class='form-control' id='examLimit' value="{{.creditInfo.BalanceMoney}}" disabled>
+                        <span class='over-text'></span>
+                    </div>
+                </div>
+                <div class='itemContent clearfix'>
+                    <div class="item-left">备注： </div>
+                    <div class="item-right">
+                        <textarea class='form-control risk-mark' disabled>{{.creditInfo.Remark}}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 审批历史 -->
+        <div class="panel col-md-4">
+            <div class="panel-title">
+                <b class='panel-line'></b> 审批历史</div>
+            <div class="panel-body" style='height:274px;overflow-y:auto;'>
+                <div class='pr timeShaftBox'>
+                    {{range $k,$v := .examineInfo}}
+                    {{if eq $k 0}}
+                    <div class='clearfix timeShaft'>
+                        <i class='littleCircle'>
+                            <i class='activeShadow'>
+                                <i class='circle active'></i>
+                            </i>
+                        </i>
+                        <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                    </div>
+                    {{else}}
+                    <div class='clearfix timeShaft'>
+                        <i class='littleCircle'>
+                            <i class='circle'></i>
+                        </i>
+                        <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}	&nbsp;	&nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;	&nbsp;({{$v.Remark}}){{end}}</div>
+                    </div>
+                    {{end}}
+                    {{end}}
+                    <div class='timeShaftLine'></div>
+                </div>
+            </div>
+        </div>
+        <!-- 资料详情 -->
+        <div class="panel col-md-8">
+            <ul class='workplace-nav clearfix'>
+                <li class='active' data-url='/usersmetadata/getrealnameauthinfo'>实名认证 </li>
+                <li data-url='/usersmetadata/getzmxyinfo'>芝麻信用</li>
+                <li data-url='/usersmetadata/getlinkmanlist'>常用联系人</li>
+                <li data-url='/usersmetadata/getusersgjjinfo'>公积金</li>
+                <li data-url='/usersmetadata/getuserszfbinfo'>支付宝</li>
+                <li data-url='/usersmetadata/getuserxxwinfo'>学信网</li>
+                <li data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                <li data-url='/usersmetadata/getaddresslist'>定位</li>
+                <li data-url='/usersmetadata/jumptobankcards'>银行卡信息</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+        <!-- 审批意见 -->
+        <div class='col-md-4' style='padding:0;'>
+            <div class="panel col-md-12" style='margin-bottom:10px;'>
+                <div class="panel-title">
+                    <b class="panel-line"></b> 风控系统审批意见</div>
+                <div class="panel-body">
+                    <div class="pr opinionBox">
+                        
+                        <div class='timeShaftLine'></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel col-md-12">
+                <div class="panel-title">
+                    <b class="panel-line"></b> 拆分资料审批意见</div>
+                <div class="panel-body" style='overflow:auto'>
+                    <table class="table table-noborder" style='min-width:300px;'>
+                        <thead>
+                            <tr>
+                                <th>审核时间</th>
+                                <th>审核信息</th>
+                                <th>操作人</th>
+                                <th>审核结果</th>
+                                <th>备注内容</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {{range $k,$v := .adviselist}}
+                            <tr>
+                                <td>{{$v.HandlingTime.Format "2006-01-02 15:04:05"}}</td>
+                                <td>{{$v.Msg}}</td>
+                                <td>{{$v.Displayname}}</td>
+                                {{if eq $v.State "QUEUEING"}}
+                                    <td>排队中</td>
+                                {{else if eq $v.State "HANDING"}}
+                                    <td>处理中</td>
+                                {{else if eq $v.State "PASS"}}
+                                    <td>通过</td>
+                                {{else if eq $v.State "REJECT"}}
+                                    <td>驳回</td>
+                                {{else if eq $v.State "OUTQUEUE"}}
+                                    <td>退回</td>
+                                {{else if eq $v.State "PAUSE"}}
+                                    <td>关闭30天</td>
+                                {{else if eq $v.State "CLOSE"}}
+                                    <td>永久关闭</td>
+                                {{end}}
+                                <td>{{$v.Remark}}</td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var uid = {{IdUidEncrypt .user.Uid}};
+        $(function () {
+            refreshOpinion();
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").css({
+                    "height": height - 27
+                });
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            }).resize();
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+        });
+        
+        function refreshOpinion(){
+            $.get("/riskadvise/getriskadvise",{uid : uid,business_type:1},function(rslt){
+                var html = [];
+                html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='activeShadow'><i class='circle active'></i></i></i><div class='timeShaftText'>"+rslt.data.AuditAdvice+"</div></div>")
+                var len = rslt.data.RiseItems&&rslt.data.RiseItems.length || 0
+                for (var i = 0; i < len; i++) {
+                    var item = rslt.data.RiseItems[i];
+                    if (item.State != 1) {
+                        html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='circle'></i></i><div class='timeShaftText' style='overflow:auto;padding-left:0;text-indent:0;'>" + item.RiskAdvise + "</div></div>")
+                    }
+                };
+                html.push("<div class='timeShaftLine'></div>");
+                $(".opinionBox").html(html.join(""));
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+                $("#riskLimit").html(rslt.data.LimitMoney);
+            })
+        }
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var data;
+            if (url == "/usersmetadata/getlinkmanlist") {
+                data = {uid:uid,is_edit:false};
+            }else {
+               data = {uid:uid};
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+    </script>
+</div>

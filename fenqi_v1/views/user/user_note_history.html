@@ -1,0 +1,121 @@
+<!-- 短信记录：/usersmetadata/getmessrecord -->
+<div class="panle" id="login_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 短信记录</div>
+    <ul class='panel-tabs clearfix'>
+        <li data-url='/usersmetadata/getmessrecord' data-type="CHECK" class='panel-item active'>短信记录</li>
+    </ul>
+    <form id="searchForm2" action="" method="get">
+    <div class="panle-body">
+        <table class="table table-hover" >
+            <thead>
+                <tr>
+                    <th>短信号码</th>
+                    <th>短信内容</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>18367776669</td>
+                <td>给你送**的优惠券，**新产品上线，**活动优惠等等</td>
+                <td><span class='mainColor-text match-linkman'>匹配联系人</span> </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+               <tr>
+                    <td colspan="5">
+                        <div class="fl">
+                            <div class="pagination"> 每页
+                                <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select> 条，共{{.count}}条
+                            </div>
+                        </div>
+                        <div class="fl">
+                            <div class="pagination" id="pagination2" data-url="/usersmetadata/getmessrecord?uid={{IdUidEncrypt .uid}}" pageSize="{{.pageSize}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("", "#login_record");
+        $(".match-linkman").off().click(function () {
+            var data = {
+                uid: uid,
+                phoneNum: 13335815683
+            };
+            $.ajax({//通讯录接口
+                url: '/usersmetadata/getmatchrecord',
+                data: data,
+                error: function (rslt) {
+                    dialog.init({
+                        title: "错误",
+                        tips: "网络错误",
+                        buttons: [{
+                            text: "确定",
+                            style: "green"
+                        }]
+                    })
+                },
+                success: function (rslt) {
+                    if (rslt.ret == 200) {
+                        $.ajax({//常用联系人接口
+                            url: '/usersmetadata/getmatchlinkman',
+                            data: data,
+                            error: function (rslt) {
+                                dialog.init({
+                                    title: "错误",
+                                    tips: "网络错误",
+                                    buttons: [{
+                                        text: "确定",
+                                        style: "green"
+                                    }]
+                                })
+                            },
+                            success: function (result) {
+                                var html = [];
+                                if(rslt.ret == 200){//通讯录有结果
+                                    html.push("<p style='font-weight:700;'>手机通讯录:</p><p>", rslt.relationship, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", rslt.phoneNum, "</p><p style='font-weight:700;margin-top:30px;'>常用联系人电话TOP15(近3个月)</p>");
+                                }else{//通讯录无结果
+                                    html.push("<p style='font-weight:700;'>手机通讯录:</p><p>", "无结果", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "</p><p style='font-weight:700;margin-top:30px;'>常用联系人电话TOP15(近3个月)</p>");
+                                }
+                                html.push("<table class='table'><thead><tr><th style='font-weight:normal;'>通话号码</th><th style='font-weight:normal;'>归属地</th><th style='font-weight:normal;'>联系次数</th></tr></thead><tbody>");
+                                
+                                if(result.ret == 200){
+                                    html.push("<tr><td>"+result.phone+"</td><td>"+result.city+"</td><td>"+result.total_cnt+"</td>")
+                                }else{
+                                    html.push("<tr><td colspan=3>无结果</td>");
+                                }
+                                html.push("</tbody></table>");
+                                dialog.init({
+                                    title: "匹配结果",
+                                    others: {
+                                        html : html.join("")
+                                    },
+                                    buttons: [{
+                                        text: "确定",
+                                        style: "green"
+                                    }]
+                                })
+                            }
+                        })
+
+                    }
+
+                }
+
+            })
+        })
+    });
+</script>

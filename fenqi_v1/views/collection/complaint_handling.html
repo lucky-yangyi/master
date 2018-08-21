@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="lock">
+    <meta name="keywords" content="现金贷">
+    <meta name="description" content="现金贷">
+    <title>投诉处理</title>
+    <style>
+        .history_success th{
+            padding-left:0px !important;
+        }
+        .history_success td{
+            border-bottom: 1px solid #ccc;
+            padding:10px 0 !important;
+        }
+        a{
+            text-decoration:none !important;
+        }
+        .history_manage{
+          position: fixed;
+          top:0;
+          left:0;
+          right: 0;
+          bottom:0;
+          background-color: rgba(0,0,0,.5);
+          z-index:101;
+        }
+        .pop_con textarea{
+          width:100%;
+        }
+    </style>
+</head>
+<body class="sticky-header">
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                    <form id="searchForm2" action="/collection/complanit" method="get">
+                        <ul class="nav pull-left" style="width: 100%">
+                            <li class="pull-left">
+                                <input id="startDate" class="Wdate input-small" value="{{.start_time}}" type="text"
+                                       onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                                       name="start_time"/> &nbsp;-&nbsp;
+                                <input id="endDate" class="Wdate input-small" type="text"
+                                       onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                                       value="{{.end_time}}" name="end_time"/>&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入手机号" name="account"/>&nbsp;&nbsp;
+                                <input type="hidden" class="input-medium" value="1" name="grade"/>
+                            </li>
+                            <li class="pull-left">
+                                <select name="handleType" id="handleType">
+                                    <option value="">状态</option>
+                                    <option value="1">待处理</option>
+                                    <option value="2">跟进</option>
+                                    <option value="3">处理困难</option>
+                                    <option value="4">处理完毕</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <button type="submit" class="btn btn-green">搜索</button>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <form action="" id="form2" method="post">
+                        <table class="table table-hover table-striped table_thead_fixed">
+                            <thead>
+                            <tr>
+                                <th>手机号</th>
+                                <th>记录人</th>
+                                <th>记录时间</th>
+                                <th width="40%">投诉内容</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $k,$v := .connRcds}}
+                            <tr>
+                                <td><a  data-id="{{IdUidEncrypt $v.Uid}}" class='openNewDetail' target="_blank" style="cursor: pointer">{{$v.Account}}</a></td>
+                                <td>{{$v.ModifyByName}}</td>
+                                <td>{{$v.CreateTime}}</td>
+                                <td>{{$v.Content}}</td>
+                                <td class="history_states">
+                                  {{if eq $v.DealStatus 1}}
+                                    待处理
+                                  {{else if eq $v.DealStatus 2}}
+                                    跟进
+                                  {{else if eq $v.DealStatus 3}}
+                                    处理困难
+                                  {{else if eq $v.DealStatus 4}}
+                                    处理完毕
+                                  {{end}}
+                                </td>
+                                <td style='text-align: left;' >
+                                     <a class="manage_button" style="margin-right: 10px;" onclick="historyManage({{IdUidEncrypt $v.Id}},{{IdUidEncrypt $v.Uid}},this)" href="javascript:void(0);">处理</a>
+                                     {{if gt $v.ModifyBy 0}}
+                                     <a class="manage_success_button" onclick="hostorySuccess({{IdUidEncrypt $v.Id}})" href="javascript:void(0);">处理结果</a>
+                                     {{end}}
+                                 </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="14">
+                                    <div class="fl">
+                                        <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条&nbsp;&nbsp;
+                                                </div>
+                                    </div>
+                                    <div class="fl">
+                                        <div class="pagination" id="pagination2" data-url="" currentPage="{{.currpage}}"
+                                             pageCount="{{.pagecount}}" pageSize='{{.pagesize}}'></div>
+                                        <script type="text/javascript">
+                                            $(function () {
+                                                $("#pagination2").my_page("#searchForm2");
+                                            });
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--处理弹窗-->
+    <div class="history_manage boxShade hide1">
+        <div class="loan_pop wet1">
+            <div class="pop_header"><span class="pop_header_txt">处理结果</span><span class="pop_close" onclick="$('.history_manage').hide()">×</span></div>
+            <div class="pop_con het1">
+                <div class="pop_con_inner">
+                    <select name="" id="cheat_op" class="set form-control">
+                        <option value="">选择处理类型</option>
+                        <option value="2">跟进</option>
+                        <option value="3">处理困难</option>
+                        <option value="4">处理完毕</option>
+                    </select>
+                    <textarea name="manage_content" id="manage_content" class="mgt" placeholder="请输入处理结果"></textarea>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot1">
+                <a class="btn allow_btn hintBtn1" onclick="$('.history_manage').hide()">取消</a>
+                <a class="btn allow_btn hintBtn2" id="manage_btn">确认</a>
+            </div>
+        </div>
+    </div>
+    <!--处理完成弹框-->
+    <div class="history_success boxShade hide1">
+        <div class="loan_pop wet2" style='width:520px;'>
+            <div class="pop_header"><span class="pop_header_txt">处理结果</span><span class="pop_close" onclick="historyClose($('.history_success'))">×</span></div>
+            <div class="pop_con het2">
+                <div class="pop_con_inner">
+                    <div>
+                        <table class="table">
+                            <thead>
+                                <th width="160px">处理时间</th>
+                                <th width="80px">处理类型</th>
+                                <th width="90px">处理人</th>
+                                <th>联系内容</th>
+                            </thead>
+                            <tbody id="manage_success">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot1">
+                <a class="btn allow_btn hintBtn2" onclick="historyClose($('.history_success'))">确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function historyClose(that) {
+        $(that).hide();
+    }
+//处理
+   function historyManage(id,uid,that) {
+       $(".history_manage").show();
+       $("#cheat_op").val("");
+       $(".history_manage #manage_content").val("");
+       $("#manage_btn").off("click").on("click",function () {
+           var manage_content = $("#manage_content").val();
+           var flagId = $("#cheat_op").val();
+           if(flagId == ""){
+               alert("请选择处理类型");
+               return;
+           }
+           if(manage_content==""){
+               alert("请填写处理结果")
+               return;
+           }
+           $.ajax({
+               url:"/collection/connRcDealUp",
+               type:"post",
+               data:{manage_content:manage_content,id:id,flagId:flagId,uid:uid},
+               success:function (result) {
+                   if(result.ret==200){
+                      var url = window.location.href;
+                      getpage(url);
+                   }else {
+                       alert(result.msg);
+                   }
+               }
+           })
+       })
+   }
+   //处理成功
+   function hostorySuccess(id) {
+       $.ajax({
+           url:"/collection/connRcDealResult",
+           type:"post",
+           data:{id:id},
+           success:function (result) {
+               if(result.ret==200){
+                    console.log(result)
+                   var html = "";
+                   for( var i = 0 ; i < result.data.length ; i++){
+                       var dealString;
+                       var dealStatus = result.data[i].DealStatus;
+                       if (dealStatus == 1) {
+                           dealString = "待处理"
+                       }else if (dealStatus == 2) {
+                           dealString = "跟进"
+                       }else if(dealStatus == 3) {
+                           dealString = "处理困难"
+                       }else {
+                           dealString = "处理完毕"
+                       }
+                       html += '<tr><td>'+result.data[i].OperateTime+'</td><td>'+dealString+'</td><td>'+result.data[i].OperationPerson+'</td><td>'+result.data[i].DealResult+'</td></tr>'
+                   }
+                   $("#manage_success").html(html);
+                   $(".history_success").show();
+               }else {
+                   alert(result.msg);
+               }
+           }
+
+       })
+   }
+    $(".openNewDetail").on("click",function(e){
+        e.preventDefault();
+        var approve_status =false;
+        var id = $(this).data("id");
+        $.zpost("/collection/checkusersmetadata",{uid:id},function(result){
+            if(result.count == 1){
+                approve_status=true;
+            }
+        });
+       setTimeout(function(){
+             if (approve_status) {
+                window.open("/usersmanage/usersmetadatalook?uid="+id);
+            }else{
+                alert("该用户未认证")
+            }
+       },100);
+    })
+</script>
+</body>
+</html>

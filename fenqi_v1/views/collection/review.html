@@ -1,0 +1,1341 @@
+<style>
+    .bgw{background-color: #fff;width: 49%;float: left;border: 1px solid #ccc}
+    .bgw h2,.bgw h3{display: inline-block;font-family: '微软雅黑 Bold', '微软雅黑';font-weight: 700;font-style: normal;font-size: 18px;text-align: left;padding-left:15px;margin: 0;}
+    .bgw h3{float: right;line-height: 55px;margin-right:15px;color:rgba(97, 164, 244, 1);}
+    .personal_information_content .title,.user_phone_content .title,.push_down  .title{height: 55px;line-height:55px;border-bottom: 1px solid #ccc;}
+    .pd{padding: 0  0 0 15px!important;box-sizing: border-box}
+    .personal_information_content,.user_phone_content{min-height: 650px;}
+    .tabstyle{width: 100%;}
+    .tabstyle th, .tabstyle td{border-bottom: 1px solid #ccc;border-right: 1px solid #ccc;height: 37px;padding-left:10px;box-sizing: border-box}
+    .br{border-right:none !important;}
+    .bbm{border-bottom: none !important;}
+    .ml10{margin-left: 10px;}
+    .mt10{margin-top: 10px !important;}
+    .tableCut{display: inline-block;font-family: '微软雅黑 Bold', '微软雅黑';font-weight: 700;font-style: normal;font-size: 18px;text-align: center;width: 150px;float: left;cursor: pointer;}
+    .user_phone_content .line{width: 150px;height: 4px;background-color: #63C4A0;margin-left: 0px;position: relative;top:51px;}
+    .user_phone_content .tabstyle th,.user_phone_content .tabstyle td{border-top: 1px solid #ccc !important;border-right:none;height: 45px;padding: 0 0 0 10px;}
+    * {box-shadow: none !important;}
+    #tels tr, #tels td, #monthTel td {border: none;border-bottom: 1px solid #ccc;}
+    #tel_show, #urgency_show, #frequent_contacts {text-align: right;font-size: 16px;font-family: bold;color: #63C4A0;padding-right: 10px;border: none;box-shadow: none;float: right;margin-right: 40px;cursor: pointer;}
+    .wrapper:after {display: none;}
+    #btn-container > div, #btn-container1 > div {moz-user-select: -moz-none;-moz-user-select: none;-o-user-select: none;-khtml-user-select: none;-webkit-user-select: none;-ms-user-select: none;user-select: none}
+    .pageInfo {height: 30px;line-height: 30px;margin-right: 30px}
+    .btn-fenye {color: #65CEA7;padding: 0 15px;display: inline-block;font-size: 14px;text-align: center;border: 1px solid #ccc;border-right: none;cursor: pointer;vertical-align: middle;height: 30px;line-height: 30px}
+    .btn-fenye.last {border-right: 1px solid #ccc}
+    .btn-fenye.active, .btn-fenye:hover {background-color: #63C4A0;color: #fff}
+    .active {color: #63C4A0}
+    #jd_address1 tr, td {height: 41px;}
+    .triangle_border_up p {margin: 0;padding: 0;padding-left: 5px;padding-top: 5px;position: absolute;top: 15px;left: -90px;display: block;width: 360px;background-color: #595959;line-height: 2;border-radius: 5px;z-index: 200;color: #fff;font-size: 14px;word-break: normal;white-space: pre-line;word-wrap: break-word;}
+    #action_type,#check_num{width: 200px;height: 30px;border: 1px solid #999;border-radius: 3px;margin-bottom:24px;padding-left:10px;box-sizing: border-box}
+    .setConts{margin-top:40px;padding-left: 30px}
+    .setConts_l,.setConts_r{float: left;}
+    #allow_btn{margin-left:20px;margin-top:55px;}
+    .setConts_r{margin-left: 15px;border: 1px solid #999;border-radius: 3px}
+    .push_down .title input{float: right;margin-right: 20px;margin-top:15px;line-height:30px !important;}
+    .task_list{margin-top:15px;width: 100% !important;padding: 0;}
+    .row .task_list  .list_span{width:150px !important;height: 50px !important;line-height:50px !important;margin: 0 !important;background-color: #fff;margin-right:10px !important;border-bottom: none ;border-bottom-right-radius: 0px;border-bottom-left-radius: 0px}
+    .list_span.active{background-color: #63C4A0 !important;color: white !important;}
+    .task_list .list_span:hover {border: 1px solid #63C4A0;cursor: pointer;color: white !important;background-color: #63C4A0 !important;}
+    .mTel,.box11,.make,.expNumber,.expBox,.export-pdf,.box22,.commonNumber{position: fixed;top:0;left:0;right: 0;bottom:0;background-color: rgba(0,0,0,.5);z-index:101;}
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row pd">
+
+            <!--个人信息块-->
+            <div class="personal_information_content bgw">
+                <div class='title'>
+                    <h2>个人信息</h2>
+                </div>
+                <table class='tabstyle'>
+                    <tbody>
+                    <tr>
+                        <td>姓名</td><th>{{.um.Verifyrealname}}</th>
+                        <td>身份证号</td><th>{{.um.IdCard}}</th>
+                        <td>身份证地址</td><th class='br'>{{.um.Address}}</th>
+                    </tr>
+                    <tr>
+                        <td>手机号</td><th onclick='M1_stickup(this)' ondblclick="M1_stickups(this)">{{.um.Account}}</th>
+                        <td>居住地址</td><th class='br'>{{.um.LiveAddress}}</th>
+                        <td></td><th class='br'></th>
+                    </tr>
+                    <tr>
+                        <td>性别</td><th>{{.um.Sex}}</th>
+                        <td>婚姻状况</td><th>{{.um.Marriage}}</th>
+                        <td>详细地址</td><th class='br'>{{.um.LiveDetailAddress}}</th>
+                    </tr>
+                    <tr>
+                        <td>催收标记</td><th class='collection_remark'>{{.um.TagType}}</th>
+                        <td>最后操作时间</td><th>{{.um.OperationTime}}</th>
+                        <td></td><th class='br'></th>
+                    </tr>
+                    <tr>
+                        <td>银行</td><th>{{.bankCard.Bank_name}}</th>
+                        <td>银行卡号</td><th>{{.bankCard.Card_number}}</th>
+                        <td>预留号码</td><th class='br' onclick='M1_stickup(this)' ondblclick="M1_stickups(this)">{{.bankCard.Bank_mobile}}</th>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!--借款信息块-->
+                <div class='title'>
+                    <h2>借款信息</h2>
+                </div>
+                <table class='tabstyle'>
+                    <tbody>
+                    <tr>
+                        <td>期数</td>
+                        <td>本金</td>
+                        <td>利息</td>
+                        <td>信审数据费</td>
+                        <td>到期时间</td>
+                        <td>逾期天数</td>
+                        <td>违约金</td>
+                        <td>滞纳金</td>
+                        <td>应还合计</td>
+                        <td>已还合计</td>
+                        <td class='br'>状态</td>
+                    </tr>
+                    {{range $k,$v:= .handlelist}}
+                    <tr>
+                        <th>{{$v.TermNo}}</th>
+                        <th>{{$v.CapitalAmount}}</th>
+                        <th>{{$v.TaxAmount}}</th>
+                        <th>{{$v.DataServiceFee}}</th>
+                        <th>{{$v.LoanReturnDate.Format "2006-01-02"}}</th>
+                        <th>{{$v.OverdueDays}}</th>
+                        <th>{{$v.OverdueBreachOfAmount}}</th>
+                        <th>{{$v.OverdueMoneyAmount}}</th>
+                        <th>{{sumMoney 6 $v.CapitalAmount $v.TaxAmount $v.OverdueMoneyAmount $v.OverdueBreachOfAmount  $v.DataServiceFee}}</th>
+                        <th>{{sumMoney 6 $v.ReturnCapitalAmount  $v.ReturnTaxAmount  $v.ReturnOverdueMoneyAmount  $v.ReturnOverdueBreachOfAmount    $v.ReturnDataServiceFee }}</th>
+                        {{if eq $v.State "BACKING"}}
+                        <th>未还</th>
+                        {{else if eq $v.State "FINISH"}}
+                        <th>已还</th>
+                        {{else}}
+                        <th></th>
+                        {{end}}
+                    </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+                <div class="push_down">
+                    <div class='title'>
+                        <h2>添加催记</h2>
+                        {{if .displayExeclButton}}
+                        <input  style='width: 83px' class='btn btn-green' type="button" id='export' value='导出信函'>
+                        {{end}}
+                        {{if .nbs}}
+                        <input style='width: 83px' class='btn btn-green hide1' type="button" id='cheat' value='提交入黑'>
+                        <input id='cheat2' class='hide1' style='color:#FFFFFF;border: 1px solid #ccc;width: 100px;height:30px;background-color: #ccc;border-color:#ccc;border-radius: 3px ' type="button" value='已提交入黑'>
+                        <input id='cheat3' class="hide1" style='color:#FFFFFF;border: 1px solid #ccc;width: 83px;height:30px;background-color: #ccc;border-color:#ccc;border-radius: 3px' type="button" value='已入黑'>
+                       {{end}}
+                    </div>
+                    <div class='setConts'>
+                        <div  class='setConts_l'>
+                            <select name="action_type" id="action_type">
+                                <option value="">请选择行动分类</option>
+                                <option value="跟进">跟进</option>
+                                <option value="承诺">承诺</option>
+                                <option value="续期">续期</option>
+                                <option value="谈判">谈判</option>
+                                <option value="跳票">跳票</option>
+                                <option value="中本人">中本人</option>
+                                <option value="中家人">中家人</option>
+                                <option value="中第三方">中第三方</option>
+                                <option value="失联">失联</option>
+                                <option value="死亡">死亡</option>
+                                <option value="盗办">盗办</option>
+                                <option value="坐牢">坐牢</option>
+                                <option value="争议">争议</option>
+                                <option value="暂停">暂停</option>
+                                <option value="留案">留案</option>
+                            </select>
+                            </br>
+                            <input id="check_num" value="{{.queryDay}}" class="Wdate input-small" placeholder='请选择复核时间' type="text" onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})" name="start_time"/>
+                            <input id="endDate" style='display: none' class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})" value="{{.end_time}}" name="end_time"/>&nbsp;&nbsp;
+                        </div>
+                        <textarea placeholder='请输入联系内容' class='setConts_r' style="width: 390px;height: 85px;padding-left: 10px" rows="3" name="remarks" id="remarks"></textarea>
+                        <a class="btn btn-green" id="allow_btn" onclick="CollectionAllow();">确定</a>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--紧急联系人，手机通讯录，常用联系人-->
+            <div class="user_phone_content bgw ml10">
+                <div class='title bbm'>
+                    <div class='tableCut'>紧急联系人</div>
+                    <div class='tableCut'>手机通讯录</div>
+                    <div class='tableCut'>常用联系人</div>
+                    {{if .collectionExeclHas}}
+                    <button class="btn btn-green hide1" style="float: right;margin: 15px 20px 0 0;" type="button" id="exlBtn">导出号码</button>
+                    {{end}}
+                    <div class='line'></div>
+                </div>
+                <table class='tabstyle tableCont'>
+                    <tbody id='monthTel'>
+
+                    </tbody>
+                </table>
+
+                <table class='tabstyle tableCont hide1'>
+                    <tbody id="telss" style="width: 100%;">
+                    </tbody>
+                    <tfoot style="margin-top: 10px;">
+                    <tr style="margin-top: 10px;">
+                        <td colspan="14" style="margin-top: 10px;" class='bbm'>
+                            <div class="fl pageInfo" style="margin-top: 30px;">
+                            </div>
+                            <div class="fl" id='btn-container' style="margin-top: 30px;">
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+
+                <table class='tabstyle tableCont hide1'>
+                    <thead class="bqsData hide1">
+                    <tr>
+                        <th>手机号</th>
+                        <th>归属地</th>
+                        <th>联系次数</th>
+                        <th>主叫次数</th>
+                        <th>被叫次数</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <thead class="tjData hide1">
+                    <tr>
+                        <th>手机号码</th>
+                        <th>归属地</th>
+                        <th>联系次数</th>
+                        <th>主叫次数</th>
+                        <th>被叫次数</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <thead class="mxData hide1">
+                    <tr>
+                        <th>手机号码</th>
+                        <th>归属地</th>
+                        <th>近一周通话次数</th>
+                        <th>近一月通话次数</th>
+                        <th>近六月通话次数</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="tels2" style="width: 100%;">
+                    </tbody>
+                    <tfoot style="margin-top: 10px;">
+                    <tr style="margin-top: 10px;">
+                        <td colspan="14" style="margin-top: 10px;" class='bbm'>
+                            <div class="fl pageInfo2" style="margin-top: 30px;">
+                            </div>
+                            <div class="fl" id='btn-container2' style="margin-top: 30px;">
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="panel col-md-12" style='float:left;'>
+                    <ul class='workplace-nav clearfix'>
+                        {{if gt .count_overdue 1}}
+                            <li class='active' data-url='/usersmetadata/getusersmanageloanrecords' style='line-height:25px;'>借款记录<br><span style='line-height:14px;' class="red-text">(多笔逾期)</span></li>
+                        {{else}}
+                            <li class='active' data-url='/usersmetadata/getusersmanageloanrecords'>借款记录</li>
+                        {{end}}
+                        <li data-url='/usersmetadata/getusersrepaymentrecords'>还款记录</li>
+                        <li data-url='/usersmetadata/getrealnameauthinfo'>实名认证 </li>
+                        <li data-url='/usersmetadata/getlinkmanlist'>联系人</li>
+                        <li data-url='/usersmetadata/getusersgjjinfo'>公积金</li>
+                        <li data-url='/usersmetadata/getuserszfbinfo'>支付宝</li>
+                        <li data-url='/collection/connhistory'>联系历史</li>
+                        <li data-url='/usersmetadata/getusersloginrecords'>登录历史</li>
+                        <li data-url='/usersmetadata/jumptomessagecenter'>消息中心</li>
+                    </ul>
+                    <div class='detail-info clearfix'>
+
+                    </div>
+                </div>
+
+        </div>
+
+
+        <div class="m1_stickup hide1"
+             style="position: fixed;top: 300px;left: 50%;transform: translateX(-50%);width: 200px;height: 50px;background-color: #515151;border-radius: 5px;color: #FCFCFC;text-align: center;line-height: 50px;">
+            已粘贴至输入框
+        </div>
+
+        <!--标记弹窗-->
+        <div class="make boxShade hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">标记</span><span class="pop_close" onclick="$('.make').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <select name="" id="make_state" class="set form-control">
+                            <option value="">选择状态</option>
+                            <option value="1">正常</option>
+                            <option value="2">虚假</option>
+                            <option value="3">异常</option>
+                        </select>
+                        <div id="make_cons" class="mgt">
+                            <select name="" class="make_contents set form-control">
+                                <option value="">选择具体描述</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn1" onclick="$('.make').hide()">取消</a>
+                    <a class="btn allow_btn hintBtn2" id="make_btn">确认</a>
+                </div>
+            </div>
+        </div>
+        <!--紧急联系人查询弹框-->
+        <div class="mTel hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">状态检测</span><span class="pop_close" onclick="$('.mTel').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <div>
+                            手机通讯录:<br/>
+                            <div class="tel_name" style="margin-bottom: 10px">
+                                <table class="table table-hover table-striped table_thead_fixed">
+                                    <tbody class="tel_names">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            常用联系人电话TOP15:<br/>
+                            <table class="box_num table table-hover table-striped table_thead_fixed">
+                                <thead class="box_n">
+                                <tr>
+                                    <th style="width: 20%;background: none;">通话号码</th>
+                                    <th style="width: 20%;background: none;">运营商</th>
+                                    <th style="width: 20%;background: none;">联系次数</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr style="line-height: 20px">
+                                    <td class="box_num1" style="width: 20%;background: none;"></td>
+                                    <td class="box_num2" style="width: 20%;background: none;"></td>
+                                    <td class="box_num3" style="width: 20%;background: none;"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn2" onclick="$('.mTel').hide()">确认</a>
+                </div>
+            </div>
+        </div>
+        <div class="box11 hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">状态检测</span><span class="pop_close" onclick="$('.box11').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <p style="color: black">检测结果:</p><p class="texs"></p>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn2" onclick="$('.box11').hide()">确认</a>
+                </div>
+            </div>
+        </div>
+        <div class="expNumber boxShade hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="$('.expNumber').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">                    <i></i><b style="line-height: 68px;">确定导出以上勾选号码?</b>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn1" onclick="$('.expNumber').hide()">取消</a>
+                    <a class="btn allow_btn hintBtn2" id="expNumberBtn">确认</a>
+                </div>
+            </div>
+        </div>
+        <div class="expBox boxShade hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="$('.expBox').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <i></i><b>请选择需要导出的号码</b>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn2" onclick="$('.expBox').hide()">确认</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-pdf boxShade hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">选择</span><span class="pop_close" onclick="$('.export-pdf').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <select name="" id="select-pdf" class='form-control set'>
+                            <option value="">选择信函类型</option>
+                            <option value="/installment/installcreatecontractpdf?pdf_type=1&id={{IdUidEncrypt .loanId}}">缴款通知书</option>
+                            <option value="/installment/installcreatecontractpdf?pdf_type=2&id={{IdUidEncrypt .loanId}}">债务律师催告函</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn1" onclick="$('.export-pdf').hide()">取消</a>
+                    <a class="btn allow_btn hintBtn2 btn-loadPdf">确认</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="box22 boxShade hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">入黑类型</span><span class="pop_close" onclick="$('.box22').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <select name="" id="cheat_op" class="balckType set form-control">
+                            <option value="0">选择入黑类型</option>
+                            <option value="1">家人代偿</option>
+                            <option value="2">本人还款意愿差</option>
+                            <option value="3">其它</option>
+                        </select>
+                        <input id="cheat_content" class="mgt form-control loan_pop_inp" style="display: none" type="text" placeholder="请填写备注">
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn1" onclick="$('.box22').hide()">取消</a>
+                    <a class="btn allow_btn hintBtn2" id='send_back'>确认</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="commonNumber hide1">
+            <div class="loan_pop wet">
+                <div class="pop_header"><span class="pop_header_txt">查询结果</span><span class="pop_close" onclick="$('.commonNumber').hide()">×</span></div>
+                <div class="pop_con het">
+                    <div class="pop_con_inner">
+                        <div>
+                            手机通讯录:<br/>
+                            <div class="tel_name">
+                                <table class="table table-hover table-striped table_thead_fixed">
+                                    <tbody class="tel_names">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pop_footer hintFoot">
+                    <a class="btn allow_btn hintBtn2" onclick="$('.commonNumber').hide()">确认</a>
+                </div>
+            </div>
+        </div>
+        <div id="dialog-contact" class="hide1" title="联系记录">loading...</div>
+    </div>
+    <script>
+        // var index = ${index};
+       // console.log(.Uid);
+       var uid = {{IdUidEncrypt .uid}};
+
+        $(function () {
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(6));
+
+            //监听个人信息块的高度做让紧急联系人同高
+            $(window).resize(function () {
+                var personalH = $('.personal_information_content').height();
+                if(personalH>650 ){
+                    $('.user_phone_content').css("height",personalH);
+                }else {
+                    $('.user_phone_content').css("height",personalH);
+                }
+            }).resize();
+
+            //页面刷新清除sessionStorage
+            sessionStorage.clear();
+            $("#checkNum").html("0");
+
+            //紧急联系人
+            emergencyContact();
+
+            //手机通讯录
+            getPaged();
+
+            //常用联系人
+            getPaged2();
+
+            AjaxLoad(".task_list","#personal_info_cont");
+            $("#details_contact_history").click();
+
+            //下载pdf
+            $(".btn-loadPdf").click(function(){
+                var value = $("#select-pdf").val();
+                if(value == ""|| value == undefined){
+                    alert("请选择信函类型")
+                    return
+                }
+                window.location.href=value;
+                $(".export-pdf").hide();
+            })
+            $("#export").click(function(){
+                $(".export-pdf").show();
+            })
+
+            //控入黑诈按钮显示隐藏
+            var isTag = {{.isTag}};
+            var blackSignState = {{.blackSignState}};
+            if (isTag == -1) {
+                $('#cheat').addClass('hide1');
+                $('#cheat2').addClass('hide1');
+                $('#cheat3').addClass('hide1');
+            } else {
+                if ( blackSignState ==2  ) {
+                    $('#cheat3').removeClass('hide1');   /*已入黑*/
+                } else if (blackSignState == 1 ) {
+                    $('#cheat2').removeClass('hide1');   /*已提交入黑*/
+                } else if (blackSignState == 3 || blackSignState == 0) {
+                    $('#cheat').removeClass('hide1');    /*提交入黑*/
+                }
+            }
+
+            $(".balckType").change(function () {
+                var cheat_op = $(this).val();
+                if (cheat_op == 3) {
+                    $("#cheat_content").show();
+                } else {
+                    $("#cheat_content").hide();
+                    $("#cheat_content").val("");
+                }
+            })
+
+            //标记入黑按钮
+            $('#cheat').click(function () {
+                $('.box22').removeClass('hide1');
+            })
+            $('#send_back').off().on('click', function () {
+                var loanId = {{.list.LoanId}};
+                var pageUid = {{IdUidEncrypt .uid}};
+                var account = {{.account}};
+                var submit_man = {{.submit_man}};
+                var mtype = {{.mtype}};
+                var cheat_op = $('.balckType option:selected').val();
+                var cheat_content = $("#cheat_content").val();
+                if (cheat_op== 0) {
+                    alert('请选择入黑类型');
+                    return false;
+                }else if (cheat_op == 3) {
+                    if (cheat_content == '') {
+                        alert("请填写备注");
+                        return;
+                    }
+                }
+                var cheat_ops = $('#cheat_op option:selected').text();
+                $.ajax({
+                    url: '/black/saveblacksign',
+                    type: 'post',
+                    data: {flagType: cheat_op, cheat_content: cheat_content, uid: pageUid,account:account,submit_man:submit_man,mtype:mtype,loanId:loanId},
+                    success: function (result) {
+                        if (result.ret == 200) {
+                            $('.box22').addClass('hide1');
+                            $('#cheat').addClass('hide1');
+                            $('#cheat2').removeClass('hide1');
+
+                        } else {
+                            alert(result.msg);
+                            return false;
+                        }
+                    }
+                })
+
+            })
+
+            //点击标记框选择对呀内容
+            $("#make_state").on("change", function () {
+                var make_state = $("#make_state").val();
+                if (parseInt(make_state) == 1) {
+                    console.log("正常");
+                    $("#make_cons").html('<select name="" class="make_content set form-control"><option value="">选择具体描述</option><option value="本人接听正常通话">本人接听正常通话</option> <option value="本人接听无通话过程">本人接听无通话过程</option></select>')
+                    return;
+                }
+                if (parseInt(make_state) == 2) {
+                    console.log("虚假");
+                    $("#make_cons").html('<select name="" class="make_content set form-control"><option value="">选择具体描述</option><option value="非本人">非本人</option><option value="空号">空号</option><option value="停机">停机</option><option value="暂停服务">暂停服务</option></select>')
+                    return;
+                }
+                if (parseInt(make_state) == 3) {
+                    console.log("异常");
+                    $("#make_cons").html('<select name="" class="make_content set form-control"><option value="">选择具体描述</option><option value="无人接听">无人接听</option><option value="不是本人接听">不是本人接听</option><option value="无法通话">无法通话</option><option value="通话中">通话中</option><option value="不在服务区">不在服务区</option><option value="关机">关机</option></select>')
+                    return;
+                }
+                if (parseInt(make_state) == "") {
+                    console.log("空");
+                    $("#make_cons").html('<select name="" class="make_content set form-control"><option value="">选择具体描述</option></select>')
+                    return;
+                }
+            })
+
+            //点击紧急联系人，手机通讯录，常用联系人进行内容切换
+            $('.tableCut').click(function () {
+                var index = $(this).index();
+                $('.tableCont').eq(index).removeClass('hide1').siblings('.tableCont').addClass('hide1')
+                var ml = 150*index;
+                $('.line').animate({"margin-left":ml},200)
+                if(index == 1){
+                    $('#exlBtn').removeClass('hide1');
+                }else {
+                    $('#exlBtn').addClass('hide1');
+                }
+            })
+        })
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var data;
+            if (url == "/usersmetadata/getlinkmanlist") {
+                data = { uid: uid, is_edit: false };
+            } else if (url == "/usersmetadata/getusersloginrecords") {
+                data = { uid: uid, is_manage: true };
+            }else if (url == "/collection/connhistory"){
+                mtype={{.mtype}};
+                uid={{.um.Uid}};
+                connectType="COLLECTION";
+                data={uid:uid ,mtype:mtype,connectType:connectType};
+            }else {
+                data = { uid: uid };
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+        //紧急联系人
+        function emergencyContact() {
+            var rads = Math.random();
+            var signBtn = '';
+            var tel_State = '';
+            var pageUid = {{IdUidEncrypt .uid}};
+            //一个月
+            $.ajax({
+                url: '/collection/phonelinkman',
+                type: 'post',
+                data: {
+                    math: rads,
+                    uid: pageUid,
+
+                },
+                success: function (result) {
+                    if(result==null){
+                        return;
+                    }
+                    var html2 = '';
+                    var jiance;
+                    for (var i = 0; result.link && i < result.link.length; i++) {
+                        if (result.link[i].Abnormal_result == '') {
+                            jiance = '';
+                        } else {
+                            if (result.link[i].Source == 1) {
+                                jiance = result.link[i].Abnormal_result + '(阿甘)'
+                            } else {
+                                jiance = result.link[i].Abnormal_result + '(弈盾)'
+                            }
+                        }
+                        if (result.link[i].SignState == 1) {
+                            tel_State = '正常';
+                        }
+                        if (result.link[i].SignState == 2) {
+                            tel_State = '虚假';
+                        }
+                        if (result.link[i].SignState == 3) {
+                            tel_State = '异常';
+                        }
+                        if (result.link[i].SignState == 0) {
+                            tel_State = '';
+                        }
+                        if (result.link[i].SignState == 0) {
+                            signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + result.link[i].Id + ',this,1,'+ result.linkmanSort + ')">标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_maked"></span></span>';
+                        } else {
+                            signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + result.link[i].Id + ',this,1,'+ result.linkmanSort + ')">重新标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_fuhao"></span><span class="tel_maked">' + result.link[i].SignRemark + '</span></span>';
+                        }
+                        html2 += '<tr>' +
+                            '<td class="name" style="cursor: pointer"><span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + result.link[i].Relation + '</span></td>' +
+                            '<td class="phoneNumber" style="cursor: pointer"><span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + result.link[i].ContactPhoneNumber + '</span></td>' +
+                            '<td  class="query" style="color: #63C4A0;cursor:pointer;" onclick="tels(this)">查询</td>' +
+                            '<td>' + signBtn + '</td>' +
+                            '</tr>';
+
+                    }
+                    $('#monthTel').append(html2);
+                    $(".state_Type").click(function () {
+                        var stateNumber = $(this).data("number");
+                        var stateRelation = $(this).data("relation");
+                        demands(stateNumber, stateRelation)
+                    });
+                    // if (!isLogged) {
+                    //     $(".call_outSide").hide();
+                    // }
+                    $(".call_outSide").click(function () {
+                        NoANICall($(this).data("phone"));
+                    })
+                }
+            })
+        }
+        function tels(ele) {
+            if ($('.box11').css('display') == 'block') {
+                $('.mTel').hide();
+            } else if ($('.box11').css('display') == 'none') {
+                $('.mTel').show();
+                $('.mTel .tel_names').html('');
+                var uid = {{IdUidEncrypt .uid}};
+                var numebr = $(ele).siblings(".phoneNumber").find("span").text();
+                $.ajax({
+                    url: "/usersmetadata/getmatchcallrecord",
+                    type: "post",
+                    async: true,
+                    data: {uid: uid, phoneNum:numebr},
+                    success: function (result) {
+                        if (result.ret == 200) {
+                            if (!result.data.MobileFlag) {
+                               $('.mTel .tel_names').html("<tr><td>无结果</td></tr>");
+                            } else {
+                                var html1 = '';
+                                // for (var i = 0; i < result.list.length; i++) {
+                                    html1 += '<tr>' +
+                                        '<td style="background: none;" class="box_b_name">' + result.data.ContactName + '</td>' +
+                                        '<td style="background: none;" class="box_b_tel">' + result.data.ContactPhoneNumber + '</td>' +
+                                        '</tr>';
+                                // }
+                                $('.mTel .tel_names').html(html1);
+                            }
+                            if (!result.data.ConnectFlag) {
+                                $(".mTel .box_n").addClass("hide1");
+                                $('.mTel .box_num1').html("无结果");
+                                $('.mTel .box_num2').html("");
+                                $('.mTel .box_num3').html("");
+                            } else {
+                                $(".mTel .box_n").removeClass("hide1");
+                                $('.mTel .box_num1').html(result.data.ContactPhoneNumber);
+                                $('.mTel .box_num2').html(result.data.MonType);
+                                $('.mTel .box_num3').html(result.data.ConnectCount);
+                            }
+                        } else {
+                            $('.mTel .tel_names').html("<tr><td>无结果</td></tr>");
+                            $(".mTel .box_n").addClass("hide1")
+                            $('.mTel .box_num1').html("无结果");
+                            $('.mTel .box_num2').html("");
+                            $('.mTel .box_num3').html("");
+                        }
+                    }
+                });
+            }
+        }
+        var TimeFn = 1;
+        function M1_stickup(that) {
+            clearTimeout(TimeFn);
+            TimeFn = setTimeout(function () {
+                var stickup = $(that).text();
+                var remarks = $("#remarks").val();
+                $("#remarks").val(remarks + stickup + "，");
+                $(".m1_stickup").show();
+                $(".m1_stickup").text("已粘贴至输入框");
+                setTimeout(function () {
+                    $(".m1_stickup").hide();
+                }, 500)
+            }, 300);
+        }
+        function M1_stickups(that) {
+            clearTimeout(TimeFn);
+        }
+        //标记 //重新标记
+        function stamp(id, that, type, sort) {
+            var pageUid = {{IdUidEncrypt .uid}};
+            var number = $(that).parent("td").siblings(".phoneNumber").find("span").text();
+            var phoneName = $(that).data("name");
+            var url = '';
+            if (type === 1) {
+                url = "/collection/sign";
+            } else if (type == 2) {
+                url = "/collection/frequent";
+            } else if (type == 3) {
+                url = "/collection/common";
+            }
+            $(".make").show();
+            $("#make_state").val("");
+            $(".make_content").val("");
+            $("#make_cons").html('<select name="" class="make_content set form-control"><option value="">选择具体描述</option></select>').show()
+            $("#make_btn").off().click(function () {
+                var make_state = $("#make_state").val();
+                var make_content = $(".make_content").val();
+                if (make_state == "") {
+                    alert("请选择标记状态");
+                    return;
+                }
+                if (make_content == "") {
+                    alert("请选择具体描述内容");
+                    return;
+                }
+                var make_contents = $(".make_content option:selected").text();
+                var make_contentd = $("#make_state option:selected").text();
+                var data = {makeState: make_state, makeContent: make_content, signId: id, "sort":sort, "uid":pageUid, "mobile":number,"phoneName":phoneName,singType:type};
+                $.ajax({
+                    url: url,
+                    type: "post",
+                    data: data,
+                    success: function (result) {
+                        if (result.ret == 200) {
+                            $(".make").hide();
+                            $(that).text("重新标记");
+                            $(that).siblings("span").find(".tel_maked").html(make_contents);
+                            $(that).siblings("span").find(".tel_fuhao").html("");
+                            $(that).siblings("span").find(".tel_makes").html(make_contentd + ":");
+                        } else {
+                            alert(result.msg);
+                        }
+                    }
+                })
+            })
+        }
+        //手机通讯录
+        var arr = [];
+        function getPaged(pageIndex) {
+            var signBtn = '';
+            var pageUid = {{IdUidEncrypt .uid}};
+            var pageIndex = parseInt(pageIndex) || 1;
+            var Uid = pageUid;
+            $.ajax({
+                url: '/collection/phonelinkman',
+                type: "post",
+                data: {
+                    telpages: Math.random(),
+                    uid: Uid,
+                    page: pageIndex
+                },
+                success: function (rslt) {
+                    if(rslt==null){
+                        return;
+                    }
+                    if (pageIndex > rslt.totalPage) {
+                        return
+                    }
+                    //数据主体渲染
+                    var html = "";
+                    for (var i = 0; i < rslt.txlist.length; i++) {
+                        if (rslt.txlist[i].SignState == 1) {
+                            tel_State = '正常';
+                        }
+                        if (rslt.txlist[i].SignState == 2) {
+                            tel_State = '虚假';
+                        }
+                        if (rslt.txlist[i].SignState == 3) {
+                            tel_State = '异常';
+                        }
+                        if (rslt.txlist[i].SignState == 0) {
+                            tel_State = '';
+                        }
+                        if (rslt.txlist[i].SignState == 0) {
+                            signBtn = '<span style="display: inline-block" class="btn btn-green remark" data-name="'+rslt.txlist[i].ContactName+'" onclick="stamp(' + rslt.txlist[i].Id + ',this,2,'+ rslt.sort + ')">标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_maked"></span></span>';
+                        } else {
+                            signBtn = '<span style="display: inline-block" class="btn btn-green remark" data-name="'+rslt.txlist[i].ContactName+'" onclick="stamp(' + rslt.txlist[i].Id + ',this,2,'+ rslt.sort + ')">重新标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_fuhao"></span><span class="tel_maked">' + rslt.txlist[i].SignRemark + '</span></span>';
+                        }
+                        html += '<tr class="trs" style="width: 100%;border-bottom: 1px solid #ddd;">' +
+                            '<td class="tds"><input style="width: 17px;height: 17px; margin: 0" class="px subCheckbox" type="checkbox" onclick="subCheckbox(this)"/></td>'+
+                            '<td class="tel" style="display: none" data-LoanId='+rslt.txlist[i].ContactPhoneNumber[0]+'>'+rslt.txlist[i].ContactPhoneNumber[0]+'</td>'+
+                            '<td style="cursor: pointer">&nbsp; <span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + rslt.txlist[i].ContactName + '</span></td>' +
+                            '<td  class="phoneNumber" style="cursor: pointer"><span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + rslt.txlist[i].ContactPhoneNumber[0] + '</span></td>' +
+                             '<td>' + signBtn + '</td>' +
+                            '</tr>';
+                    }
+                    $('#telss').html(html);
+
+                    //按钮部分渲染
+                    var navHtml = "";
+                    var container = $("#btn-container");
+                    $(".single_total").html("5");
+                    $(".all_total").html(rslt.count);
+                    if (rslt.totalPage > 5) {
+                        navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged(" + 1 + ")'>首页</div>";//加载首页按钮
+                    }
+                    navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged(" + (pageIndex - 1 || 1) + ")'>上一页</div>";//加载上一页按钮
+                    if (rslt.totalPage > 5) {
+                        if(rslt.totalPage - pageIndex < 2){//如果后面两页不存在，则在前面添加倒数4，5页页码
+                            for(var i = rslt.totalPage-2;i<pageIndex;i++){
+                                navHtml+="<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged("+(i-2)+")'>"+(i-2)+"</div>";
+                            }
+                        }
+                        var len = pageIndex + 2;
+                        for (var i = pageIndex - 2; i <= len; i++) {//从当前页前2页开始循环，保证前面的页码能够加载出来，加载5个，则循环次数为5
+                            if (pageIndex - i == 0) {//如果循环到当前page，则增加active状态
+                                navHtml += "<div class='btn-fenye active' onmousedown='fyBtns()' onclick='getPaged(" + i + ")'>" + i + "</div>";
+                            } else if (i - 1 < 0 || i - rslt.totalPage > 0) {//如果前2页没有东西，则不加载任何,如果后两页没有东西，也不加载
+                            } else {//加载普通按钮
+                                navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged(" + i + ")'>" + i + "</div>";
+                            }
+                        }
+                        if(pageIndex-2<=0){//如果前面两页不存在，则后面补上页码
+                            for(var i = 0;i>=pageIndex-2;i--){
+                                navHtml+="<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged("+(pageIndex+3-i)+")'>"+(pageIndex+3-i)+"</div>";
+                            }
+                        }
+                    } else {
+                        for (var i = 1; i <= rslt.totalPage; i++) {
+                            if (rslt.page == i) {
+                                navHtml += "<div class='active btn-fenye' onclick='getPaged(" + i + ")'>" + i + "</div>";
+                            } else {
+                                navHtml += "<div class='btn-fenye' onclick='getPaged(" + i + ")'>" + i + "</div>";
+                            }
+                        }
+                    }
+                    navHtml += "<div class='btn-fenye lines' onmousedown='fyBtns()' onclick='getPaged(" + ((pageIndex + 1) > len ? len : (pageIndex + 1)) + ")'>下一页</div>";//加载下一页按钮
+                    if (rslt.totalPage > 5) {
+                        navHtml += "<div style='border-right: 1px solid #ccc' class='btn-fenye last' onmousedown='fyBtns()' onclick='getPaged(" + rslt.totalPage + ")'>末页</div>";//加载末页按钮
+                    }
+                    navHtml += '<p style="display: inline-block;margin-left: 5px">共' + rslt.totalPage + '页</p>'
+                    container.html(navHtml);
+                    if (rslt.totalPage == 0) {
+                        container.html("暂时没有数据").css("text-align", "center");
+                    }
+                    //页数信息
+                    var pageBar = "";
+                    pageBar = "<div><input style='position:relative;top:5px;width: 18px;height: 18px; margin: 0;' type='checkbox' id='checkAll' onclick='checkAll(this)'/>&nbsp;<span style='vertical-align: 0px'>全选</span>，已选<span id='checkNum'>0</span>条,每页<span >10</span>条，总共<span >" + rslt.count + "</span>条</div>"
+                    $(".pageInfo").html(pageBar)
+                    if (rslt.totalPage <= 5) {
+                        $(".lines").css('borderRight', '1px solid #ccc')
+                    }
+                    $("#checkNum").html(window.sessionStorage.checked);
+                    var arr = [];
+                    if(sessionStorage.rememberSel){
+                        var arr1 = sessionStorage.rememberSel.split(',');
+                        for(var i = 0 ; i<arr1.length;i++){
+                            arr.push(arr1[i])
+                        }
+                    }
+                    if(!sessionStorage.rememberSel){
+                        sessionStorage.rememberSel = "";
+                    }
+                    var isAllSel = false;
+                    var nowList = sessionStorage.rememberSel.split(',');
+                    for(var i = 0,len=nowList.length;i< len;i++){
+                        if(nowList[i] == " ")break;
+                        $(".trs").find("td[data-loanId="+nowList[i]+"]").prev().find("input").attr("checked","checked");
+                    }
+                    var checkedAll=0;
+                    var checkedLen = $('.trs').length;
+                    $(".trs input").each(function () {
+                        if(this.checked){
+                            checkedAll +=1;
+                        }
+                        if(checkedAll==checkedLen){
+                            isAllSel = true;
+                        }
+                    })
+                    if(isAllSel){
+                        $("#checkAll").attr("checked","checked");
+                    }
+                }
+            });
+        }
+
+        //常用联系人
+        function getPaged2(pageIndex) {
+            var pageUid = {{IdUidEncrypt .uid}};
+            var pageIndex = parseInt(pageIndex) || 1;
+            var Uid = pageUid;
+            $.ajax({
+                url: '/collection/operatordata',
+                type: "post",
+                data: {
+                    telpages: Math.random(),
+                    uid: Uid,
+                    page: pageIndex
+                },
+                success: function (rslt) {
+                    console.log(rslt)
+                    if(rslt==null){
+                        return;
+                    }
+                    if (pageIndex > rslt.pagecount) {
+                        return
+                    }
+                    //数据主体渲染
+                    var html = "";
+                    var signBtn = "";
+                    for (var i = 0; i < rslt.list.length ;i++) {
+                        if (rslt.list[i].SignState == 1) {
+                            tel_State = '正常';
+                        }
+                        if (rslt.list[i].SignState == 2) {
+                            tel_State = '虚假';
+                        }
+                        if (rslt.list[i].SignState == 3) {
+                            tel_State = '异常';
+                        }
+                        if (rslt.list[i].SignState == 0) {
+                            tel_State = '';
+                        }
+                        if (rslt.mobileAuthType == 1) {
+                            if (rslt.list[i].SignState == 0) {
+                                signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + rslt.list[i].Id + ',this,3,' + rslt.sort + ')">标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_maked"></span></span>';
+                            } else {
+                                signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + rslt.list[i].Id + ',this,3,' + rslt.sort + ')">重新标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_fuhao">:</span><span class="tel_maked">' + rslt.list[i].SignRemark + '</span></span>';
+                            }
+                            html += '<tr class="trs" style="width: 100%;border-bottom: 1px solid #ddd;">' +
+                                '<td  class="phoneNumber" style="cursor: pointer"><span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + rslt.list[i].Peer_num + '</span></td>' +
+                                '<td >' + rslt.list[i].City + '</td>' +
+                                '<td >' + rslt.list[i].Call_Cnt_1w + '</td>' +
+                                '<td >' + rslt.list[i].Call_Cnt_1m + '</td>' +
+                                '<td >' + rslt.list[i].Call_Cnt_6m + '</td>' +
+                                '<td class="query" style="color: #63C4A0;cursor:pointer;" onclick="tela(this)">查询</td>' +
+                                '<td>' + signBtn + '</td>' +
+                                '</tr>';
+                        } else if (rslt.mobileAuthType == 2){
+                            if (rslt.list[i].SignState == 0) {
+                                signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + rslt.list[i].Id + ',this,3,'+ rslt.sort + ',' + rslt.list[i].Mobile + ')">标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_maked"></span></span>';
+                            } else {
+                                signBtn = '<span style="display: inline-block" class="btn btn-green remark" onclick="stamp(' + rslt.list[i].Id + ',this,3,'+ rslt.sort + ',' + rslt.list[i].Mobile + ')">重新标记</span><span style="color: #7a7676;display:inline-block" >&nbsp;&nbsp;<span class="tel_makes">' + tel_State + '</span><span class="tel_fuhao">:</span><span class="tel_maked">' + rslt.list[i].SignRemark + '</span></span>';
+                            }
+
+                                html += '<tr class="trs" style="width: 100%;border-bottom: 1px solid #ddd;">' +
+                                '<td  class="phoneNumber" style="cursor: pointer"><span onclick="M1_stickup(this)" ondblclick="M1_stickups(this)">' + rslt.list[i].Phone + '</span></td>' +
+                                '<td >' + rslt.list[i].Phone_location + '</td>' +
+                                '<td >' + rslt.list[i].Talk_cnt + '</td>' +
+                                '<td >' + rslt.list[i].Call_cnt + '</td>' +
+                                '<td >' + rslt.list[i].Called_cnt + '</td>' +
+                                '<td class="query" style="color: #63C4A0;cursor:pointer;" onclick="tela(this)">查询</td>' +
+                                '<td>' + signBtn + '</td>' +
+                                '</tr>';
+
+                        }
+                    }
+                    if(rslt.mobileAuthType == 2){
+                        $(".tjData").show();
+                    }else if  (rslt.mobileAuthType == 1){
+                        $(".mxData").show();
+                    }
+                    $('#tels2').html(html);
+
+                    //按钮部分渲染
+                    var navHtml = "";
+                    var container = $("#btn-container2");
+                    $(".all_total").html(rslt.count);
+                    if (rslt.pagecount > 5) {
+                        navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged2(" + 1 + ")'>首页</div>";//加载首页按钮
+                    }
+                    navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged2(" + (pageIndex - 1 || 1) + ")'>上一页</div>";//加载上一页按钮
+                    if (rslt.pagecount > 5) {
+                        if(rslt.pagecount - pageIndex < 2){//如果后面两页不存在，则在前面添加倒数4，5页页码
+                            for(var i = rslt.pagecount-2;i<pageIndex;i++){
+                                navHtml+="<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged2("+(i-2)+")'>"+(i-2)+"</div>";
+                            }
+                        }
+                        var len = pageIndex + 2;
+                        for (var i = pageIndex - 2; i <= len; i++) {//从当前页前2页开始循环，保证前面的页码能够加载出来，加载5个，则循环次数为5
+                            if (pageIndex - i == 0) {//如果循环到当前page，则增加active状态
+                                navHtml += "<div class='btn-fenye active' onmousedown='fyBtns()' onclick='getPaged2(" + i + ")'>" + i + "</div>";
+                            } else if (i - 1 < 0 || i - rslt.pagecount > 0) {//如果前2页没有东西，则不加载任何,如果后两页没有东西，也不加载
+                            } else {//加载普通按钮
+                                navHtml += "<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged2(" + i + ")'>" + i + "</div>";
+                            }
+                        }
+                        if(pageIndex-2<=0){//如果前面两页不存在，则后面补上页码
+                            for(var i = 0;i>=pageIndex-2;i--){
+                                navHtml+="<div class='btn-fenye' onmousedown='fyBtns()' onclick='getPaged2("+(pageIndex+3-i)+")'>"+(pageIndex+3-i)+"</div>";
+                            }
+                        }
+                    } else {
+                        for (var i = 1; i <= rslt.pagecount; i++) {
+                            if (rslt.currpage == i) {
+                                navHtml += "<div class='active btn-fenye' onclick='getPaged2(" + i + ")'>" + i + "</div>";
+                            } else {
+                                navHtml += "<div class='btn-fenye' onclick='getPaged2(" + i + ")'>" + i + "</div>";
+                            }
+                        }
+                    }
+                    navHtml += "<div class='btn-fenye lines' onmousedown='fyBtns()' onclick='getPaged2(" + ((pageIndex + 1) > len ? len : (pageIndex + 1)) + ")'>下一页</div>";//加载下一页按钮
+                    if (rslt.pagecount > 5) {
+                        navHtml += "<div style='border-right: 1px solid #ccc' class='btn-fenye last' onmousedown='fyBtns()' onclick='getPaged2(" + rslt.pagecount + ")'>末页</div>";//加载末页按钮
+                    }
+                    navHtml += '<p style="display: inline-block;margin-left: 20px">共' + rslt.pagecount + '页</p>'
+                    container.html(navHtml);
+                    if (rslt.pagecount == 0) {
+                        container.html("暂时没有数据").css("text-align", "center");
+                    }
+                    //页数信息
+                    var pageBar = "";
+                    pageBar = "<div style='position: relative;top: 5px;margin-right: 30px;'>每页<span>10</span>条&nbsp;&nbsp;&nbsp; 总共<span>" + rslt.count + "</span>条</div>"
+                    $(".pageInfo2").html(pageBar)
+                    if (rslt.pagecount <= 5) {
+                        $(".lines").css('borderRight', '1px solid #ccc')
+                    }
+                }
+            });
+        }
+        //导出号码
+        function isContains(str,substr) {
+            return new RegExp(substr).test(str)
+        }
+        Array.prototype.indexOf = function(val) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == val) return i;
+            }
+            return -1;
+        };
+        Array.prototype.remove = function(val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
+        function checkAll(that) {
+            var num = 0;
+            var isChecked = $(that).prop("checked");
+            if(isChecked==true){
+                $.each($('.subCheckbox'),function(){
+                    if(!this.checked){
+                        num += 1;
+                    }
+                });
+                $(".subCheckbox").prop("checked", isChecked);
+                InitChecked(num);
+                console.log(arr)
+                $(".trs .subCheckbox:checked").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                    sessionStorage.rememberSel=arr;
+                    var checkedTest =sessionStorage.rememberSel ;
+                    if(isContains(checkedTest,$(this).parent().siblings(".tel").text())==false){
+                        arr.push($(this).parent().siblings(".tel").text())
+                    }
+                });
+                sessionStorage.rememberSel=arr;
+            }else {
+                $(".subCheckbox").prop("checked", isChecked);
+                InitChecked1(num)
+                $(".trs .subCheckbox").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                    arr.remove($(this).parent().siblings(".tel").text());
+                });
+                sessionStorage.rememberSel= arr;
+            }
+        }
+        //实现单选全选
+        function subCheckbox(that) {
+            if(that.checked){
+                if($('#checkNum').text()==''){
+                    $('#checkNum').text('0')
+                }
+                $("#checkNum").text((parseInt($("#checkNum").text())+1))
+                arr.push($(that).parent().siblings(".tel").text())
+            }else {
+                $("#checkNum").text((parseInt($("#checkNum").text())-1))
+                arr.remove($(that).parent().siblings(".tel").text());
+            }
+            if ($("#checkAll").prop('checked')) {
+                $(".subCheckbox").each(function (i, ck) {
+                    if (!$(ck).prop('checked')) {
+                        $("#checkAll").prop("checked", false);
+                    }
+                });
+
+            } else {
+                var i = 0;
+                $(".subCheckbox").each(function () {
+                    if ($(this).prop('checked')) {
+                        i++;
+                    }
+                });
+                if ($(".subCheckbox").length == i) {
+                    $("#checkAll").prop("checked", true);
+                }
+
+            }
+            sessionStorage.rememberSel = arr;
+        }
+        function fyBtns() {
+            window.sessionStorage.checked = $("#checkNum").text();
+        }
+        $("#exlBtn").click(function () {
+            if(sessionStorage.rememberSel){
+                var lastData=sessionStorage.rememberSel;
+                if(lastData.length<1){
+                    $(".expBox").show();
+                }else {
+                    $(".expNumber").show();
+                }
+            }else{
+                $(".expBox").show();
+            }
+        })
+        $("#expNumberBtn").on("click", function () {
+            var exlId = {{IdUidEncrypt  .um.Uid}};
+            var lastData=sessionStorage.rememberSel;
+            var url = "/collection/phonelinkmantoexcel?&account="+lastData+"&uid="+exlId;
+            window.location.href= url;
+            setTimeout("window.location.reload()",1000);
+        });
+        function InitChecked(nums) {
+            var checkItems = 0;
+            $(".trs input:checked").each(function () {
+                checkItems += 1;
+            });
+            if(window.sessionStorage.checked && parseInt(nums)> 0){
+                window.sessionStorage.checked = parseInt(nums)+parseInt($("#checkNum").text());
+                $("#checkNum").html(window.sessionStorage.checked)
+            }else if(window.sessionStorage.checked && parseInt(nums)<1){
+                window.sessionStorage.checked = parseInt(checkItems)+parseInt($("#checkNum").text());
+                $("#checkNum").html(window.sessionStorage.checked)
+            }else {
+                $("#checkNum").html(checkItems)
+            }
+
+        }
+        function InitChecked1(nums) {
+            var checkItems = 0;
+            $(".subCheckbox").each(function () {
+                checkItems += 1;
+            });
+            if(window.sessionStorage.checked && parseInt(nums)==0){
+                window.sessionStorage.checked = parseInt($("#checkNum").text())-checkItems;
+                $("#checkNum").html(window.sessionStorage.checked)
+            }else {
+                $("#checkNum").html('0')
+            }
+        }
+        function closeBoxd(that) {
+            that.addClass("hide1")
+        }
+
+        //确认添加催记
+        function CollectionAllow() {
+            var loanId = {{.list.LoanId}};
+            var clickflag = true;
+            if (clickflag) {
+                clickflag = false;
+                var uid = {{IdUidEncrypt .list.Uid}};
+                var type = {{.mtype}};
+                var handleId = {{.list.HandleId}}
+                var checkNum = $("#check_num").val();
+
+                var actionType = $("#action_type").val();
+
+                if (actionType == "") {
+                    alert("选择行动分类")
+                    return false;
+                }
+                var connContext = '';
+                var remarks = $("#remarks").val()
+                if (remarks.replace(/[\r\n]/g,"").replace(/\ +/g,"") == ""){
+                    alert("联系内容不能为空!")
+                    return false;
+                }
+                var remarkStr = connContext + " " + remarks
+                var  urls = "";
+                  urls="/collection/handle";
+                $.zpost(urls,
+                    {
+                        "handleId": handleId,
+                        "uid": uid,
+                        "loanId": loanId,
+                        "type": type,
+                        "actionType": actionType,
+                        "remark": remarkStr,
+                        "promiseMoney": $("#count_num").val(),
+                        "check_num": checkNum
+                    }, function (result) {
+                        if (!!result && result.ret == 200) {
+                            $("#action_type").val("");
+                            $("#remarks").val("");
+                            $("#check_num").val("");
+                            alert(result.msg);
+                            location.reload();
+                        } else {
+                            alert(result.msg);
+                        }
+                        clickflag = true;
+                    });
+            }
+        }
+        //查询
+        function tela(ele) {
+            // $(".commonNumber").show();
+            // $('.commonNumber .tel_names').html('');
+            var uid = {{IdUidEncrypt .uid}};
+            var phone = $(ele).siblings(".phoneNumber").find("span").text();
+            $.ajax({
+                url :"/usersmetadata/getmatchrecord",
+                data : {
+                    uid: uid,
+                    phoneNum:phone
+                },
+                success : function(rslt){
+                    if(rslt.ret == 200){
+                        dialog.init({
+                            title : "匹配结果",
+                            others : {
+                                html : "<p>手机通讯录</p>"+rslt.relationship+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+rslt.phoneNum
+                            },
+                            buttons : [{
+                                text : "确定",
+                                style : "green"
+                            }]
+                        })
+                    }else {
+                         dialog.init({
+                            title : "匹配结果",
+                            others : {
+                                html : "<p>手机通讯录</p><span>无结果</span>"
+                            },
+                            buttons : [{
+                                text : "确定",
+                                style : "green"
+                            }]
+                        })
+                    }
+                }
+            })
+        }
+        //联系历史修改
+        $('#dialog-contact').dialog({
+            autoOpen: false,
+            modal: true,
+            width:700,
+            maxHeight: 700,
+            position: ["center", 100]
+        });
+        function add(uid){
+            $('#dialog-contact').dialog('open');
+            $('#dialog-contact').load("/usersmetadata/connrcd?uid="+uid);
+        }
+        //详情加载
+        var mtype={{ .mtype}};
+        function AjaxLoad(id,show){
+            var uid ={{IdUidEncrypt  .um.Uid}};
+            var token={{.token}};
+            $(id).find(".list_span").off('click').click(function(){
+                if($(this).hasClass('active')){
+                    $(".list_span").css('border','1px solid #ccc')
+                    $(this).removeClass('active')
+                    $("#personal_info_cont").hide()
+                    $("#content").hide()
+                    return;
+                }
+                $(".list_span").css('border-bottom','none')
+                var $_this=$(this);
+                var _ss= Math.random(1000000);
+                var url=$_this.data("url");
+                url += "?id="+uid+"&mtype="+mtype+'&token='+token+"&_"+_ss; // uid后缀
+                $.zget(url,{},function(result){
+                    $(show).empty().append(result).show();
+                    $_this.addClass("active").siblings().removeClass("active");
+                    execjs(result);
+                });
+            });
+        }
+    </script>
+</div>

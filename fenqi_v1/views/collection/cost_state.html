@@ -1,0 +1,452 @@
+<style>
+    #approval_form table td{
+        border: none;
+    }
+    .line{
+        border-top: 1px solid #ccc !important;
+    }
+    .red{
+        color: red;
+    }
+    #imgs img{
+        width: 160px;
+        height: 160px;
+        margin-right: 20px;
+    }
+    .photo_this1 {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        text-align: center;
+        z-index: 1000;
+        display: none;
+    }
+
+    .photo_this1 #photosd {
+        margin: 0 auto;
+        margin-top: 140px;
+        width: 900px;
+        height: 600px;
+        background-color: #fff;
+    }
+
+    .photo_this1 #photosd #pootods {
+        max-width: 465px;
+        max-height: 465px;
+        margin: 85px auto 0;
+    }
+    #pooted_btns {
+        width: 40px;
+        position: fixed;
+        top: 700px;
+        left: 49%;
+        z-index: 1001;
+        display: none;
+    }
+    #refuse_txt,#result,#agree_txt{
+        width:260px;
+        height: 100px
+    }
+</style>
+<div id="personal-info"></div>
+<div class="panel panel_approval panel_border_green">
+    <div class="panel-body">
+        <table class="table table-hover table-striped table_thead_fixed">
+            <thead>
+            <tr>
+                <th>借款金额</th>
+                <th>借款时间</th>
+                <th>期数</th>
+                <th>本金</th>
+                <th>利息</th>
+                <th>信审数据费</th>
+                <th>到期时间</th>
+                <th>逾期天数</th>
+                <th>逾期费用</th>
+                <th>应还总额</th>
+                <th>已还金额</th>
+                <th>待还金额</th>
+            </tr>
+            </thead>
+            <tbody>
+                {{range $k,$v := .list}}
+                <tr>
+                <td>{{$v.LoanMoney}}</td>
+                <td>{{$v.LoanTime}}</td>
+                <td>{{$v.TermNo}}</td>
+                <td>{{$v.CapitalAmount}}</td>
+                <td>{{$v.TaxAmount}}</td>
+                <td>{{$v.StageFee}}</td>
+                <td>{{$v.RepayTime}}</td>
+                <td>{{$v.OverDay}}</td>
+                <td>{{$v.OverMoney}}</td>
+                <td>{{$v.ShouldAlsoAmount}}</td>
+                <td>{{$v.RepayMoney}}</td>
+                <td>{{sumMoney 2 $v.ShouldAlsoAmount $v.RepayMoney }}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        <form action="" method="post" id="approval_form">
+            <h2 class="panel-title" id='states'>减免审批</h2>
+            <table class="table table-striped table_thead_fixed">
+                <tbody>
+                    <tr>
+                        <td style='width: 7%'>发起人</td>
+                        <td>{{.approve.RequestSysName}}</td>
+                    </tr>
+                    <tr>
+                        <td>发起时间</td>
+                        <td>{{.approve.CreateTime}}</td>
+                    </tr>
+                    <tr>
+                        <td>减免金额</td>
+                        <td>{{.approve.Money}}</td>
+                    </tr>
+                    <tr>
+                        <td >减免原因</td>
+                        <td>{{.approve.Reason}}</td>
+                    </tr>
+                    <tr class='hide1' id='photo_img'>
+                        <td></td>
+                        <td id='imgs'>
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-striped table_thead_fixed" >
+                <tbody class='lines'>
+                {{range $k,$v:=.clist}}
+                    <tr {{if eq $v.State "REFUSE"}}class="red"{{else if eq $v.State "REFUSEDONE"}}class="red"{{end}}>
+                        <td style='width: 7%;'>{{if eq $v.Source "APPROVE"}}审批人{{else}}处理人{{end}}</td>
+                        <td style='width: 8%'>{{$v.Displayname}}</td>
+                       <td style='width: 7%'>{{if eq $v.State "REFUSE"}}退回原因{{else if eq $v.State "REFUSEDONE"}}退回原因{{else}}审批意见{{end}}</td>
+                        <td>{{$v.Opinion}}</td>
+                        <td>{{$v.CreateTime}}</td>
+                    </tr>
+                {{end}}
+                <tr class='data_show hide1'>
+                    <td>处理人</td>
+                    <td>{{.DisposeSysName}}</td>
+                </tr>
+                </tbody>
+            </table>
+            <a id='refuse_btn' style="margin-left: 25%;margin-top: 10px;background: none;color: #63C4A0;border: 1px solid #63C4A0"  class="btn hide1">退回</a>
+            <a id='agree_btn' style="margin-left: 20px;margin-top: 10px;"  class="btn btn-green hide1">审批通过</a>
+            <a id='done_btn' style="margin-left: 20px;margin-top: 10px;"  class="btn btn-green hide1">确认减免</a>
+            <a id='superior_btn' style="margin-left: 20px;margin-top: 10px;"  class="btn btn-green hide1">提交上级</a>
+        </form>
+    </div>
+
+
+
+    <!--审批通过弹窗-->
+    <div class="finishBox boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="closePopup($('.finishBox'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <i></i><b></b>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn allow_btn hintBtn1" onclick="closePopup($('.finishBox'))">取消</a>
+                <a class="btn allow_btn hintBtn2" id='success'>确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='photo_this1'>
+    <div id='photosd'>
+        <img id='pootods' src="">
+    </div>
+</div>
+<img id='pooted_btns' src="../static/img/rotate.png">
+<script>
+    $(function(){
+
+        //加载头部个人信息页
+        $.zget("/usersmanage/usersmetadatalook?uid={{IdUidEncrypt .uid}}",{},function(back){
+            if(back){
+                $("#personal-info").html(back);
+                execjs(back);
+            }
+        });
+        var approveState={{.approve.State}};
+        var id={{IdUidEncrypt .id}} ;
+        //判断按钮显示
+        var show_hide = 1;
+        var loginSysId={{.Id}};
+        var isCheckDispose= {{.isCheckDispose}};
+        if(isCheckDispose){
+           show_hide=0;
+        }
+       var isDisplayApplove= {{.isDisplayApplove}};
+       if(!isDisplayApplove){
+            show_hide=-1;
+       }
+        if(show_hide==1){
+            if (approveState=='NONE'){
+                $('#refuse_btn').removeClass("hide1");
+                $('#agree_btn').removeClass("hide1");
+                $('#superior_btn').removeClass("hide1");
+            }
+        }else if(show_hide==0) {
+              if (approveState=='AGREE'){
+                  $('#refuse_btn').removeClass("hide1");
+                    $('#done_btn').removeClass("hide1");
+            }
+        }
+
+        var states = {{.approve.State}};
+        if(states=='NONE'){
+            $('#states').html('减免审批');
+        }else if(states=='REFUSE'){
+            $('#states').html('审批退回');
+        }else if(states=='AGREE'){
+            $('#states').html('处理审批');
+        }else if(states=='REFUSEDONE'){
+            $('#states').html('处理退回');
+        }else if(states=='DONE'){
+            $('#states').html('处理完成');
+        }else if(states==' FAIL'){
+            $('#states').html('处理失败');
+        }
+
+
+        var data_show = {{.approve.State}};
+        if(data_show=='REFUSEDONE' || data_show=='DONE'){
+            $('.data_show').show();
+        }
+//        alert(data_show)
+        var line_show = {{.clist}};
+//        alert(line_show.length);
+        if(line_show.length==0){
+            $('.lines tr').eq(0).find('td').removeClass('line');
+        }else {
+            $('.lines tr').eq(0).find('td').addClass('line');
+        }
+
+        //加载图片
+        var imgs = {{.approve.ImagesUrl}};
+        if(imgs.length>0){
+            $('#photo_img').show();
+            var arr = imgs.split(',');
+            $.each(arr,function (index,value) {
+                var img = new Image();
+                img.src += value;
+                $('#imgs').append(img);
+            })
+        }
+        //点击图片放大
+        $('#imgs').on('click','img',function () {
+            $("#pooted_btns").show();
+            var src = $(this).attr('src');
+            $('#pootods').attr('src',src);
+            $('.photo_this1').show();
+        })
+        $('.photo_this1').click(function () {
+            $(this).hide();
+            $("#pooted_btns").hide();
+        })
+        var currents = 0;
+        document.getElementById('pooted_btns').onclick = function () {
+            var w = $("#photosd").width();//容器宽度
+            var img_w = $('#pootods').width();//图片宽度
+            var img_h = $('#pootods').height();//图片高度
+            if (img_w > w) {//如果图片宽度超出容器宽度--要撑破了
+                var height = (w * img_h) / img_w; //高度等比缩放
+                $('#pootods').css({"width": w, "height": height});//设置缩放后的宽度和高度
+            }
+            currents = (currents + 90) % 360;
+            document.getElementById('pootods').style.transform = 'rotate(' + currents + 'deg)';
+        }
+
+        //点击退回
+        $('#refuse_btn').click(function () {
+            $('#refuse_txt').val('');
+            var state;
+            if(show_hide==1){
+                state = 'REFUSE';
+            }else {
+                state = 'REFUSEDONE';
+            }
+
+            dialog.init({
+                title : "退回",
+                textarea : {
+                    html : "<textarea id='refuse_txt' class='form-control' name='REFUSE' placeholder='请填写退回原因'></textarea>"
+                },
+                buttons :[{
+                    text : "确定",
+                    style : "green",
+                    func : function(){
+                        var refuse = $('#refuse_txt').val();
+                        if(refuse==''){
+                            alert('请填写退回原因')
+                            return false;
+                        }else {
+                            $.ajax({
+                                url:'/costapprove/costapprove',
+                                type:'post',
+                                data:{result:refuse,id:id,state:state,isBack:true},
+                                success:function (result) {
+                                    if(result.ret==200){
+                                        $(".J_modal").remove();
+                                        getpage(window.sessionStorage.URl)
+                                    }else {
+                                        alert(result.msg);
+                                        $('.giveBack').hide();
+                                        return false;
+                                    }
+                                }
+                            })
+                        }
+                    }
+                },{
+                    text : "取消",
+                    style : "default"
+                }]
+            });
+        })
+        var money = {{.approve.Money}};
+        //点击审批通过
+        $('#agree_btn').click(function () {
+            $('#agree_txt').val('');
+            $("#passMoney").val(money)
+            dialog.init({
+                title : "审批通过",
+                input : {
+                    html : ' <input type="number" id="passMoney" class="loan_pop_inp form-control" min="0" placeholder="请输入减免金额">'
+                },
+                textarea : {
+                    html : "<textarea id='agree_txt' class='mgt form-control' name='REFUSE' placeholder='请填写审批意见'></textarea>"
+                },
+                buttons : [{
+                    text : "确定",
+                    style : "green",
+                    func : function(){
+                        var agree = $('#agree_txt').val();
+                        var passMoney = $("#passMoney").val();
+                        if(!agree){
+                            agree="情况属实，同意减免";
+                        }
+                        if(passMoney==''){
+                            alert('请输入减免金额')
+                            return false;
+                        }else {
+                            $.ajax({
+                                url:'/costapprove/costapprove',
+                                type:'post',
+                                data:{result:agree,id:id,state:'AGREE',approveMoney:passMoney},
+                                success:function (result) {
+                                    if(result.ret==200){
+                                        $(".J_modal").remove();
+                                        getpage(window.sessionStorage.URl)
+                                    }else {
+                                        alert(result.msg);
+                                        $('.passBox').hide();
+                                        return false;
+                                    }
+                                }
+                            })
+                        }
+                    }
+                },{
+                    text : "取消",
+                    style : "default"
+                }]
+            })
+
+        })
+
+        //点击提交上级
+        $('#superior_btn').click(function () {
+            $('#superior_txt').val('');
+            $('#approveMoney').val(money);
+            var options = '<select name="approveSysId" id="approveSysId" class=" form-control"><option value="">请选择审批人</option><option value="10">温锦锦</option><option value="11">马路路</option></select>';
+            dialog.init({
+                title : "提交上级",
+                input : {
+                    html : options+'<input type="number" id="approveMoney" class="loan_pop_inp form-control" min="0" placeholder="请输入减免金额">'
+                },
+                textarea : {
+                    html : "<textarea id='result' class='mgt form-control' name='result' placeholder='请填写审批意见'></textarea>"
+                },
+                buttons : [{
+                    text : "确认",
+                    style : "green",
+                    func : function(){
+                        var superior_1 = $('#approveSysId').val();//上级id
+                        var superior_txt = $('#result').val();//提交原因
+                        var approveMoney = $('#approveMoney').val();
+                        if(!superior_txt){
+                        superior_txt="情况属实，同意减免";
+                        }
+                        if(superior_1==''){
+                            alert('请选择审批人');
+                            return false;
+                        }else if(approveMoney==''){
+                            alert('请输入减免金额')
+                            return false;
+                        }else{
+                            $.ajax({
+                                url:'/costapprove/addcostapprove',
+                                type:'post',
+                                data:{opinion:superior_txt,parentId:superior_1,id:id,submitMoney:approveMoney},
+                                success:function (result) {
+                                    if(result.ret==200){
+                                        $(".J_modal").remove();
+                                        getpage(window.sessionStorage.URl)
+                                    }else {
+                                        alert(result.msg);
+                                        $('.approveBox').hide();
+                                        return false;
+                                    }
+                                }
+                            })
+                        }
+                    }
+                },{
+                    text : "取消",
+                    style : "default"
+                }]
+            })
+        })
+    //点击处理完成
+        $('#done_btn').click(function () {
+            dialog.init({
+                title : "提示",
+                tips : "此操作会生成新的还款，请确认减免金额无误",
+                buttons : [{
+                    text : "确认",
+                    style : "green",
+                    func: function(){
+                        $.ajax({
+                            url:'/costapprove/costapprove',
+                            type:'post',
+                            data:{id:id,state:'DONE',isFinish:true},
+                            success:function (result) {
+                                if(result.ret==200){
+                                    $(".J_modal").remove();
+                                    getpage(window.sessionStorage.URl);
+                                }else {
+                                    alert(result.msg);
+                                    $('.finishBox').hide();
+                                    return;
+                                }
+                            }
+                        })
+                    }
+                },{
+                    text : "取消",
+                    style : "default"
+                }]
+            })
+        })
+    });
+</script>

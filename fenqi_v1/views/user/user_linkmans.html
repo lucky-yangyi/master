@@ -1,0 +1,284 @@
+<!-- 常用联系人路由：/usersmetadata/getlinkmanlist -->
+<div class="panel pr" id='linkMan_box'>
+    <div class="panel-title">
+        <b class="panel-line"></b> 联系人</div>
+
+    <ul class='panel-tabs clearfix'>
+        <li data-url='/usersmetadata/getlinkmanlist' data-type="CHECK"  class='panel-item {{if eq .type 1}}active{{end}}'>常用联系人</li>
+        <li data-url='/usersmetadata/getphonebook' data-type="ENTER"  class='panel-item {{if eq .type 2}}active{{end}}'>手机通讯录</li>
+        <li data-url='/usersmetadata/getcallrecord' data-type="COLLECTION"  class='panel-item {{if eq .type 3}}active{{end}}'>通话记录</li>
+    </ul>
+   
+    <form id="searchForm2" action="" method="get">
+    {{if eq .type 1}}
+        <div class="panel-body pr">
+            {{range $k,$v := .sortLinkmans}}
+            <div class="linkmanbox clearfix form-inline fl">
+                <div class="fl clearfix linkItem" data-id='{{$v.Id}}' data-uid='{{$v.Uid}}'>
+                    <div class="linkbox">
+                        <p>关系：</p>
+                        <div class='linkbox_value'>{{$v.Relation}}</div>
+                        {{if eq $k 0}}
+                        <select name="" id="" class='form-control'>
+                            <option value="父母" {{if eq $v.Relation "父母"}}selected="selected" {{end}}>父母</option>
+                            <option value="配偶" {{if eq $v.Relation "配偶"}}selected="selected" {{end}}>配偶</option>
+                        </select>
+                        {{else}}
+                        <select name="" id="" class='form-control'>
+                            <option value="父母" {{if eq $v.Relation "父母"}}selected="selected" {{end}}>父母</option>
+                            <option value="配偶" {{if eq $v.Relation "配偶"}}selected="selected" {{end}}>配偶</option>
+                            <option value="朋友" {{if eq $v.Relation "朋友"}}selected="selected" {{end}}>朋友</option>
+                        </select>
+                        {{end}}
+                    </div>
+
+                    <div class="linkbox">
+                        <p>姓名：</p>
+                        <div class='linkbox_value'>{{$v.LinkmanName}}</div>
+                        <input type="text" value='{{$v.LinkmanName}}' class='form-control'>
+                    </div>
+                    <div class="linkbox">
+                        <p>手机号：</p>
+                        <div class='linkbox_value'>{{$v.ContactPhoneNumber}}</div>
+                        <input type="text" value='{{$v.ContactPhoneNumber}}' class='form-control onlyNumber'>
+                    </div>
+                    <div class="linkbox">
+                        <p>号码归属地：</p>
+                        <div class='linkbox_value'>{{$v.Zone}}</div>
+                    </div>
+
+                    <div class="subhead">{{if eq $k 0}}与借款人近一个月内通话记录({{$.before30.Format "2006-01-02"}}~{{$.beginTime.Format "2006-01-02"}}) {{end}}</div>
+
+                    <div class="linkbox">
+                        <p>主叫次数：</p>
+                        <div class='linkbox_value'>{{$v.DialCount}}</div>
+                    </div>
+                    <div class="linkbox">
+                        <p>被叫次数：</p>
+                        <div class='linkbox_value'>{{$v.DialedCount}}</div>
+                    </div>
+                    <div class="linkbox">
+                        <p>联系时间(秒)：</p>
+                        <div class='linkbox_value'>{{$v.DurationTotal}}</div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+            <div class='saveLinkBox'>
+                <button class='btn btn-green' id='saveLinkman'>保存并重检</button>
+                <button class='btn btn-default' id='cancle_savelink'>取消</button>
+            </div>
+        </div>
+    {{else if eq .type 2}}
+        {{if .is_Has}}
+            <table class="table table-hover">
+                 <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>手机号</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{range $k,$v := .list}}
+                    <tr>
+                        <td>{{$v.ContactName}}</td>
+                        <td>{{$v.ContactPhoneNumber}}</td>
+                        <td><a class='mainColor-text' target="_blank" href="http://www.baidu.com/s?wd={{$v.ContactPhoneNumber}}">百度搜索</a></td>
+                    </tr>
+                {{end}}
+                </tbody>
+                <tfoot>
+                <tr>
+                   <tr>
+                        <td colspan="5">
+                            <div class="fl">
+                                <div class="pagination"> 每页
+                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="30">30</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select> 条，共{{.count}}条
+                                </div>
+                            </div>
+                            <div class="fl">
+                                <div class="pagination" id="pagination2" data-url="/usersmetadata/getphonebook?uid={{IdUidEncrypt .uid}}&type={{.type}}" pageSize="{{.pageSize}}" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tr>
+                </tfoot>
+            </table>
+        {{else}}
+            未获取到手机通讯记录
+        {{end}}
+    {{else if eq .type 3}}
+            {{if .isHas}}
+                <table class="table table-hover">
+                    <thead>
+                       <tr>
+                           <th>手机号</th>
+                           <th>归属地</th>
+                           <th>联系次数</th>
+                           <th>主叫次数</th>
+                           <th>被叫次数</th>
+                           <th>联系时长(秒)</th>
+                           <th>通讯录备注</th>
+                       </tr>
+                   </thead>
+                   {{if eq .mtype 1}}
+                    </tbody>
+                        {{range $k,$v := .list}}
+                        <tr>
+                           <td>{{$v.Peer_num}}</td>
+                           <td>{{$v.City}}</td>
+                           <td>{{$v.Total_Cnt}}</td>
+                           <td>{{$v.Dial_Cnt_3m}}</td>
+                           <td>{{$v.Dialed_Cnt_3m}}</td>
+                           <td>{{$v.Call_Time_3m}}</td>
+                           <td>{{if eq $v.ContactName ""}}无结果{{else}}{{$v.ContactName}}{{end}}</td>
+                           <td><a class='mainColor-text' target="_blank" href="http://www.baidu.com/s?wd={{$v.Peer_num}}">百度搜索</a></td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                    {{else if eq .mtype 2}}
+                     <tbody>
+                        {{range $k,$v := .list}}
+                        <tr>
+                           <td>{{$v.Phone}}</td>
+                           <td>{{$v.Phone_location}}</td>
+                           <td>{{$v.Talk_cnt}}</td>
+                           <td>{{$v.Call_cnt}}</td>
+                           <td>{{$v.Called_cnt}}</td>
+                           <td>{{$v.Talk_seconds}}</td>
+                           <td>{{if eq $v.ContactName ""}}无结果{{else}}{{$v.ContactName}}{{end}}</td>
+                           <td><a class='mainColor-text' target="_blank" href="http://www.baidu.com/s?wd={{$v.Phone}}">百度搜索</a></td>
+                       </tr>
+                        {{end}}
+                   </tbody>
+                   {{end}}
+                   <tfoot>
+                       <tr>
+                           <td colspan="8">
+                               <div class="fl">
+                                   <div class="pagination"> 每页{{.count}}条，共{{.count}}条 {{.currPage}}页
+                                   </div>
+                               </div>
+                           </td>
+                       </tr>
+                   </tfoot>
+               </table>
+            {{else}}
+                未获取到通话记录
+            {{end}}
+    {{end}}
+    </form>
+    {{if .isEdit}}
+    <div class="edit-btn" id='linkmanBtn'>
+        <i class='icon-edit' aria-hidden="true"></i>编辑
+    </div>
+    {{end}}
+    <script>
+        $(function () {
+            $("#pagination2").my_page("", "#linkMan_box");
+            $(".linkmanbox .form-control,.saveLinkBox").hide()
+            $("#linkmanBtn").click(function () {
+                $(".linkbox_value").hide();
+                $(".linkmanbox .form-control").show();
+                $(".saveLinkBox").show()
+            });
+            $("#cancle_savelink").click(function () {
+                $(".linkbox_value").show();
+                $(".linkmanbox .form-control").hide();
+                $(".saveLinkBox").hide()
+            });
+            $("#saveLinkman").click(function () {
+                var data = [];
+                $(".linkItem").each(function () {
+                    var obj = {};
+                    obj.relation = $(this).find(".linkbox").eq(0).find(".form-control").val();
+                    obj.linkman_name = $(this).find(".linkbox").eq(1).find(".form-control").val();
+                    obj.contact_phone_number = $(this).find(".linkbox").eq(2).find(".form-control").val();
+                    obj.id = $(this).data("id");
+                    obj.uid = $(this).data("uid");
+                    obj.riskRecordType = {{.riskRecordType}};
+                    data.push(obj)
+                });
+                var modal = '<div class="countdown-modal"><div class="countdown-time">重检中...</div></div>';
+                $("body").append(modal);
+                $.ajax({
+                    type: "post",
+                    url: "/usersmetadata/updatelinkmans",
+                    data: JSON.stringify(data),
+                    success: function (rslt) {
+                        if (rslt.ret == 200) {
+                            if (typeof refreshOpinion == "function") {
+                                // $(".countdown-modal").remove();
+                                // refreshOpinion();
+                                location.reload()
+                            }
+                        } else {
+                            alert(rslt.err);
+                        }
+                    }
+                });
+                $(".linkItem").each(function (i, n) {
+                    $(this).find(".linkbox").eq(0).find(".linkbox_value").text(data[i].relation).show().siblings(".form-control").hide();
+                    $(this).find(".linkbox").eq(1).find(".linkbox_value").text(data[i].linkman_name).show().siblings(".form-control").hide();
+                    $(this).find(".linkbox").eq(2).find(".linkbox_value").text(data[i].contact_phone_number).show().siblings(".form-control").hide();
+                    $(".linkmanbox .form-control").hide();
+                    $(".saveLinkBox").hide()
+                });
+            });
+
+            $(".panel-tabs .panel-item").off().click(function () {
+                var url = $(this).data("url");
+                var type = $(this).data("type");
+                var data = {
+                    uid: uid,
+                    connectType: type
+                }
+                $.zget(url, data, function (rslt) {
+                    $(".detail-info").empty().html(rslt);
+                })
+            });
+            $(".match-address").off().click(function(){
+                var phone = parseInt($(this).data("phone"));
+                $.ajax({
+                    url :"/usersmetadata/getmatchrecord",
+                    data : {
+                        uid: uid,
+                        phoneNum:phone
+                    },
+                    success : function(rslt){
+                        if(rslt.ret == 200){
+                            dialog.init({
+                                title : "匹配结果",
+                                others : {
+                                    html : "<p>手机通讯录</p>"+rslt.relationship+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+rslt.phoneNum
+                                },
+                                buttons : [{
+                                    text : "确定",
+                                    style : "green"
+                                }]
+                            })
+                        }else {
+                             dialog.init({
+                                title : "匹配结果",
+                                others : {
+                                    html : "<p>手机通讯录</p><span>无结果</span>"
+                                },
+                                buttons : [{
+                                    text : "确定",
+                                    style : "green"
+                                }]
+                            })
+                        }
+                    }
+                })
+            })
+        });
+    </script>
+</div>

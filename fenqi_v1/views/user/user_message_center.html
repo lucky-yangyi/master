@@ -1,0 +1,64 @@
+<!-- 消息中心路由：/usersmetadata/getusersloginrecords -->
+<div class="panle">
+    <div class="panel-title">
+        <b class="panel-line"></b> 消息中心</div>
+    <div class="panle-body">
+        <div class="g-message">
+           
+        </div>
+        <div class='u-LoadMore J_messageLoadMore'>加载更多</div>
+    </div>
+</div>
+<script>
+    $(function () {
+        var currentPage = 1, pagesize = 4, isEnd = false;
+        $(".J_messageLoadMore").click(function () {
+            if (isEnd) {
+                return;
+            }
+            isEnd = true;
+            getMessage();
+        });
+        $(".g-message").delegate(".u-checkDetailMessage", "click", function (e) {
+            e.preventDefault();
+            $(this).parent().html($(this).data("content"));
+        })
+        getMessage();
+        function getMessage() {
+            $.ajax({
+                url: "/usersmetadata/getusersmessages",
+                type: "get",
+                data: {
+                    uid: uid,
+                    page: currentPage++
+                },
+                success: function (rslt) {
+                    if (rslt.ret == 200) {
+                        var messageHtml = [];
+                        var len = rslt.data && rslt.data.length;
+                        for (var i = 0; i < len; i++) {
+                            var item = rslt.data[i];
+                            messageHtml.push('<div class="g-messageBox">');
+                            messageHtml.push('<div class="u-messageStatus ' + (item.Isread ? "f-hide" : "") + '"></div>');
+                            messageHtml.push('<div class="g-messagetitle clearfix">');
+                            messageHtml.push('<div class="u-messageType">' + item.Title + '</div>');
+                            messageHtml.push('<div class="u-messageTime">' + item.Createhidetime + '</div>');
+                            messageHtml.push('</div>');
+                            messageHtml.push('<div class="u-messageContent">' + item.Content.substring(0, 50) + (item.Content.length > 50 ? '<a data-content="' + item.Content + '" class="u-checkDetailMessage">查看详情 ></a>' : "") + ' </div>');
+                            messageHtml.push('</div>');
+                        }
+                        $(".g-message").append(messageHtml.join(""));
+                        if ((currentPage - 1) >= rslt.pageCount) {
+                            $(".J_messageLoadMore").html("已经没有更多消息");
+                            isEnd = true;
+                        } else {
+                            isEnd = false;
+                        }
+                    } else {
+                        alert(rslt.msg);
+                    }
+                }
+            })
+        }
+    })
+</script>

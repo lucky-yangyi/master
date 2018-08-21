@@ -1,0 +1,482 @@
+<!-- 注册用户列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+
+    .warning_icon {
+        display: inline-block;
+        width: 31px;
+        height: 28px;
+        background: url("/static/img/img_04.png") no-repeat;
+        vertical-align: top;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="verifyRealName" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="registerTime" placeholder='到期时间' class="input-small" value="{{.registerTime}}" type="text" name="register_time"
+                                    />
+                                </li>
+                                <li class="pull-left">
+                                    <select name="overdue_num" id="overdue_num">
+                                        <option value="">逾期天数</option>
+                                        <option value="16,16">16天</option>
+                                        <option value="17,17">17天</option>
+                                        <option value="18,18">18天</option>
+                                        <option value="19,19">19天</option>
+                                        <option value="20,20">20天</option>
+                                        <option value="21,21">21天</option>
+                                        <option value="22,22">22天</option>
+                                        <option value="23,23">23天</option>
+                                        <option value="24,24">24天</option>
+                                        <option value="25,25">25天</option>
+                                        <option value="26,26">26天</option>
+                                        <option value="27,27">27天</option>
+                                        <option value="28,28">28天</option>
+                                        <option value="29,29">29天</option>
+                                        <option value="30,30">30天</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="handleType" id="handleType">
+                                        <option value="">处理情况</option>
+                                        <option value="1">已处理</option>
+                                        <option value="2">未处理</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="action_type" id="action_type">
+                                        <option value="">行动分类</option>
+                                        <option value="未处理">无</option>
+                                        <option value="跟进">跟进</option>
+                                        <option value="承诺">承诺</option>
+                                        <option value="续期">续期</option>
+                                        <option value="谈判">谈判</option>
+                                        <option value="跳票">跳票</option>
+                                        <option value="中本人">中本人</option>
+                                        <option value="中家人">中家人</option>
+                                        <option value="中第三方">中第三方</option>
+                                        <option value="失联">失联</option>
+                                        <option value="死亡">死亡</option>
+                                        <option value="盗办">盗办</option>
+                                        <option value="坐牢">坐牢</option>2
+                                        <option value="争议">争议</option>
+                                        <option value="暂停">暂停</option>
+                                        <option value="留案">留案</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select name="collectionUserId" id="collector" style="width: 80px;">
+                                        <option value="0">催收员</option>
+                                        {{range $uk,$uv := .collecionUsers}}
+                                        <option value="{{$uv.Id }}">{{$uv.Verifyrealname}}</option>
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                  {{if .distributeHas}}
+                                  <li class="f-left">
+                                <button type="button" id="allot" class="btn btn-green" style="margin-right: 20px;">重新分配</button>
+                            </li>
+                            <script>
+                                //确认
+                                $("#allot").click(function () {
+                                    var arr = [];
+                                    $(".trs input:checked").each(function () {
+                                        arr.push($(this).parent().siblings(".tel").text())
+                                    });
+                                    if (arr.length == 0) {
+                                        $('.a0_hint').removeClass("hide1");
+                                        return false;
+                                    }
+                                    $(".reassignment").removeClass("hide1");
+                                })
+                            </script>
+                            {{end}}
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th class="ths"></th>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>借款金额</th>
+                                        <th>到期时间</th>
+                                        <th>逾期天数</th>
+                                        <th>逾期待还</th>
+                                        <th>行动分类</th>
+                                        <th>最后催记时间</th>
+                                        <th>复核时间</th>
+                                        <th>催收员</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k, $v := .list}}
+                                    <tr class="trs">
+                                        <tr class="trs">
+                                        <td class="tds"><input style="width: 17px;height: 17px; margin: 0" class="px subCheckbox" type="checkbox"/></td>
+                                        <td class="tel" style="display: none" data-LoanId={{$v.LoanId}}>{{$v.LoanId}}</td>
+                                        <td>{{$v.Account}}</td>
+                                        <td>{{$v.VerifyRealName}}</td>
+                                        <td>{{$v.Money}}</td>
+                                        <td>{{$v.ExpirationTime}}</td>
+                                        <td>{{$v.MaxOverdueDays}}</td>
+                                        <td>{{$v.NeedPayment}}</td>
+                                        <td>{{$v.Actiontype}}</td>
+                                        <td>{{$v.HandleTime}}</td>
+                                        {{if le $v.CompositeDate "1990-01-01 08:00:00 " }}
+                                        <td></td>
+                                        {{else}}
+                                        <td>{{$v.CompositeDate}}</td>
+                                        {{end}}
+                                        <td>{{$v.CollectionName}}</td>
+                                        <td>
+                                            <a class='skip1' href='/collection/mhandle?mtype=14&id={{IdUidEncrypt $v.LoanId}}'>处理</a>
+                                        </td>
+                                    </tr>
+                                {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl f2" style="margin-right: 50px;">
+                                        <div class="pagination"><input style="position:relative;top:-2px;width: 18px;height: 18px; margin: 0;" type="checkbox" id="checkAll" class="px"/>&nbsp;&nbsp;<span style="vertical-align: 5px">全选</span></div>
+                                    </div>
+                                    <div class="fl f2" style="margin-right: 50px">
+                                        <div class="pagination">已选<span id="checkNum">0</span>条&nbsp;&nbsp;逾期待还:{{f2s .sumMoney.SumWaitMoney}}元&nbsp;&nbsp;借款本金:{{f2s .sumMoney.Sumloanmoney}}元
+                                    </div>
+                                            <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条&nbsp;&nbsp;
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                    $(function () {
+                                                        $("#pagination2").my_page("#searchForm2");
+                                                        $("#registerTime").dateRangePicker({
+                                                            separator: "~",
+                                                            autoClose: true,
+                                                            shortcuts: null,
+                                                            customShortcuts: [{
+                                                                name: "清空",
+                                                                dates: function () {
+                                                                    return ["", "", ""]
+                                                                }
+                                                            }]
+                                                        });
+                                                    });
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ <!--重新分配-->
+    <div class="reassignment boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header" style="background-color: #63C4A0;"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="closePopup($('.reassignment'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <div>
+                        <label class="indent" for="selCollectionUser">
+                            分配给 :
+                            <select class="form-control set" name="" id="selCollectionUser">
+                                <option value="">催收员</option>
+                                {{range $uk,$uv := .collecionUsers}}
+                                <option value="{{IdUidEncrypt $uv.Id}}">{{$uv.Verifyrealname}}</option>
+                                {{end}}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn btn-green hintBtn1" onclick="closePopup($('.reassignment'))">取消</a>
+                <a class="btn btn-green hintBtn2" id="subBtn">确认</a>
+            </div>
+        </div>
+    </div>
+
+    <!--重新分配无订单提示框-->
+    <div class="a0_hint boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header" style="background-color: #63C4A0;"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="closePopup($('.a0_hint'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <div>
+                        请选择要重新分配的订单
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn btn-green hintBtn2" onclick="closePopup($('.a0_hint'))">确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function isContains(str,substr) {
+        return new RegExp(substr).test(str)
+    }
+    Array.prototype.indexOf = function(val) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == val) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function(val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+    if(window.sessionStorage.tel){
+        $('.input-medium').eq(0).val(window.sessionStorage.tel);
+    }
+    if(window.sessionStorage.nm){
+        $('.input-medium').eq(2).val(window.sessionStorage.nm);
+    }
+    if(window.sessionStorage.time){
+        $('#startDate').val(window.sessionStorage.time);
+    }
+    if(window.sessionStorage.aa){
+        $('#endDate').val(window.sessionStorage.aa)
+    }
+    if(window.sessionStorage.bb){
+        $('#overdue_num').val(window.sessionStorage.bb)
+    }
+    if(window.sessionStorage.cc){
+        $('#action_type').val(window.sessionStorage.cc)
+    }
+    if(window.sessionStorage.dd){
+        $('#handleType').val(window.sessionStorage.dd);
+    }
+    if(window.sessionStorage.ff){
+        $('#collector').val(window.sessionStorage.ff);
+    }
+    if(window.sessionStorage.gg){
+        $('#loanTermCount').val(window.sessionStorage.gg);
+    }
+    if(window.sessionStorage.hh){
+        $('#collectorOrgId').val(window.sessionStorage.hh);
+    }
+    $().ready(function(){
+        $("#stillMoney").html(window.sessionStorage.stillSumMoney);
+        $("#checkNum").html(window.sessionStorage.checked)
+        var arr = [];
+        if(sessionStorage.rememberSel_s3){
+            var arr1 = sessionStorage.rememberSel_s3.split(',');
+            for(var i = 0 ; i<arr1.length;i++){
+                arr.push(arr1[i])
+            }
+        }
+
+        //全选全不选
+        $("#checkAll").off().click(function () {
+            var num = 0;
+            var money1= 0;
+            var isChecked = $(this).prop("checked");
+            if(isChecked==true){
+                $.each($('.subCheckbox'),function(){
+                    if(!this.checked){
+                        num += 1;
+                        money1 += parseInt($(this).parent().siblings(".stillMoeny").text());
+                    }
+                });
+                $(".subCheckbox").prop("checked", isChecked);
+                InitChecked(num,money1);
+                $(".trs .subCheckbox:checked").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                    sessionStorage.rememberSel_s3=arr;
+                    var checkedTest =sessionStorage.rememberSel_s3 ;
+                    if(isContains(checkedTest,$(this).parent().siblings(".tel").text())==false){
+                        arr.push($(this).parent().siblings(".tel").text())
+                    }
+                });
+                sessionStorage.rememberSel_s3=arr;
+            }else {
+                    $(".subCheckbox").prop("checked", isChecked);
+                    InitChecked1(num,money1)
+                    $(".trs .subCheckbox").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                        arr.remove($(this).parent().siblings(".tel").text());
+                    });
+                    sessionStorage.rememberSel_s3= arr;
+            }
+        })
+        //实现单选全选
+        $(".subCheckbox").off().click(function () {
+            if(this.checked){
+                if($('#checkNum').text()==''){
+                    $('#checkNum').text('0')
+                }
+                if($('#stillMoney').text()==''){
+                    $('#stillMoney').text('0')
+                }
+                $("#stillMoney").text((parseInt($('#stillMoney').text())+parseInt($(this).parent().siblings(".stillMoeny").text())));
+                $("#checkNum").text((parseInt($("#checkNum").text())+1))
+                 arr.push($(this).parent().siblings(".tel").text())
+            }else {
+                $("#stillMoney").text((parseInt($('#stillMoney').text())-parseInt($(this).parent().siblings(".stillMoeny").text())));
+                $("#checkNum").text((parseInt($("#checkNum").text())-1))
+                arr.remove($(this).parent().siblings(".tel").text());
+            }
+            if ($("#checkAll").prop('checked')) {
+                $(".subCheckbox").each(function (i, ck) {
+                    if (!$(ck).prop('checked')) {
+                        $("#checkAll").prop("checked", false);
+                    }
+                });
+
+            } else {
+                var i = 0;
+                $(".subCheckbox").each(function () {
+                    if ($(this).prop('checked')) {
+                        i++;
+                    }
+                });
+                if ($(".subCheckbox").length == i) {
+                    $("#checkAll").prop("checked", true);
+                }
+
+            }
+            sessionStorage.rememberSel_s3 = arr;
+        });
+        if(!sessionStorage.rememberSel_s3){
+            sessionStorage.rememberSel_s3 = "";
+        }
+        var isAllSel = false;
+        var nowList = sessionStorage.rememberSel_s3.split(',');
+        if(sessionStorage.rememberSel_s3 == ""){
+            $("#checkNum").text(0);
+        }else{
+            $("#checkNum").text(nowList.length);
+        }
+        for(var i = 0,len=nowList.length;i< len;i++){
+            if(nowList[i] == " ")break;
+            $(".trs").find("td[data-loanId="+nowList[i]+"]").prev().find("input").attr("checked","checked");
+        }
+        var checkedAll=0;
+        var checkedLen = $('.trs').length;
+        $(".trs input").each(function () {
+            if(this.checked){
+                checkedAll +=1;
+            }
+            if(checkedAll==checkedLen){
+                isAllSel = true;
+            }
+        })
+        if(isAllSel){
+            $("#checkAll").attr("checked","checked");
+        }
+        $("#pagination2 ul li a").mousedown(function(){
+            window.sessionStorage.checked = $("#checkNum").text();
+            window.sessionStorage.stillSumMoney = $("#stillMoney").text();
+        });
+        $("#subBtn").on("click", function () {
+            //获取催收员
+            var collectionUserId = $("#selCollectionUser").val();
+            if (collectionUserId == 0) {
+                alert("请选择催收员")
+                return false;
+            }
+            var lastData=sessionStorage.rememberSel_s3;
+            $.zpost("/collection/manualdistribution", {"loanIds": lastData, "uid": collectionUserId, "ctype": 14}, function (result) {
+                if (result.ret == 200) {
+                    $(".reassignment").hide();
+                    sessionStorage.clear();
+                    window.location.reload();//刷新当前页面.
+                } else {
+                    alert(result.msg);
+                    return false;
+                }
+            })
+        });
+    })
+
+    function InitChecked(nums,moneys) {
+        //初始化金额
+        var stillSumMoney = 0.0;
+        var checkItems = 0;
+        $(".trs input:checked").each(function () {
+            var stillMoeny = $(this).parent().siblings(".stillMoeny").text()
+            stillSumMoney += parseFloat(stillMoeny);
+            checkItems += 1;
+        });
+        if(window.sessionStorage.checked && parseInt(nums)> 0){
+            window.sessionStorage.checked = parseInt(nums)+parseInt($("#checkNum").text());
+            window.sessionStorage.stillSumMoney = parseInt(moneys)+parseInt($("#stillMoney").text());
+            $("#stillMoney").html(window.sessionStorage.stillSumMoney);
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else if(window.sessionStorage.checked && parseInt(nums)<1){
+            window.sessionStorage.checked = parseInt(checkItems)+parseInt($("#checkNum").text());
+            window.sessionStorage.stillSumMoney = parseInt(stillSumMoney.toFixed(2))+parseInt($("#stillMoney").text());
+            $("#stillMoney").html(window.sessionStorage.stillSumMoney);
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else {
+            $("#stillMoney").html(stillSumMoney.toFixed(2));
+            $("#checkNum").html(checkItems)
+        }
+
+    }
+    function InitChecked1(nums,moneys) {
+        //初始化金额
+        var stillSumMoney = 0.0;
+        var checkItems = 0;
+        $(".subCheckbox").each(function () {
+            var stillMoeny = $(this).parent().siblings(".stillMoeny").text()
+            stillSumMoney += parseFloat(stillMoeny);
+            checkItems += 1;
+        });
+        if(window.sessionStorage.checked && parseInt(nums)==0){
+            window.sessionStorage.checked = parseInt($("#checkNum").text())-checkItems;
+            window.sessionStorage.stillSumMoney = parseInt($("#stillMoney").text())-parseInt(stillSumMoney.toFixed(2));
+            $("#stillMoney").html(window.sessionStorage.stillSumMoney);
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else {
+            $("#stillMoney").html('0.00');
+            $("#checkNum").html('0')
+        }
+    }
+
+</script>

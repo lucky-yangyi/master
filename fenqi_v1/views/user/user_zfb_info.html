@@ -1,0 +1,293 @@
+<!-- 支付宝路由：/usersmetadata/getuserszfbinfo -->
+<style>
+    .mgb {
+        overflow-x: auto;
+    }
+</style>
+<div class="panel">
+    <div class="panel-title">
+        <b class="panel-line"></b> 基本信息</div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="4">基本信息</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{if .isZFBShow}}
+                    <tr>
+                        <td>姓名：{{.data.MXZFBData.Userinfo.User_Name}}</td>
+                        <td>性别：{{if eq .data.MXZFBData.Userinfo.Gender "MALE"}}男{{else if eq .data.MXZFBData.Userinfo.Gender "FEMALE"}}女{{end}}</td>
+                        <td>身份证号：{{.data.MXZFBData.Userinfo.Idcard_Number}}</td>
+                        <td>是否实名认证：{{if .data.MXZFBData.Userinfo.Certified}}是{{else}}否{{end}}</td>
+                    </tr>
+                    <tr>
+                        <td>邮箱：{{.data.MXZFBData.Userinfo.Email}}</td>
+                        <td>手机号：{{.data.MXZFBData.Userinfo.Phone_Number}}</td>
+                        <td>淘宝会员名：{{.data.MXZFBData.Userinfo.Taobao_ID}}</td>
+                        <td>支付宝注册时间：{{formatGLNZTime .data.MXZFBData.Userinfo.Register_Time}}</td>
+                    </tr>
+                {{else}}
+                    <tr><td>暂未获取到支付宝基本信息</td></tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="4">资产</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{if .isZFBShow}}
+                    <tr>
+                        <td>余额：{{divide .data.MXZFBData.Wealth.Yue 100}}元</td>
+                        <td>余额宝：{{divide .data.MXZFBData.Wealth.Yeb 100}}元</td>
+                        <td>招财宝：{{divide .data.MXZFBData.Wealth.Zcb 100}}元</td>
+                        <td>基金：{{divide .data.MXZFBData.Wealth.Fund 100}}元</td>
+                    </tr>
+                    <tr>
+                        <td>存金宝：{{divide .data.MXZFBData.Wealth.Cjb 100}}元</td>
+                        <td>淘宝理财：{{divide .data.MXZFBData.Wealth.Taolicai 100}}元</td>
+                        <td>花呗额度：{{divide .data.MXZFBData.Wealth.Huabai_Limit 100}}元</td>
+                    </tr>
+                {{else}}
+                    <tr><td>暂未获取到支付宝资产信息</td></tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="7">交易记录</td>
+                </tr>
+            </thead>
+            <tbody class='trade_records_tbody'>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7">
+                        <div class="fl">
+                            <div class="pagination" id="pagination1" data-url="/usersmetadata/getuserszfbtradeinfo?uid={{IdUidEncrypt .uid}}" currentPage="1" pageCount="3"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered" >
+            <thead>
+                <tr>
+                    <td colspan="8">绑定银行卡信息</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{if .isZFBShow}}
+                    <tr>
+                        <td>银行名称</td>
+                        <td>银行卡类型</td>
+                        <td>银行卡标志</td>
+                        <td>用户姓名</td>
+                        <td>银行卡尾号（后四位）</td>
+                        <td>绑定手机号码</td>
+                        <td>银行卡绑定时间</td>
+                        <td>是否开通快捷支付</td>
+                    </tr>
+                    {{range $k,$v := .data.MXZFBData.Bankinfo}}
+                    <tr>
+                        <td>{{$v.Bank_Name}}</td>
+                        <td>{{$v.Card_Type}}</td>
+                        <td>{{$v.Provider_Userid}}</td>
+                        <td>{{$v.User_Name}}</td>
+                        <td>{{$v.Card_Number}}</td>
+                        <td>{{$v.Mobile}}</td>
+                        <td>{{formatGLNZTime $v.Active_Date}}</td>
+                        <td>{{if $v.Open_Fpcard}}是{{else}}否{{end}}</td>
+                    </tr>
+                    {{end}}
+                {{else}}
+                    <tr><td>暂未获取到支付宝绑定银行卡信息</td></tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="3">联系人信息</td>
+                </tr>
+            </thead>
+            <tbody class='alipay_contacts'>
+                
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <div class="fl">
+                            <div class="pagination" id="pagination3" data-url="/usersmetadata/getuserszfbalipaycontacts?uid={{IdUidEncrypt .uid}}" currentPage="1" pageCount="3"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+                <tr>
+                    <td colspan="4">最近交易人信息</td>
+                </tr>
+            </thead>
+            <tbody class='recent_trade_message'>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <div class="fl">
+                            <div class="pagination" id="pagination2" data-url="/usersmetadata/getuserszfbrecenttradersinfo?uid={{IdUidEncrypt .uid}}" currentPage="1" pageCount="3"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="panel-body mgb">
+        <table class="table table-green table-bordered">
+            <thead>
+            <tr>
+                <td colspan="2">芝麻信用分记录(近三个月)</td>
+            </tr>
+            </thead>
+            <tbody class='recent_zm_score'>
+            {{if .isZMShow}}
+                {{range $k,$v := .zfbZMData}}
+                <tr>
+                    <td>{{$v.Time}}</td>
+                    <td>{{$v.ZmScore}}</td>
+                </tr>
+                {{end}}
+            {{else}}
+                <tr><td>暂未获取到芝麻分</td></tr>
+            {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var isZFBShow = {{.isZFBShow}};
+    function renderPage1(data) {
+        html = ["<tr><td>交易时间</td><td>交易类型</td><td>交易对方</td><td>商品名称</td><td>交易金额（元）</td><td>交易状态</td></tr>"];
+        var len = data.data && data.data.length;
+        for (var i = 0; i < len; i++) {
+            var item = data.data[i];
+            html.push("<tr>");
+            html.push("<td>" + item.trade_time.replace("T", " ").substring(0, 19) + "</td>");
+            html.push("<td>" + item.trade_type + "</td>");
+            html.push("<td>" + item.counterparty + "</td>");
+            html.push("<td>" + item.product_name + "</td>");
+            html.push("<td>" + item.trade_amount / 100 + "</td>");
+            html.push("<td>" + item.trade_status + "</td>");
+            html.push("</tr>")
+        }
+        $(".trade_records_tbody").html(html.join(""));
+        $("#pagination1").attr("currentPage", data.currPage).attr("pageCount", data.pageCount);
+        $("#pagination1").my_page("", null, renderPage1)
+    }
+    function renderPage2(data) {
+        var html = ["<tr><td>联系人Id</td><td>账号</td><td>昵称</td><td>真实姓名</td></tr>"];
+        var len = data.data && data.data.length;
+        for (var i = 0; i < len; i++) {
+            var item = data.data[i];
+            html.push("<tr>");
+            html.push("<td>" + item.alipay_userid + "</td>");
+            html.push("<td>" + item.account + "</td>");
+            html.push("<td>" + item.nick_name + "</td>");
+            html.push("<td>" + item.real_name + "</td>");
+            html.push("</tr>")
+        }
+        $(".recent_trade_message").html(html.join(""));
+        $("#pagination2").attr("currentPage", data.currPage).attr("pageCount", data.pageCount);
+        $("#pagination2").my_page("", null, renderPage2)
+    }
+    function renderPage3(data) {
+        var html = ["<tr><td>联系人Id</td><td>真实姓名</td><td>帐号</td></tr>"];
+        var len = data.data && data.data.length;
+        for (var i = 0; i < len; i++) {
+            var item = data.data[i];
+            html.push("<tr>");
+            html.push("<td>" + item.alipay_userid + "</td>");
+            html.push("<td>" + item.real_name + "</td>");
+            html.push("<td>" + item.account + "</td>");
+            html.push("</tr>")
+        }
+        $(".alipay_contacts").html(html.join(""));
+        $("#pagination3").attr("currentPage", data.currPage).attr("pageCount", data.pageCount);
+        $("#pagination3").my_page("", null, renderPage3)
+    }
+    if (isZFBShow) {
+        $.ajax({//交易信息
+            type: "get",
+            url: "/usersmetadata/getuserszfbtradeinfo",
+            data: {
+                uid: {{ IdUidEncrypt .uid }}
+            },
+            success : function (rslt) {
+                if (rslt.ret == 200) {
+                    renderPage1(rslt);
+                }
+            }
+        });
+
+        $.ajax({//最近交易人信息
+            type: "get",
+            url: "/usersmetadata/getuserszfbrecenttradersinfo",
+            data: {
+                uid: {{ IdUidEncrypt .uid }}
+            },
+            success : function (rslt) {
+                if (rslt.ret == 200) {
+                    renderPage2(rslt);
+                }
+            }
+        });
+        $.ajax({//联系人信息
+            type: "get",
+            url: "/usersmetadata/getuserszfbalipaycontacts",
+            data: {
+                uid: {{ IdUidEncrypt .uid }}
+            },
+            success : function (rslt) {
+                if (rslt.ret == 200) {
+                    renderPage3(rslt);
+                }
+            }
+        });
+    }else {
+        var trade_records_html = [];
+        trade_records_html.push("<tr>");
+        trade_records_html.push("<td>暂未获取到支付宝交易记录</td>");
+        trade_records_html.push("</tr>")
+        $(".trade_records_tbody").html(trade_records_html.join(""));
+
+        var recent_trade_message_html = [];
+        recent_trade_message_html.push("<tr>");
+        recent_trade_message_html.push("<td>暂未获取到支付宝最近交易人信息</td>");
+        recent_trade_message_html.push("</tr>")
+        $(".recent_trade_message").html(recent_trade_message_html.join(""));
+
+        var alipay_contacts_html = [];
+        alipay_contacts_html.push("<tr>");
+        alipay_contacts_html.push("<td>暂未获取到支付宝联系人信息</td>");
+        alipay_contacts_html.push("</tr>")
+        $(".alipay_contacts").html(alipay_contacts_html.join(""));
+    }
+</script>

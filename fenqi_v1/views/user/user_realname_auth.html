@@ -1,0 +1,143 @@
+<!-- 信审工作台  授信管理 实名认证 -->
+<!-- 实名认证路由：/usersmetadata/getrealnameauthinfo -->
+<div class='panel'>
+    <div class="panel-title">
+        <b class="panel-line"></b> 实名认证</div>
+    <div class='panel-body'>
+        <div class='itemContent clearfix'>
+            <div class="item-left">姓名： </div>
+            <div class="item-right">{{.user.IdName}}</div>
+        </div>
+        <div class='itemContent clearfix'>
+            <div class="item-left">身份证号： </div>
+            <div class="item-right">{{idCardFilter .user.IdNumber}}</div>
+        </div>
+        <div class='itemContent clearfix'>
+            <div class="item-left">住址： </div>
+            <div class="item-right">{{.user.Address}}</div>
+        </div>
+        <div class='itemContent clearfix'>
+            <div class="item-left">民族： </div>
+            <div class="item-right">{{.user.Nation}}</div>
+        </div>
+        <div class='itemContent clearfix'>
+            <div class="item-left">性别： </div>
+            <div class="item-right">{{.user.Gender}}</div>
+        </div>
+    </div>
+    <div class="panel-title">
+        <b class="panel-line"></b> OCR </div>
+    <div class="panel-body">
+        {{range $k,$v := .ocrInfo}}
+        <div class='itemContent clearfix'>
+            <div class="face-info">
+                <span>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</span>
+            </div>
+            <div class='img-container'>
+                <img src="{{$v.IdcardFrontPhoto}}" alt="身份证正面" title="身份证正面" onload='resetImg(this)'>
+                <img src="{{$v.IdcardBackPhoto}}" alt="身份证反面" title="身份证反面" onload='resetImg(this)'>
+                <img src="{{$v.IdcardPortraitPhoto}}" alt="头像照" title="头像照" onload='resetImg(this)'>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    <div class="panel-title">
+        <b class="panel-line"></b> 人脸比对 </div>
+    <div class="panel-body">
+        {{range $k,$v := .identifyInfo}}
+        <div class='itemContent clearfix'>
+            <div class="face-info">
+                <span>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</span>
+                <span>相似度：
+                    <span class='{{if eq $v.AuthResult "F"}}red{{end}}'>{{$v.Similarity}}</span>
+                </span>
+                <span>有盾结果：
+                    <span class='{{if eq $v.AuthResult "F"}}red{{end}}'>{{if eq $v.AuthResult "T"}}成功{{else if eq $v.AuthResult "F"}}失败{{else if eq $v.AuthResult "C"}}人工审核{{end}}</span>
+                </span>
+            </div>
+            <div class='img-container'>
+                <img src="{{$v.LivingPhoto}}" alt="活体清晰照" title="活体清晰照" onload='resetImg(this)'>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+<div class='g-imgModal f-hide' style="position:fixed;z-index:999;" id='img-compare'>
+    <div class="row mag-eg-row">
+        <div class="col g-content">
+            <i class='icon-close'>&times;</i>
+            <div class="mag-eg-el-wrap img-thumbnail" style='border:none;'>
+                <div class="proportion" style="margin:0 auto;">
+                    <div mag-thumb="outer" class="mag-eg-el">
+                        <img src="" style="margin:0 auto;border:1px solid #fff;border-radius:6px;padding:4px;" />
+                    </div>
+                    <div class="filler"></div>
+                </div>
+            </div>
+            <div class="mag-eg-el-wrap img-thumbnail">
+                <div class="proportion" style='margin:0 auto;'>
+                    <div mag-zoom="outer" class="mag-eg-el">
+                        <img src="" style='margin:0 auto;' />
+                    </div>
+                    <div class="filler"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        $(".img-container img").click(function () {
+            var img_width = $(this).width();
+            var img_height = $(this).height();
+            $(".g-imgModal").show();
+            $(".mag-eg-row img").attr("src", $(this).attr("src"));
+            $(".proportion").eq(0).css({
+                "width": img_width,
+                "height": img_height
+            });
+            $(".proportion").eq(0).find("img").css({
+                "width": img_width,
+                "height": img_height
+            });
+            $(".proportion").eq(1).css({
+                "width": img_width * 2,
+                "height": img_height * 2
+            });
+            $(".proportion").eq(1).find("img").css({
+                "width": img_width * 2,
+                "height": img_height * 2
+            })
+        });
+        $host = $('[mag-thumb="outer"]');
+        $host.mag({
+            mode: 'outer',
+            ratio: 1 / 1,
+            toggle: false
+        });
+        $(".img-container img").click(function () {
+            var top = $('body').scrollTop();
+            $(window).scroll(function () { 	//滚动时，固定页面滚动条到页顶的高度，使其不滚动		    	
+                $('body').scrollTop(top);
+            });
+        });
+        $("#img-compare").click(function (e) {
+            if (e.target.id == "img-compare") {
+                $(".g-imgModal").hide();
+                $(window).off('scroll');
+            }
+        });
+        $(".icon-close").click(function () {
+            $(".g-imgModal").hide();
+            $(window).off('scroll');
+        });
+    })();
+    function resetImg(ele) {
+        var img_width = $(ele).width();
+        var img_height = $(ele).height();
+        $(ele).css({
+            width: img_width / 2,
+            height: img_height / 2
+        });
+    }
+</script>

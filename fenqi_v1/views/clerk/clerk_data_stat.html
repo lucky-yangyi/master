@@ -1,0 +1,206 @@
+<!-- 业务员列表 -->
+<style>
+    .f-left {
+        float: right;
+        margin: 0 20px 0 0;
+    }
+
+    .hide1 {
+        display: none;
+    }
+    .btn-active{
+        width:128px;
+        height: 40px;
+        line-height: 40px;
+        color:#63C4A0;
+        border:1px solid #ccc;
+        margin-bottom: 10px;
+    }
+    .btn-inactive{
+        width:128px;
+        height: 40px;
+        line-height: 40px;
+        color:#333;
+        border:1px solid #ccc;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <select id="district" name="district">
+                                        <option value="">请选择大区</option>
+                                        {{range .regions}}
+                                            {{if eq .Id $.region}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select id="province" name="province">
+                                        <option value="">请选择省份</option>
+                                        {{range .provinces}}
+                                            {{if eq .Id $.province}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <select id="office" name="office">
+                                        <option value="">请选择营业部</option>
+                                        {{range .offices}}
+                                            {{if eq .Id $.office}}
+                                            <option value="{{.Id}}" selected="selected">{{.Name}}</option>
+                                            {{else}}
+                                            <option value="{{.Id}}">{{.Name}}</option>
+                                            {{end}}
+                                        {{end}}
+                                    </select>
+                                </li>
+                                <input value="2" name="judge" hidden></input>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                         
+                    
+                    <div class="panel-body">
+                        <div>
+                            <div class="btn btn-active btn-item">今日数据</div>
+                            <div class="btn btn-inactive btn-item">累计数据</div>
+                        </div>
+                        <form action="" id="form2" method="post">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th title='业务员已认领客户的注册量'>注册量</th>
+                                        <th title='客户已通过身份认证的数量'>身份认证通过量</th>
+                                        <th title='提交授信申请的数量'>提交授信申请量</th>
+                                        <th title='授信成功并出额的数量'>授信通过量</th>
+                                        <th title='申请借款的数量'>申请借款笔数</th>
+                                        <th title='放款成功的数量'>放款成功笔数</th>
+                                        <th title='当日授信成功数量/当日注册量'>授信通过率/日</th>
+                                        <th title='当日放款成功数量/当日注册量'>放款通过率/日</th>
+                                        <th title='当日逾期金额/当日应还金额'>金额首逾率/日</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="trs">
+                                        <td>{{.data.rCount}}</td>
+                                        <td>{{.data.ocrCount}}</td>
+                                        <td>{{.data.postAuthCount}}</td>
+                                        <td>{{.data.authPassCount}}</td>
+                                        <td>{{.data.loanCount}}</td>
+                                        <td>{{.data.loanSucceedCount}}</td>
+                                        <td>{{.data.authRate}}%</td>
+                                        <td>{{.data.loanRate}}%</td>
+                                        <td>{{.data.moneyOv}}%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered f-hide">
+                                <thead>
+                                    <tr>
+                                        <th title='业务员已认领客户累计的注册量'>注册量</th>
+                                        <th title='累计客户已通过身份认证的数量'>身份证通过量</th>
+                                        <th title='累计客户授信状态为“提交”的数量'>提交授信申请量</th>
+                                        <th title='累计客户授信成功并出额的数量'>授信通过量</th>
+                                        <th title='累计客户申请借款的数量'>申请借款笔数</th>
+                                        <th title='累计客户放款成功的数量'>放款成功笔数</th>
+                                        <th title='累计授信成功数量/总注册量'>授信通过率</th>
+                                        <th title='累计放款成功数量/总注册量'>放款通过率</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="trs">
+                                        <td>{{.data.rCount2}}</td>
+                                        <td>{{.data.ocrCount2}}</td>
+                                        <td>{{.data.postAuthCount2}}</td>
+                                        <td>{{.data.authPassCount2}}</td>
+                                        <td>{{.data.loanCount2}}</td>
+                                        <td>{{.data.loanSucceedCount2}}</td>
+                                        <td>{{.data.authRate2}}%</td>
+                                        <td>{{.data.loanRate2}}%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var permission = {{.permission}};
+    if(!permission){
+        dialog.init({
+            title : "温馨提示",
+            tips : "您暂无权限查看该区域数据",
+            buttons : [{
+                text : "知道了",
+                style : "green"
+            }]
+        })
+    }
+    $(function () {
+        
+        $(".btn-item").click(function(){
+            var index = $(this).index();
+            $(this).addClass("btn-active").removeClass("btn-inactive");
+            $(this).siblings().addClass("btn-inactive").removeClass("btn-active");
+            $(".table").hide().eq(index).show();
+        })
+          $("#district").change(function(){
+              var district = $(this).val();
+              $.ajax({
+                  url:"/sysorg/getsysorg",
+                  type:"post",
+                  data:{oId:district},
+                  success:function(result){
+                      if(result.ret == 200){
+                          console.log(result,111)
+                          var html = '<option value="">请选择省份</option>';
+                          for(var i = 0; i < result.sos.length; i++){
+                           html += '<option value='+result.sos[i].Id+'>'+result.sos[i].Name+'</option>'
+                          }
+                          $('#province').html(html);
+                          $('#office').html(html);
+                      }
+                  }
+              })
+          })
+          $("#province").change(function(){
+              var province = $(this).val();
+              $.ajax({
+                  url:"/sysorg/getsysorg",
+                  type:"post",
+                  data:{oId:province},
+                  success:function(result){
+                      if(result.ret == 200){
+                          var html = '<option value="">请选择营业部</option>';
+                          for(var i = 0; i < result.sos.length ; i++){
+                           html += '<option value='+result.sos[i].Id+'>'+result.sos[i].Name+'</option>'
+                          }
+                          $('#office').html(html);
+                      }
+                  }
+              })
+          })
+      });
+  </script>

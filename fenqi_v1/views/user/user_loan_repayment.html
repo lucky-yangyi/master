@@ -1,0 +1,110 @@
+<!-- 借还记录路由：/usersmetadata/getusersloanandrepaymentrecords -->
+
+<div class="panel">
+    <div class="panel-title">
+        <b class="panel-line"></b> 借款记录 </div>
+    <div class="panel-body mgb" style='overflow-x:auto;'>
+        <table class="table table-hover table-green table-bordered" style='min-width:1112px;'>
+            <thead>
+                <tr>
+                    <td>申请时间</td>
+                    <td>借款金额</td>
+                    <td>信息数据费</td>
+                    <td>到账金额</td>
+                    <td>期限</td>
+                    <td>结清日期</td>
+                    <td>状态</td>
+                    <td>备注</td>
+                    <td>操作</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $k,$v := .loanRecords}}
+                <tr data-id='{{$v.Id}}'>
+                    <td>{{$v.LoanDate.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{f2s $v.Money}}</td>
+                    <td>{{f2s $v.AuthFee}}</td>
+                    <td>{{f2s $v.RealMoney}}</td>
+                    <td>{{$v.LoanTermCount}}月
+                        （{{if eq ($v.ReplyTime.Format "2006-01-02") "0001-01-01"}}--{{else}}{{$v.ReplyTime.Format "2006-01-02"}}{{end}}至
+                        {{if eq ($v.EndDate.Format "2006-01-02") "0001-01-01"}}--{{else}}{{$v.EndDate.Format "2006-01-02"}}{{end}}）</td>
+                    <td>{{if eq ($v.FinishDate.Format "2006-01-02") "0001-01-01"}}暂无{{else}}{{$v.FinishDate.Format "2006-01-02"}}{{end}}</td>
+                    <td>{{if eq $v.State "FINISH"}}结清 {{else if eq $v.State "BACKING"}}还款中 {{else if eq $v.State "PAYING"}}打款中{{else if eq $v.State "REFUSE"}}拒绝 {{else if eq $v.State "FAIL"}}打款失败 {{else if eq $v.State "RECONFIRM"}}暂未通过{{else if eq $v.State "CONFIRM"}}审核中{{end}}
+                    </td>
+                    <td>{{$v.Mark}}</td>
+                    <td>
+                        <a onclick="creditPlan(this,1)" data-url='/usersmetadata/getusersrepaymentschedules' href='javascript:;'>还款计划</a>
+                        <!-- <a onclick="creditPlan()" data-url='' href="#">发放记录</a> -->
+                        <a onclick="creditPlan(this,2)" data-url='/usersmetadata/getusersloanrepaymentrecords' href="javascript:;">还款记录</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function creditPlan(ele,type) {
+            var url = $(ele).data("url");
+            var id = $(ele).parent().parent().data("id");
+            $.ajax({
+                type: "get",
+                url: url,
+                data: {
+                    loan_id: id
+                },
+                success: function (rslt) {
+                    if (rslt.ret == 200) {
+                        var html = [];
+                        if (type == 1) {//还款计划
+                            $("#payplan-title").html("还款计划");
+                            var length = rslt.data&&rslt.data.length;
+                            for (var i = 0; i < length; i++) {
+                                idx = (i + 1) + "期"
+                                var item = rslt.data[i];
+                                var alreadyReturnMoney = 0;
+                                if (item.State == "结清"){
+                                    alreadyReturnMoney = item.CapitalAmount+item.TaxAmount+item.OverdueBreachOfAmount+item.OverdueMoneyAmount
+                                }else {
+                                    alreadyReturnMoney = item.RemainMoneyChargeUpAmount;
+                                }
+                                html.push("<tr>");
+                                html.push("<td>" + idx + "</td>");
+                                html.push("<td>" + item.LoanReturnDate + "</td>");
+                                html.push("<td>" + item.CapitalAmount + "</td>");
+                                html.push("<td>" + item.TaxAmount + "</td>");
+                                html.push("<td>" + item.OverdueBreachOfAmount + "</td>");
+                                html.push("<td>" + item.OverdueMoneyAmount + "</td>");
+                                html.push("<td>" + (item.CapitalAmount+item.TaxAmount+item.OverdueBreachOfAmount+item.OverdueMoneyAmount).toFixed(2) + "</td>");
+                                html.push("<td>" + alreadyReturnMoney.toFixed(2) + "</td>");
+                                html.push("<td>" + item.OverdueDays + "</td>");
+                                html.push("<td>" + item.State + "</td>");
+                                html.push("</tr>");
+                            }
+                            $(".modal_payPlan_tbody").html(html.join(""));
+                            var thead = '<tr><td>期数</td><td>应还日期</td><td>本金</td><td>利息</td><td>违约金</td><td>滞纳金</td><td>应还合计</td><td>已还金额</td><td>逾期天数</td><td>状态</td></tr>';
+                            $(".modal_payPlan_thead").html(thead);
+                        } else if (type == 2) {//还款记录
+                            $("#payplan-title").html("还款记录");
+                            var length = rslt.data&&rslt.data.length;
+                            for (var i = 0; i < length; i++) {
+                                var item = rslt.data[i]
+                                html.push("<tr>");
+                                html.push("<td>" + item.CreateTime+ "</td>");
+                                html.push("<td>" + item.ReturnMoney + "</td>");
+                                html.push("<td>" + item.PaymentState + "</td>");
+                                html.push("<td>" + item.PaymentType + "</td>");
+                                html.push("</tr>");
+                            }
+                            $(".modal_payPlan_tbody").html(html.join(""))
+                            var thead = '<tr><td>还款时间</td><td>还款金额</td><td>还款状态</td><td>还款类型</td></tr>';
+                            $(".modal_payPlan_thead").html(thead);
+                        }
+                        $("#order-payplan").show();
+                    }else{
+                        alert(rslt.msg)
+                    }
+                }
+            })
+        }
+    </script>
+</div>

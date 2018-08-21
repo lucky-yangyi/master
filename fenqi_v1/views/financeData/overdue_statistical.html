@@ -1,0 +1,143 @@
+<!-- 逾期统计 -->
+<style>
+    #form2 th,#form2 td{height: 43px;border-bottom: 1px solid #ddd;text-align: center;border-right: 1px solid #ddd;}
+    #form2{width: 3500px;}
+    #form2 tfoot tr td{padding-left:30px;}
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border" style='border: none'>
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input id="dealTime" placeholder='处理时间' class="input-small" value="" type="text" name="deal_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body" style="overflow-x: auto;width:100%;padding: 0;">
+                        <form action="" id="form2" method="post">
+                            <table style="width: 3700px;">
+                                <thead>
+                                <tr>
+                                    <th row="3" col="4" rowspan="2" colspan="1">日期</th>
+                                    <th row="3" col="4" rowspan="2" colspan="1">当日逾期总金额（总计中本+息+违约金+滞纳金）</th>
+                                    <th row="3" col="4" rowspan="2" colspan="1">首逾率（三期）</th>
+                                    <th row="10" col="5" rowspan="1" colspan="4">总计</th>
+                                    <th row="10" col="5" rowspan="1" colspan="5">第一期</th>
+                                    <th row="10" col="5" rowspan="1" colspan="5">第二期</th>
+                                    <th row="10" col="5" rowspan="1" colspan="5">第三期</th>
+                                </tr>
+                                <tr>
+                                    <th row="2" col="4">当日总新增逾期本金</th>
+                                    <th row="2" col="4">当日总新增逾期利息</th>
+                                    <th row="2" col="4">当日总新增逾期违约金</th>
+                                    <th row="2" col="4">当日总新增逾期滞纳金</th>
+
+                                    <th row="2" col="5">当日新增逾期本金</th>
+                                    <th row="2" col="5">当日新增逾期利息</th>
+                                    <th row="2" col="5">当日新增逾期违约金</th>
+                                    <th row="2" col="5">当日新增逾期滞纳金</th>
+                                    <th row="2" col="5">首逾率</th>
+
+                                    <th row="2" col="5">当日新增逾期本金</th>
+                                    <th row="2" col="5">当日新增逾期利息</th>
+                                    <th row="2" col="5">当日新增逾期违约金</th>
+                                    <th row="2" col="5">当日新增逾期滞纳金</th>
+                                    <th row="2" col="5">首逾率</th>
+
+                                    <th row="2" col="5">当日新增逾期本金</th>
+                                    <th row="2" col="5">当日新增逾期利息</th>
+                                    <th row="2" col="5">当日新增逾期违约金</th>
+                                    <th row="2" col="5">当日新增逾期滞纳金</th>
+                                    <th row="2" col="5">首逾率</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>2017.12.12</td>
+                                    <td>1000</td>
+                                    <td>2000</td>
+                                    <td>3000</td>
+                                    <td>4000</td>
+                                    <td>5000</td>
+                                    <td>6000</td>
+                                    <td>7000</td>
+                                    <td>8000</td>
+                                    <td>9000</td>
+                                    <td>1000</td>
+                                    <td>2000</td>
+                                    <td>3000</td>
+                                    <td>4000</td>
+                                    <td>5000</td>
+                                    <td>6000</td>
+                                    <td>7000</td>
+                                    <td>8000</td>
+                                    <td>9000</td>
+                                    <td>1000</td>
+                                    <td>2000</td>
+                                    <td>3000</td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select> 条，共100条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url="" pageSize='10' currentPage="10" pageCount="10"></div>
+                                            <script type="text/javascript">
+                                                $(function () {
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                    $("#dealTime").dateRangePicker({
+                                                        separator: "~",
+                                                        autoClose: true,
+                                                        shortcuts: null,
+                                                        customShortcuts: [{
+                                                            name: "今日",
+                                                            dates: function(){
+                                                                return [moment().toDate(), moment().toDate()]
+                                                            }
+                                                        }, {
+                                                            name: "昨日",
+                                                            dates: function(){
+                                                                return [moment().subtract(1, "days").toDate(), moment().subtract(1, "days").toDate()]
+                                                            }
+                                                        }, {
+                                                            name: "最近一周",
+                                                            dates: function () {
+                                                                var start = moment().day(-6).toDate();
+                                                                var end = moment().day(0).toDate();
+                                                                return [start, end];
+                                                            }
+                                                        }
+                                                        ]
+                                                    })
+                                                });
+                                            </script>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="panle" id="login_record">
+    <div class="panel-title">
+        <b class="panel-line"></b> 登录历史</div>
+    <form id="searchForm2" action="" method="get">
+    <div class="panle-body">
+        <table class="table table-hover" >
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>操作</th>
+                    <th>GPS定位</th>
+                    <th>IP</th>
+                    <th>手机机型</th>
+                    <th>系统版本号</th>
+                    <th>APP版本号</th>
+                    <th>设备号</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range $k,$v := .data}}
+                <tr>
+                    <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                    <td>{{if eq $v.SilentLogin 1}}登陆(静默登录){{else}}登陆{{end}}</td>
+                    <td>{{if eq $v.SilentLogin 0}}
+                            {{if $v.IsGPS}}{{$v.Province}}-{{$v.City}}-{{$v.District}}-{{$v.Street}}
+                            {{else}}未开启GPS定位权限{{end}}
+                        {{else}}-
+                        {{end}}
+                    </td>
+                    <td><a target="_blank" href="http://www.baidu.com/s?wd={{$v.Ip}}">{{$v.Ip}}</a>
+                    </td>
+                    <td>{{$v.MobileType}}</td>
+                    <td>{{$v.MobileVersion}}</td>
+                    <td>{{$v.AppVersion}}</td>
+                    <td>{{$v.Devicecode}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="8">
+                    <div class="fl">
+                        <div class="pagination"> 每页{{.pageSize}}条，共{{.count}}条
+                        </div>
+                    </div>
+                    <div class="fl">
+                        <div class="pagination" id="pagination2" data-url="/usersmetadata/getusersloginrecords?uid={{IdUidEncrypt .uid}}&is_manage=true" currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#pagination2").my_page("","#login_record");
+    });
+</script>

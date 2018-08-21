@@ -1,0 +1,596 @@
+<!-- 处理（授信信审） -->
+
+<style>
+    div.panel{
+        min-height:442px;
+    }
+</style>
+<div class="sticky-header">
+    <!-- 订单状态 -->
+    <div class="wrapper f-hide" id='creditManage'>
+        <div class='panel col-md-4'>
+            <!-- 基本信息 -->
+            <div class='form-inline'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 基本信息</div>
+                <div class="panel-body" id='basic_body'>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">姓名： </div>
+                        <div class="item-right">{{.baseinfo.Verifyrealname}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">ID号： </div>
+                        <div class="item-right">{{.baseinfo.Uid}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">手机号： </div>
+                        <div class="item-right">{{.baseinfo.Account}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">身份证号： </div>
+                        <div class="item-right">{{.baseinfo.IdCard}}</div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">学历： </div>
+                        <div class="item-right">
+                            <span class='item-info'>{{.baseinfo.Education}}</span>
+                            <select name="" id="basic_edu" class='form-control' style='display:none;'>
+                                <option value="">请选择</option>
+                                <option value="小学">小学</option>
+                                <option value="初中">初中</option>
+                                <option value="高中">高中</option>
+                                <option value="专科">专科</option>
+                                <option value="本科">本科</option>
+                                <option value="硕士">硕士</option>
+                                <option value="博士及以上">博士及以上</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">婚姻： </div>
+                        <div class="item-right">
+                            <span class='item-info'>{{.baseinfo.Marriage}}</span>
+                            <select name="" id="basic_merry" class='form-control' style='display:none;'>
+                                <option value="">请选择</option>
+                                <option value="未婚">未婚</option>
+                                <option value="已婚">已婚</option>
+                                <option value="其它">其它</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix'>
+                        <div class="item-left">现居住地址： </div>
+                        <div class="item-right" style='float:left;overflow:visible;'>
+                            <p class='item-info'>{{.baseinfo.Province}} {{.baseinfo.City}} {{.baseinfo.District}}</p>
+                            <p class='item-info'>{{.baseinfo.LiveDetailAddress}}</p>
+                            <div class='city-picker-box pr' style='width:200px;margin-bottom:10px;display:inline-block;visibility:hidden'>
+                                <input id="city-picker1" class="form-control"  type="text" value="{{.baseinfo.Province}}/{{.baseinfo.City}}/{{.baseinfo.District}}" data-toggle="city-picker" style='max-width:300px;'>
+                            </div>
+                            <textarea name="" id="basic_addr" class='form-control' style='display:none;' width='100%'>{{.baseinfo.LiveDetailAddress}}</textarea>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix' id="worldPosition">
+                        <div class="item-left">经纬度： </div>
+                        <div class="item-right" style='float:left;overflow:visible;'>
+                            <p class='item-info'>({{.baseinfo.Longitude}},{{.baseinfo.Latitude}})</p>
+                        </div>
+                    </div>
+                    <div class='itemContent clearfix f-hide' id='submitBtn'>
+                        <div class="item-left"></div>
+                        <div class="item-right">
+                            <button class='btn btn-green' id='save_basic'>保存并重检</button>
+                            <button class='btn btn-default' id='cancle_basic'>取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='edit-btn' id='basic_btn'>
+                <i class='icon-edit' aria-hidden="true"></i>编辑
+            </div>
+        </div>
+        <!-- 风控信息审批 -->
+        <div class='panel col-md-4'>
+            <div class="panel-title">
+                <b class='panel-line'></b> 风控信息</div>
+            <div class="panel-body">
+                <div class='itemContent clearfix'>
+                    <div class="item-left">建议额度： </div>
+                    <div class="item-right">风控系统给出</div>
+                </div>
+                <div class='itemContent clearfix'>
+                    <div class="item-left">审批额度： </div>
+                    <div class="item-right fl">
+                        <input type="text" class='form-control' id='examLimit' placeholder="填写金额范围0-20000">
+                        <span class='over-text'></span>
+                    </div>
+                </div>
+                <div class='itemContent clearfix'>
+                    <div class="item-left">备注： {{.loginState}}{{.is_order}}</div>
+                    <div class="item-right">
+                        <textarea class='form-control risk-mark' placeholder="填写备注（选填）"></textarea>
+                    </div>
+                </div>
+                <div class='itemContent clearfix text-center' style='margin-top:70px;'>
+                    <button data-type="1" data-url='/workspace/creditcutop' class='btn btn-green risk-btn'>通过</button>
+                    <button data-type="2" data-url='/workspace/creditcutop' class='btn btn-danger risk-btn'>关闭</button>
+                    <button data-type="3" data-url='/workspace/creditcutop' class='btn btn-default risk-btn'>退回</button>
+                    <button data-type="4" data-url='/workspace/creditcutop' class='btn btn-default risk-btn'>驳回</button>
+                </div>
+            </div>
+
+            
+        </div>
+        <!-- 审批历史 -->
+        <div class="panel col-md-4">
+            <div class="panel-title">
+                <b class='panel-line'></b> 审批历史  <span style='float:right;' id='orderCountDownT'></span></div>
+            <div class="panel-body" style='height:385px;overflow-y:auto;'>
+                <div class='pr timeShaftBox'>
+                    {{range $k,$v := .record}}
+                    {{if eq $k 0}}
+                    <div class='clearfix timeShaft'>
+                        <i class='littleCircle'>
+                            <i class='activeShadow'>
+                                <i class='circle active'></i>
+                            </i>
+                        </i>
+                        <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}}     &nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;    &nbsp;({{$v.Remark}}){{end}}</div>
+                    </div>&nbsp;
+                    {{else}}
+                    <div class='clearfix timeShaft'>
+                        <i class='littleCircle'>
+                            <i class='circle'></i>
+                        </i>
+                        <div class='timeShaftText'>{{$v.OperatorTime.Format "2006-01-02 15:04:05"}} &nbsp;  &nbsp;{{$v.Content}}{{if ne $v.Remark ""}}<br>&nbsp;    &nbsp;({{$v.Remark}}){{end}}</div>
+                    </div>
+                    {{end}}
+                    {{end}}
+                    <div class='timeShaftLine'></div>
+                </div>
+            </div>
+        </div>
+        <!-- 资料详情 -->
+        <div class="panel col-md-8">
+            <ul class='workplace-nav clearfix'>
+                <li data-url='/usersmetadata/getlinkmanlist'>常用联系人</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+        <!-- 审批意见 -->
+        <div class="panel col-md-4">
+            <div class="panel-title">
+                <b class="panel-line"></b> 风控系统审批意见</div>
+            <div class="panel-body">
+                <div class="pr opinionBox">
+                    
+                </div>
+            </div>
+        </div>
+        <!-- 弹窗 -->
+        <!-- <div class="g-modal f-hide">
+            <div class='g-content'>
+                <div class='modal-title clearfix green'>
+                    <div class="title-text">授权通过</div>
+                    <div class="modal-close">&times;</div>
+                </div>
+                <div class="modal-body">
+                    <div class='modal-tips'>确定授权通过</div>
+                    <input id="startDate" class="Wdate input-small" value="" placeholder='入列时间' style='margin-bottom:5px;' type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d'})"/>
+                    <br/>
+                    <textarea class='modal-textarea' placeholder="填写关闭备注" style='display:none;'></textarea>
+                    <div class="red-text" style='display:none;'>备注未填写</div>
+                </div>
+                <div class="modal-foot">
+                    <div class='btn btn-green' id='modal-btn-left'>确定</div>
+                    <div class='btn btn-default' id='modal-btn-right'>取消</div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+    <!-- 无订单状态 -->
+    <div class="wrapper pr f-hide" id='outOrderModal'>
+        <div class="outline-box">
+            <div class='box-middle clearfix'>
+                <img src="../../static/img/noorder.jpg" alt="无订单" class='fl'>
+                <div class='box-text'>
+                    <h1>当前没有要审核的订单</h1>
+                    <h2>那你真是好棒棒哦</h2>
+                    <h3>10秒之后自动刷新，迫不及待我要 <a href="">手动刷新</a></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 离线状态 -->
+    <div class="wrapper pr f-hide" id='outlineModal'>
+        <div class="outline-box">
+            <div class='box-middle clearfix'>
+                <img src="../../static/img/outline.png" alt="无订单" class='fl'>
+                <div class='box-text'>
+                    <h1>离线状态中</h1>
+                    <h2>因过竹院逢僧话，偷得浮生半日闲</h2>
+                    <button class='btn btn-green' onclick="changeOnline()" id='changeOnlineBtn'>在线</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var approve_limit_below = 0;
+        var approve_limit_upper = 20000;
+        $(function () {
+            $("#city-picker1").citypicker();
+            var lineState = {{.loginstate}};//在线状态
+            var uid = {{IdUidEncrypt .uid}};//uid
+            var mainId = {{IdUidEncrypt .id}};//主键id
+            var orderState ={{.ok_order}};//订单状态
+            var timeDiff = {{.timeDiff}}; //时间
+            if(timeDiff<=0){
+                orderState = false;
+            }
+            if(orderState){//有订单情况下，都会显示订单，无论是否在线
+                if(lineState == "ONLINE"){
+                    refreshOpinion();
+                    var creditTimeOut2 = setTimeout(function(){//44分57秒后自动离线
+                        changeOffline();
+                    },2699000);
+                    creditTimeOut_Arr.push(creditTimeOut2)
+                }
+                $("#creditManage").show();
+                var orderCountDownTime2 = setInterval(function(){//订单剩余时间显示
+                    timeDiff--;
+                    if(timeDiff>=0){
+                        $("#orderCountDownT").html("订单剩余处理时间:"+Math.floor(timeDiff/60)+"分"+parseInt(timeDiff%60)+"秒")
+                    }else{
+                        $("#orderCountDownT").html("该订单已超时");
+                        $("input,textarea,select,button:not(#changeOnlineBtn)").prop("disabled","disabled");
+                        clearInterval(orderCountDownTime2);
+                        changeOffline();
+                    }
+                },1000);
+                orderCountDownTime_Arr.push(orderCountDownTime2);
+            }else if(lineState == "OFFLINE"){//离线状态，且无订单状态下， 显示离线状态
+                $("#outlineModal").show();
+                // $("html").css("overflow","hidden");
+            }else{//在线， 无订单情况下， 显示无订单
+                $("#outOrderModal").show();
+                // $("html").css("overflow","hidden");
+                var creditTimeOut2 = setTimeout(function(){//无订单状态  10秒自动刷新
+                    // location.reload();
+                    getpage(location.href);
+                },10000);
+                creditTimeOut_Arr.push(creditTimeOut2)
+            }
+            $("#basic_edu").val({{.baseinfo.Education}});
+            $("#basic_merry").val({{.baseinfo.Marriage}});
+            $(window).resize(function () {
+                var height = $(".timeShaftBox").height()
+                $(".timeShaftLine").eq(0).css({
+                    "height": height - 27
+                });
+                var height2 = $(".opinionBox").height()
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+            }).resize();
+            $(".norefresh").click(function(){
+                clearInterval(orderCountDownTime2);
+            });
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+            $("#basic_btn").click(function () {//编辑基本信息
+                $("#basic_body .itemContent .item-right").find(".item-info").hide();
+                $("#basic_body .itemContent .item-right").find("select,textarea").show();
+                $(".city-picker-box").css("visibility", "visible");
+                $("#submitBtn").show();
+                $("#worldPosition").hide()
+
+            });
+            $("#cancle_basic").click(function () {//退出编辑基本信息
+                $("#basic_body .itemContent .item-right").find(".item-info").show();
+                $("#basic_body .itemContent .item-right").find("select,textarea").hide();
+                $(".city-picker-box").css("visibility", "hidden");
+                $("#submitBtn").hide();
+                $("#worldPosition").show()
+                return false;
+            });
+            $("#save_basic").click(function () {//保存编辑基本信息
+                var data = {
+                    education: $("#basic_edu").val(),
+                    marriage: $("#basic_merry").val(),
+                    addr: $("#city-picker1").val() + "-" + $("#basic_addr").val(),
+                    province : $("#city-picker1").val().split("/")[0],
+                    city : $("#city-picker1").val().split("/")[1],
+                    district : $("#city-picker1").val().split("/")[2],
+                    live_detail_address:$("#basic_addr").val(),
+                    ubi_id : {{.baseinfo.UbiId}},
+                    uid : uid,
+                    mainId : mainId
+            
+                };
+                var modal = '<div class="countdown-modal"><div class="countdown-time">重检中...</div></div>';
+                $("body").append(modal);
+                $.zget("/usersmetadata/updateusersbaseinfo",data,function(rslt){
+                    if(rslt.ret == 200){
+                        if (typeof refreshOpinion == "function") {
+                                // $(".countdown-modal").remove();
+                                // refreshOpinion();
+                                location.reload()
+                            }
+                    }else {
+                        alert(rslt.err);
+                    }
+                });
+                
+                $("#basic_edu,#basic_merry").hide();
+                $(".city-picker-box").css("visibility", "hidden");
+                $("#basic_body .itemContent .item-right>span,#basic_body .itemContent .item-right>p").show();
+                $("#submitBtn,#basic_addr").hide();
+                $("#basic_edu").siblings(".item-info").html(data.education);
+                $("#basic_merry").siblings(".item-info").html(data.marriage);
+                $("#basic_addr").siblings(".item-info").eq(0).html(data.province+" "+(data.city||"")+" "+(data.district|| ""));
+                $("#basic_addr").siblings(".item-info").eq(1).html(data.live_detail_address);
+                $("#worldPosition").show()
+            });
+            var flag = true;
+            $(".risk-btn").click(function () {
+                var type = $(this).data("type");
+                var url = $(this).data("url");
+                //showDialog(type, url);
+
+                if(type == "1"){//通过
+                    dialog.init({
+                        title : "授信通过",
+                        tips : "确定初审授信通过",
+                        buttons :[{
+                            text : "确定",
+                            style : "green",
+                            func : function(){
+                                if(!flag){
+                                    return;
+                                }
+                                var data = {
+                                    uid : uid,
+                                    state : "PASS",
+                                    remark : $(".risk-mark").val(),
+                                    id : mainId,
+                                    balancemoney : $("#examLimit").val(),//通过金额
+                                    check:3
+                                };
+                                var value = parseFloat($("#examLimit").val());
+                                if (value < approve_limit_below || value > approve_limit_upper) {
+                                    $(".over-text").html("授信额度不得超过"+approve_limit_below+"~"+approve_limit_upper);
+                                } else if (value % 100 != 0) {
+                                    $(".over-text").html("授信额度需为100的整数倍")
+                                }
+                                if ($(".over-text").html() != "" || $("#examLimit").val() == "" ) {
+                                    return;
+                                }
+                                flag = false;
+                                $.zget(url,data,function(rslt){
+                                    flag = true;
+                                    if(rslt.ret == 200){
+                                        countdownanimation(3,rslt.msg,function(){
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            },
+                            
+                        },{
+                            text : "取消",
+                            style : "default modal-close"
+                        }]
+                    });
+                }else if(type == "2"){//关闭
+                    dialog.init({
+                        header :{
+                            style : "red",
+                        },
+                        close : {
+                            style : "red"
+                        },
+                        title : "授信关闭",
+                        textarea :{
+                            html : "<textarea class='modal-textarea' placeholder='填写关闭备注' ></textarea>"
+                        },
+                        buttons : [{
+                            text : "关闭30天",
+                            style : "red",
+                            func : function(){
+                                if(!flag){
+                                    return;
+                                }
+                                var data = {
+                                    uid : uid,
+                                    state : "PAUSE",
+                                    remark : $(".modal-textarea").val(),
+                                    id : mainId,
+                                    check:3
+                                };
+                                if(isBlank(data.remark)){
+                                    $(".modal-body .red-text").show();
+                                    $(".modal-textarea").addClass("warning-border");
+                                    return;
+                                };
+                                flag = false;
+                                $.zget(url,data,function(rslt){
+                                    flag = true;
+                                    if(rslt.ret == 200){
+                                        countdownanimation(3,rslt.msg,function(){
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            }
+                        },{
+                            text: "永久关闭",
+                            style : "red",
+                            func : function(){
+                                if(!flag){
+                                    return;
+                                }
+                                var data = {
+                                    uid : uid,
+                                    state : "CLOSE",
+                                    remark : $(".modal-textarea").val(),
+                                    id : mainId,
+                                    check:3
+                                };
+                                if(isBlank(data.remark)){
+                                    $(".modal-body .red-text").show();
+                                    $(".modal-textarea").addClass("warning-border");
+                                    return;
+                                };
+                                flag = false;
+                                $.zget(url,data,function(rslt){
+                                    flag = true;
+                                    if(rslt.ret == 200){
+                                        countdownanimation(3,rslt.msg,function(){
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            }
+                        }]
+                    })
+                }else if(type == "3"){
+                    dialog.init({
+                        title : "授信退回",
+                        textarea :{
+                            html : "<textarea class='modal-textarea' placeholder='填写退回备注' ></textarea>"
+                        },
+                        buttons : [{
+                            text : "确定",
+                            style : "green",
+                            func : function(){
+                                if(!flag){
+                                    return;
+                                }
+                                var data = {
+                                    uid : uid,
+                                    state : "OUTQUEUE",
+                                    remark : $(".modal-textarea").val(),
+                                    id : mainId,
+                                    check:3
+                                };
+                                if(isBlank(data.remark)){
+                                    $(".modal-body .red-text").show();
+                                    $(".modal-textarea").addClass("warning-border");
+                                    return;
+                                };
+                                flag = false;
+                                $.zget(url,data,function(rslt){
+                                    flag = true;
+                                    if(rslt.ret == 200){
+                                        countdownanimation(3,rslt.msg,function(){
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            }
+                        },{
+                            text : "取消",
+                            style : "default modal-close"
+                        }]
+                    })
+                }else if(type == "4"){//驳回
+                    dialog.init({
+                        title : "授信驳回",
+                        others :{
+                            html : "<select class='form-control J_rejectType'><option value=''>请选择驳回类型</option><option value='联系人1'>联系人1</option><option value='联系人2'>联系人2</option></select><select class='form-control J_rejectReason'><option value=''>请选择驳回原因</option><option value='空号、停机'>空号、停机</option><option value='未接'>未接</option><option value='虚假'>虚假</select>"
+                        },
+                        buttons : [{
+                            text : "确定",
+                            style : "green",
+                            func : function(){
+                                if(!flag){
+                                    return;
+                                }
+                                var data = {
+                                    uid : uid,
+                                    state : "REJECT",
+                                    id : mainId,
+                                    rejectType : $(".J_rejectType").val(),
+                                    rejectReason : $(".J_rejectReason").val(),
+                                    check:3
+                                };
+                                if(isBlank(data.rejectType)){
+                                    $(".J_rejectType").addClass("warning-border");
+                                    $(".J_rejectReason").removeClass("warning-border");
+                                    return
+                                }else if(isBlank(data.rejectReason)){
+                                    $(".J_rejectReason").addClass("warning-border");
+                                    $(".J_rejectType").removeClass("warning-border");
+                                    return
+                                }else{
+                                    $(".J_rejectReason,.J_rejectType").removeClass("warning-border");
+                                };
+                                flag = false;
+                                $.zget(url,data,function(rslt){
+                                    flag = true;
+                                    if(rslt.ret == 200){
+                                        countdownanimation(3,rslt.msg,function(){
+                                            location.reload();
+                                        });
+                                    }
+                                });
+                            }
+                        },{
+                            text : "取消",
+                            style : "default modal-close"
+                        }]
+                    })
+                }
+            });
+            $("#examLimit").blur(function () {
+                var value = parseInt($(this).val());
+                if (value < approve_limit_below || value > approve_limit_upper) {
+                    $(".over-text").html("授信额度不得超过"+approve_limit_below+"~"+approve_limit_upper);
+                } else if (value % 100 != 0) {
+                    $(".over-text").html("授信额度需为100的整数倍")
+                } else {
+                    $(".over-text").html("")
+                }
+            });
+        });
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var uid = {{IdUidEncrypt .uid}};
+            var data;
+            if (url == "/usersmetadata/getlinkmanlist") {
+                data = {uid:uid,is_edit:true,riskRecordType:1};
+            }else {
+                data = {uid:uid};
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+        function refreshOpinion(){
+            var uid = {{IdUidEncrypt .uid}};
+            $.get("/riskadvise/getriskadvise",{uid : uid,business_type:1},function(rslt){
+                var html = [];
+                html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='activeShadow'><i class='circle active'></i></i></i><div class='timeShaftText'>"+rslt.data.AuditAdvice+"</div></div>")
+                var len = rslt.data.RiseItems&&rslt.data.RiseItems.length || 0
+                for (var i = 0; i < len; i++) {
+                    var item = rslt.data.RiseItems[i];
+                    if (item.State != 1) {
+                        html.push("<div class='clearfix timeShaft'><i class='littleCircle'><i class='circle'></i></i><div class='timeShaftText'  style='overflow:auto;padding-left:0;text-indent:0;'>" + item.RiskAdvise + "</div></div>")
+                    }
+                };
+                html.push("<div class='timeShaftLine'></div>");
+                $(".opinionBox").html(html.join(""));
+                var height2 = $(".opinionBox").height();
+                $(".timeShaftLine").eq(1).css({
+                    "height": height2 - 27
+                });
+                $("#riskLimit").val(rslt.data.LimitMoney);
+            })
+        }
+    </script>
+</div>

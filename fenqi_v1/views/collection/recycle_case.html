@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="lock">
+    <meta name="keywords" content="fenqi">
+    <meta name="description" content="fenqi">
+    <link href="../static/css/index.css" rel="stylesheet">
+    <script src="../static/js/WdatePicker.js" type="text/javascript"></script>
+    <script src="../static/js/page.js" type="text/javascript"></script>
+    <title>回收案件</title>
+</head>
+<body class="sticky-header">
+
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                    <form id="searchForm2" action="/collection/list" method="get">
+                        <ul class="nav pull-left" style="width: 100%">
+                            <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" />&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="verifyRealName" />&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                    <input id="registerTime" placeholder='到期时间' class="input-small" value="{{.registerTime}}" type="text" name="register_time"
+                                    />
+                            </li>
+                            <li class="pull-left">
+                                    <select name="overdue_num" id="overdue_num">
+                                        <option value="">逾期天数</option>
+                                        <option value="0,0">0天</option>
+                                        <option value="1,1">1天</option>
+                                        <option value="2,2">2天</option>
+                                        <option value="3,3">3天</option>
+                                        <option value="4,4">4天</option>
+                                        <option value="5,5">5天</option>
+                                        <option value="6,6">6天</option>
+                                        <option value="7,7">7天</option>
+                                        <option value="8,8">8天</option>
+                                        <option value="9,9">9天</option>
+                                        <option value="10,10">10天</option>
+                                        <option value="11,11">11天</option>
+                                        <option value="12,12">12天</option>
+                                        <option value="13,13">13天</option>
+                                        <option value="14,14">14天</option>
+                                        <option value="15,15">15天</option>
+                                        <option value="16,16">16天</option>
+                                        <option value="17,17">17天</option>
+                                        <option value="18,18">18天</option>
+                                        <option value="19,19">19天</option>
+                                        <option value="20,20">20天</option>
+                                        <option value="21,21">21天</option>
+                                        <option value="22,22">22天</option>
+                                        <option value="23,23">23天</option>
+                                        <option value="24,24">24天</option>
+                                        <option value="25,25">25天</option>
+                                        <option value="26,26">26天</option>
+                                        <option value="27,27">27天</option>
+                                        <option value="28,28">28天</option>
+                                        <option value="29,29">29天</option>
+                                        <option value="30,30">30天</option>
+                                        <option value="1,3">1-3天</option>
+                                        <option value="4,15">4-15天</option>
+                                        <option value="16,30">16-30天</option>
+                                        <option value="31,60">31-60天</option>
+                                        <option value="61,90">61-90天</option>
+                                    </select>
+                            </li>
+                             <li class="pull-left">
+                                <select name="handleType" id="handleType" >
+                                    <option value="">结清阶段</option>
+                                    {{range $uk,$uv := .cleaningMtype}}
+                                    <<option value="{{$uk}}">{{$uv}}</option>
+                                    {{end}}
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <select name="collectUserId" id="collector" style="width: 95px;">
+                                    <option value="0">催收员</option>
+                                     <option value="-1">无</option>
+                                    {{range $uk,$uv := .collecionUsers}}
+                                    <<option value="{{$uv.Id}}">{{$uv.Verifyrealname}}</option>
+                                    {{end}}
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <button type="submit" class="btn btn-green" style="margin-right: 20px;">搜索</button>
+                            </li>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <form action="" id="form2" method="post">
+                        <table class="table table-hover table-striped table_thead_fixed">
+                            <thead>
+                            <tr>
+                                <th>手机号</th>
+                                <th>姓名</th>
+                                <th>借款金额</th>
+                                <th>结清期数</th>
+                                <th>结清时间</th>
+                                <th>逾期天数</th>
+                                <th>结清阶段</th>
+                                <th>回收金额</th>
+                                <th>逾期费用</th>
+                                <th>费用减免</th>
+                                <th>催收员</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $k, $v := .list}}
+                            <tr>
+                                <td>{{$v.Account}}</td>
+                                <td>{{$v.Name}}</td>
+                                <td>{{f2s $v.CapitalAmount}}</td>
+                                <td>{{$v.TermNo}}</td>
+                                <td>{{$v.ReturnDate.Format "2006-01-02"}}</td>
+                                <td>{{$v.OverdueDays}}</td>
+                                <td>{{mtype $v.Mtype}}</td>
+                                <td>{{sumMoney 6 $v.CapitalAmount $v.TaxAmount $v.OverdueMoneyAmount $v.OverdueBreachOfAmount  $v.DataServiceFee $v.DerateAmount}}</td>
+                                <td>{{sumMoney 3 $v.OverdueMoneyAmount $v.OverdueBreachOfAmount}}</td>
+                                <td>{{f2s $v.DerateAmount}}</td>
+                                <td>{{$v.CollectionName}}</td>
+                                <td>
+                                    <a href="/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}" target="_blank">查看</a>
+                                </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="14">
+                                    <div class="fl">
+                                        <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条&nbsp;&nbsp;借款本金:{{ .sumloanmoney}}元&nbsp;&nbsp;实还金额:{{  .realrepayment}}元&nbsp;&nbsp;费用减免金额:{{ .costrelieffee}}元
+                                                </div>
+                                    </div>
+                                    <div class="fl">
+                                        <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                        <script type="text/javascript">
+                                            $(function () {
+                                                        $("#pagination2").my_page("#searchForm2");
+                                                        $("#registerTime").dateRangePicker({
+                                                            separator: "~",
+                                                            autoClose: true,
+                                                            shortcuts: null,
+                                                            customShortcuts: [{
+                                                                name: "清空",
+                                                                dates: function () {
+                                                                    return ["", "", ""]
+                                                                }
+                                                            }]
+                                                        });
+                                                    });
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate;
+        return currentdate;
+    }
+    function getPreMonth(date) {
+        var arr = date.split('-');
+        var year = arr[0]; //获取当前日期的年份
+        var month = arr[1]; //获取当前日期的月份
+        var day = arr[2]; //获取当前日期的日
+        var days = new Date(year, month, 0);
+        days = days.getDate(); //获取当前日期中月的天数
+        var year2 = year;
+        var month2 = parseInt(month) - 1;
+        if (month2 == 0) {
+            year2 = parseInt(year2) - 1;
+            month2 = 12;
+        }
+        var day2 = day;
+        var days2 = new Date(year2, month2, 0);
+        days2 = days2.getDate();
+        if (day2 > days2) {
+            day2 = days2;
+        }
+        if (month2 < 10) {
+            month2 = '0' + month2;
+        }
+        var t2 = year2 + '-' + month2 + '-' + day2;
+        return t2;
+    }
+    var times = getPreMonth(getNowFormatDate());
+    var datad = times.split('-');
+    var maxdatas = getNowFormatDate();
+    var datatime = datad[0]+"-"+datad[1]+"-"+"01";
+    //导出到Excel接口
+
+    $(function () {
+        $("#handleType").change(function(){
+            var val = $(this).val();
+            var has = getUrlString("handleType");
+            var url = $("#pagination2").data("url");
+            if(isBlank(has)){
+                var data = {
+                    account : $("[name = 'account']").val(),
+                    verifyRealName : $("[name = 'verifyRealName']").val(),
+                    register_time : $("[name = 'register_time']").val(),
+                    overdue_num : $("[name = 'overdue_num']").val(),
+                    handleType : val,
+                    collectUserId : $("[name = 'collectUserId']").val(),
+                }
+                var uri = url.split('?')[0] + '?'+"account="+data.account+"&verifyRealName="+data.verifyRealName+"&register_time="+data.register_time+"&overdue_num="+data.overdue_num+"&handleType=" + val + "&collectUserId="+data.collectUserId;
+
+                $.zget(uri, {}, function (result) {
+                    history.pushState({ html: result }, "现金分期", url);
+                    $('.wrapper').html(result);
+                    SearchCondition(uri);
+                    execjs(result);
+                    submitFlag = true;
+                });
+            }
+        });
+        $("#collector").change(function(){
+            var val = $(this).val();
+            var has = getUrlString("collectUserId");
+            var url = $("#pagination2").data("url");
+            if(isBlank(has)){
+                var data = {
+                    account : $("[name = 'account']").val(),
+                    verifyRealName : $("[name = 'verifyRealName']").val(),
+                    register_time : $("[name = 'register_time']").val(),
+                    overdue_num : $("[name = 'overdue_num']").val(),
+                    handleType : $("[name = 'handleType']").val(),
+                    collectUserId : val
+                }
+                var uri = url.split('?')[0] + '?'+"account="+data.account+"&verifyRealName="+data.verifyRealName+"&register_time="+data.register_time+"&overdue_num="+data.overdue_num+"&handleType=" + data.handleType + "&collectUserId="+data.collectUserId;
+
+                $.zget(uri, {}, function (result) {
+                    history.pushState({ html: result }, "现金分期", url);
+                    $('.wrapper').html(result);
+                    SearchCondition(uri);
+                    execjs(result);
+                    submitFlag = true;
+                });
+            }
+        })
+
+
+        $('#export').on('click', function () {
+            var account = $('#account').val();      //手机号
+            var userId = $('#userId').val();        //用户Id
+            var verifyRealName = $('#verifyRealName').val();   //用户姓名
+            var startDate = $('#startDate').val();             //结算时间
+            var endDate = $('#endDate').val();                  //结算时间
+            var overdue_num = $('#overdue_num').val();          //逾期天数
+            var outsourcingCompanyt = $('#outsourcing_companyt').val(); //委外公司
+            var collector = $('#collector').val();              //操作员
+            var  pkg_type =$('#pkg_type').val();
+            var handleType=$('#handleType').val();// 催收阶段
+            var url = '/newoutcollect/newoutsourcingrecyclecasedatatoexcel?account=' + account + '&userid=' + userId +'&verifyRealName=' + verifyRealName + '&finishdate1=' + startDate + '&finishdate2=' + endDate +'&handleType='+handleType+
+                '&overdue_num=' + overdue_num + '&collectionUserId=' + collector + '&outsourcing_companyt=' + outsourcingCompanyt+'&pkg_type='+pkg_type;
+            window.location.href = url;
+        });
+    })
+</script>
+
+</html>

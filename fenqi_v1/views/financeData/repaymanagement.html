@@ -1,0 +1,108 @@
+<!-- 回款管理列表 -->
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="" method="get">
+                            <ul class="nav pull-left" style="width: 100%">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="account" id="account"/>&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="user_name" id="user_name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input id="create_time" placeholder='放款时间' class="input-small" value="" type="text" name="submit_time" />
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <li class="pull-left" style="margin-left: 10px">
+                                    <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class="table table-hover table-striped table_thead_fixed">
+                                <thead>
+                                    <tr>
+                                        <th>手机号</th>
+                                        <th>姓名</th>
+                                        <th>放款时间</th>
+                                        <th>借款金额</th>
+                                        <th>借款期限</th>
+                                        <th>到账金额</th>
+                                        <th>操作人</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $k,$v := .list}}
+                                    <tr class="trs">
+                                        <td>{{mobileFilter $v.Account}}</td>
+                                        <td>{{$v.VerifyRealName}}</td>
+                                        <td>{{if eq ($v.CreateTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}暂无{{else}}{{$v.CreateTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                        <td>{{fs $v.Money}}</td>
+                                        <td>{{$v.LoanTermCount}}</td>
+                                        <td>{{fs $v.Rmoney}}</td>
+                                         <td>{{if eq $v.OperatorId -9}}风控系统{{else}}{{$v.DisplayName}}{{end}}</td>
+                                        <td> <a target='_blank' href='/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}&return_money=1'><span class="mainColor-text">查看</span></font></a></td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="14">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页 <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                <script type="text/javascript">
+                                                $(function () {
+                                                    $("#pagination2").my_page("#searchForm2");
+                                                    $("#create_time").dateRangePicker({
+                                                        separator: "~",
+                                                        autoClose: true,
+                                                        shortcuts: null,
+                                                        customShortcuts: [{
+                                                            name: "清空",
+                                                            dates: function(){
+                                                                return ["", "",""]
+                                                            }
+                                                        }]
+                                                    });
+                                                });   
+                                                </script>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                    <script>
+                        $('#export').on('click', function () {
+                            var account = $("#account").val();      //手机号
+                            var user_name = $('#user_name').val();      //姓名
+                            var create_time = $('#create_time').val();      //放款时间
+                            var url = '/financedata/repaymanagementtoexcel?account=' + account + '&user_name=' + user_name + '&create_time=' + create_time ;
+                            window.location.href = url;
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

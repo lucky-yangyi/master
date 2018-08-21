@@ -1,0 +1,286 @@
+<!-- 信审通过率 -->
+<style>
+        .statistics {
+            cursor: pointer;
+        }
+        .vertical-mid{
+            vertical-align: middle;
+        }
+    </style>
+    <div class="sticky-header">
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel_border">
+                        <div class="panel_heading">
+                            <form id="searchForm2" action="/businesspassreport/creditpassrate" method="get">
+                                <ul class="nav pull-left" style="width: 100%;">
+                                    <li class="pull-left">
+                                        <input id="dealTime" placeholder='请选择时间' class='input-small' value="" type="text" name="deal_time" />
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="business_type" id="business_type">
+                                            <option value="">业务类型</option>
+                                            <option value="现金分期">现金分期</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="count_dimension" id="count_dimension">
+                                            <option value="">统计维度</option>
+                                            <option value="次数">次数</option>
+                                            <option value="人数">人数</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="data_type" id="data_type">
+                                            <option value="">数据类型</option>
+                                            <option value="数量">数量</option>
+                                            <option value="比例">比例</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="channel" id="channel">
+                                            <option value="">用户来源</option>
+                                            <option value="线下">线下</option>
+                                            <option value="非线下">非线下</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <button type="submit" class="btn btn-green">搜索</button>
+                                    </li>
+                                    <li class="pull-left" style="margin-left: 10px">
+                                        <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                        <div class="panel-body">
+                            <form action="" id="form2" method="post">
+                                <table class='table table-bordered text-center'>
+                                    <tbody>
+                                        <tr>
+                                            <td>日期</td>
+                                            <td class='statistics' data-number="0">审核</td>
+                                            <td class='statistics' data-number="1">通过</td>
+                                            <td class='statistics' data-number="2">信审驳回</td>
+                                            <td class='statistics' data-number="3">关闭30天</td>
+                                            <td class='statistics' data-number="4">永久关闭</td>
+                                            <td class='statistics' data-number="5">流程中</td>
+                                        </tr>
+                                        {{if eq .dataType "数量"}}
+                                        {{range $k,$v := .list}}
+                                        <tr>
+                                            <td>{{$v.Createtime.Format "2006-01-02"}}</td>
+                                            <td>{{$v.SystemCreditIntoXS}}</td>
+                                            <td>{{$v.XSCreditSuccess}}</td>
+                                            <td>{{$v.XSCreditRejected}}</td>
+                                            <td>{{$v.XSCreditCloseDays}}</td>
+                                            <td>{{$v.XSCreditClosePermanent}}</td>
+                                            <td>{{$v.XSCrediting}}</td>
+                                        </tr>
+                                        {{end}}
+                                        {{else}}
+                                        {{range $k,$v := .list}}
+                                        <tr>
+                                            <td>{{$v.Createtime.Format "2006-01-02"}}</td>
+                                            <td>{{$v.SystemCreditIntoXS}}</td>
+                                            <td>{{getDivide $v.XSCreditSuccess $v.SystemCreditIntoXS}}</td>
+                                            <td>{{getDivide $v.XSCreditRejected $v.SystemCreditIntoXS}}</td>
+                                            <td>{{getDivide $v.XSCreditCloseDays $v.SystemCreditIntoXS}}</td>
+                                            <td>{{getDivide $v.XSCreditClosePermanent $v.SystemCreditIntoXS}}</td>
+                                            <td>{{getDivide $v.XSCrediting $v.SystemCreditIntoXS}}</td>
+                                        </tr>
+                                        {{end}}
+                                        {{end}}
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="fl">
+                                                <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.count}}条
+                                                </div>
+                                            </div>
+                                            <div class="fl">
+                                                <div class="pagination" id="pagination2" data-url="/businesspassreport/creditpassrate" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </form>
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 18px;margin-top: -50px;" class="lineChart hide1">
+            <div style="background-color:white;">
+                <div id="main" style="width: 100%;height:500px;"></div>
+            </div>
+        </div>
+        <script>   
+            $("#dealTime").dateRangePicker({
+                separator: "~",
+                autoClose: true,
+                shortcuts: null,
+                endDate : moment().toDate(),
+                customShortcuts: [{
+                    name: "清空",
+                    dates: function () {
+                        return ["", "", ""]
+                    }
+                }, {
+                    name: "今日",
+                    dates: function () {
+                        return [moment().toDate(), moment().toDate()]
+                    }
+                }, {
+                    name: "昨日",
+                    dates: function () {
+                        return [moment().subtract(1, "days").toDate(), moment().subtract(1, "days").toDate()]
+                    }
+                }, {
+                    name: "近7日",
+                    dates: function () {
+                        var start = moment().subtract(6, "days").toDate();
+                        var end = moment().subtract(0, "days").toDate();
+                        return [start, end];
+                    }
+                }, {
+                    name: "当月",
+                    dates: function () {
+                        var start = moment().toDate();
+                        var end = moment(moment()).startOf('month').toDate();
+                        return [start, end];
+                    }
+                }]
+            })
+            $("#pagination2").my_page("#searchForm2");
+            //显示折线图
+            $(".statistics").click(function () {
+                var data = {
+                    deal_time : $("#dealTime").val(),//日期
+                    business_type : $('#business_type').val(),     //业务类型
+                    count_dimension : $('#count_dimension').val(), //统计维度
+                    data_type : $('#data_type').val(),  //数据类型
+                    channel : $('#channel').val(),  //用户来源
+                    type : $(this).text(),
+                    choose_type : $(this).attr("data-number")
+                };
+                var y_name = "";
+                if(data.data_type == "比例"){
+                    if(data.choose_type == "0"){
+                        y_name = "人数(人)"
+                    }else {
+                        y_name = "比例(%)";
+                    }
+                }else {
+                    y_name = "人数(人)"
+                }
+                $.ajax({
+                    url: '/businesspassreport/creditpassratelinechart',
+                    type: 'post',
+                    data: data,
+                    success: function (rslt) {
+                        if (rslt.ret == 200) {
+                            $(".lineChart").show();
+                            var times = [];
+                            var datas = [];
+                            for (var i = 0; i < rslt.data.length; i++) {
+                                times.push(rslt.data[i].Createtime);
+                                datas.push(rslt.data[i].Count);
+                            }
+                            var braceLen = rslt.data.length;
+                            drawCharts(times, datas, data.type, y_name, braceLen);
+                        } else {
+                            alert("数据请求失败");
+                        }
+                    }
+                })
+            })
+            //导出数据
+            $('#export').on('click', function () {
+                var dealTime = $('#dealTime').val();      //开始日期
+                var businessType = $('#business_type').val();      //业务类型
+                var countDimension = $('#count_dimension').val();  //统计维度
+                var dataType = $('#data_type').val(); //数据类型
+                var channel = $('#channel').val(); //用户来源
+                var url = '/businesspassreport/creditpassratetoexcel?deal_time=' + dealTime + '&business_type=' + businessType + '&count_dimension=' + countDimension + '&data_type=' + dataType + '&channel=' + channel;
+                window.location.href = url;
+            });
+    
+            function drawCharts(time, data, name, unit, brace) {
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('main'));
+                var option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    legend: {
+                        data: [name]
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '7%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: time,
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            name: unit,
+                            type: 'value',
+                            boundaryGap: false,
+                        }
+                    ],
+                    series: [
+                        {
+                            name: name,
+                            type: 'line',
+                            //                    areaStyle: {normal: {}},
+                            data: data
+                        },
+                    ]
+                };
+                if (brace > 10) {
+                    option.dataZoom = [
+                        {
+                            type: 'slider',
+                            xAxisIndex: 0,
+                            filterMode: 'filter',
+                            start: 66,
+                            end: 100,
+                            bottom: 0
+                        },
+                        {
+                            type: 'inside',
+                            xAxisIndex: 0,
+                            filterMode: 'empty'
+                        }
+                    ]
+                }
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            }
+        </script>
+    </div>

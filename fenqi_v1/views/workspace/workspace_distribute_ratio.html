@@ -1,0 +1,145 @@
+<style>
+    @media (min-width: 992px) {
+        .col-md-6 {
+            width: 49.5%;
+            margin-right: 0.5%;
+        }
+    }
+
+    .table-noborder tbody tr td,
+    .table-noborder thead tr th,
+    .table-noborder tfoot tr td {
+        vertical-align: middle;
+        border: none;
+        padding: 5px;
+    }
+    .table-noborder tfoot tr td{
+        text-align: right;
+    }
+    textarea.form-control {
+        height: 180px;
+    }
+</style>
+
+<div class="sticky-header">
+    <div class="wrapper pr">
+        <div class="panel col-md-6">
+            <div class="panel-title">
+                <b class='panel-line'></b> 案件比例
+            </div>
+            <div class="panel-body">
+                <table class='table table-noborder'>
+                    <tbody>
+                        <tr>
+                            <td colspan="4">案件比例</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>拆分比例</td>
+                            <td></td>
+                            <td>完整比例</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <input type="text" class='form-control J_split onlyNumber' placeholder="请输入大于等于0的整数">
+                            </td>
+                            <td>:</td>
+                            <td>
+                                <input type="text" class='form-control J_full onlyNumber' placeholder="请输入大于等于0的整数">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>修改说明</td>
+                            <td colspan="3">
+                                <textarea name="" id="" class='form-control J_changeRemark'></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                <button id='J_submitRatio' class='btn btn-green'>提交</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="panel col-md-6">
+            <div class="panel-title">
+                <b class='panel-line'></b> 修改历史
+            </div>
+            <div class="panel-body">
+                <table class='table table-noborder'>
+                    <thead>
+                        <tr>
+                            <th>案件比例(拆分审核:完整审核)</th>
+                            <th>操作人</th>
+                            <th>操作时间</th>
+                            <th>修改说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{range $k,$v := .list}}
+                        <tr>
+                            <ideo></ideo>
+                            <td>{{$v.PartWeight}}:{{$v.AllWeight}}</td>
+                            <td>{{$v.Operator}}</td>
+                            <td>{{$v.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+                            <td>{{$v.Remark}}</td>
+                        </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $("#J_submitRatio").click(function(){
+            var data = {
+                part_weight : parseInt($(".J_split").val()),
+                all_weight : parseInt($(".J_full").val()),
+                remark : $(".J_changeRemark").val()
+            };
+            if($(".J_split").val() == undefined || $(".J_split").val() == "" || data.part_weight < 0){
+                $(".J_split").addClass("warning-border");
+                $(".J_changeRemark,.J_full").removeClass("warning-border");
+                return
+            }else if($(".J_full").val() == undefined || $(".J_full").val() == "" || data.part_weight < 0) {
+                $(".J_full").addClass("warning-border");
+                $(".J_changeRemark,.J_split").removeClass("warning-border");
+                return
+            }else if(isBlank(data.remark)){
+                $(".J_changeRemark").addClass("warning-border");
+                $(".J_split,.J_full").removeClass("warning-border");
+                return
+            }else {
+                $(".J_full,.J_changeRemark,.J_split").removeClass("warning-border");
+            }
+            dialog.init({
+                title : "提示",
+                tips : "确定调整(拆分审核:完整审核)</br>案件比例为"+data.part_weight+":"+data.all_weight+"?",
+                buttons : [{
+                    text : "确定",
+                    style : "green",
+                    func : function(){
+                        $.zpost("/workspace/motifycreditratio",data,function(rslt){
+                            if(rslt.ret == 200){
+                                $(".J_modal").remove();
+                                window.location.reload();
+                            }else {
+                                alert(rslt.err);
+                            }
+                        })
+                    }
+                },{
+                    text : "取消",
+                    style : "default modal-close"
+                }]
+            })
+        })
+    })
+</script>

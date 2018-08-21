@@ -1,0 +1,218 @@
+<!-- 添加账号 -->
+
+<div class="panel panel_account_form">
+    <div class="panel-body">
+        <h2 class="panel-title">{{if eq .flag 1}}编辑{{else}}添加{{end}}账号</h2>
+        <!--<h2 class="panel-title">编辑账号</h2>-->
+        <ul class="p-info col-md-4">
+            <li class="col-md-12">
+                <div class="col-md-3">账号</div>
+                <div class="col-md-4"><input type="text" class='onlyNumber' placeholder="请输入手机号" maxlength="11" id="account" value="" name="account" /></div>
+                <div class="col-md-4 hide1 error account_num_error"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3">密码</div>
+                <div class="col-md-4"><input type="password" placeholder="请填写密码" maxlength="25" disabled id="password" name="passwd" value='123456' /></div>
+                <div class="col-md-4 hide1 error password_error"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3">使用人</div>
+                <div class="col-md-4"><input type="text" placeholder="请填写使用人姓名" id="name" value="" name="username" /></div>
+                <div class="col-md-4 hide1 error user_name_error"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3">邀请码</div>
+                <div class="col-md-4"><input type="text" class='onlyNumber' maxlength='2' placeholder="请填写邀请码(2位数)" id="invitation_code" value="" name="invitationCode" /></div>
+                <div class="col-md-4 hide1 error user_name_error hide1"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3">岗位</div>
+                <div class="col-md-4">
+                    <input id="station" name="station" type="text" value="" placeholder="选择岗位"/>
+                </div>
+                <div class="col-md-4 hide1 error post_error"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3">账号状态</div>
+                <div class="col-md-4">
+                    <select name="status" id="account_status">
+                        <option  value="1">启用</option>
+                        <option  value="2">禁用</option>
+                    </select>
+                </div>
+                <div class="col-md-4 hide1 error account_status_error"></div>
+            </li>
+            <li class="col-md-12">
+                <div class="col-md-3"></div>
+                <div class="col-md-8">
+                    <a class="btn btn-green" onclick="AccountFormSubmit()">确定</a>
+                    <a class="btn btn-default" onclick="AccountFormBack()">取消</a>
+                </div>
+                <div class="col-md-1"></div>
+            </li>
+        </ul>
+        <div class="col-md-3 sys_box">
+            <div class="sys_box_header"><span class="fl sys_header_txt">岗位</span><span class="sys_box_close fr">×</span></div>
+            <div class="sys_box_content">
+                <ul id="treeRoot" class="ztree"></ul>
+            </div>
+        </div>
+        <input type="hidden" id="rid" value="">
+        <input type="hidden" id="role_code" value=""/>
+        <input type="hidden" id="stationId" value=""/>
+    </div>
+</div>
+<div id="dialog-cancel" title="取消" class="hide1">loading...</div>
+<script>
+        var phoneNum = /^1[3456789]\d{9}$/;
+        function AccountFormSubmit(){
+            var account = $("#account").val(),
+                password = $("#password").val(),
+                name = $("#name").val(),
+                account_status = $("#account_status").val(),
+                uid = {{IdUidEncrypt .user.Id}},
+                role_code=$("#role_code").val(),
+                    invitationCode = $("#invitation_code").val();
+                var stationId=$("#stationId").val();
+                stationId=stationId-100000;
+
+            $(".error").html("");
+            $(".panel_account_form input,.panel_account_form select").removeClass("account_form_input_error");
+            if(!phoneNum.test(account)){
+                $("#account").parent().siblings('.error').append("手机号不正确").show();
+            }else if($('#name').val() == ''){
+                $('#name').parent().siblings('.error').append("请填写姓名").show();
+            }else if($('#invitation_code').val() == '' || $('#invitation_code').val().length < 2){
+                $('#invitation_code').parent().siblings('.error').append("请填写2位数邀请码").show();
+            }else if($('#station').val() == ''){
+                $('#station').parent().siblings('.error').append("请选择岗位").show();
+            }else{
+               if ({{.flag}}){
+                $.zpost("/salesman/updatesaleman",{sid:{{.sid}},uid:uid,account:account,password:password,name:name,account_status:account_status,role_code:role_code,stationId:stationId,invitationCode:invitationCode},function(result){
+                    //if(result.ret==0){该账号已存在}else
+                    if(result.ret==200){//成功
+                        alert("成功");
+                        return getpage('/salesman/getsalesmanlist');
+                    }else{
+                        alert(result.msg);
+                        $(".account_num_error").html(result.msg);
+                    }
+                });
+               } else{
+                $.zpost("/salesman/addsaleman",{uid:uid,account:account,password:password,name:name,account_status:account_status,role_code:role_code,stationId:stationId,invitationCode:invitationCode},function(result){
+                    //if(result.ret==0){该账号已存在}else
+                    if(result.ret==200){//成功
+                        alert("成功");
+                        return getpage('/salesman/getsalesmanlist');
+                    }else{
+                        alert(result.msg);
+                        $(".account_num_error").html(result.msg);
+                    }
+                });
+               }
+            }
+        }
+
+        function confirmCancel(){
+            $('#dialog-cancel').dialog('close');
+            return getpage('/salesman/getsalesmanlist');
+        }
+        function AccountFormBack(){
+            var account = $("#account").val(),
+                password = $("#password").val(),
+                name = $("#name").val(),
+                account_status = $("#account_status").val();
+            if(!!account || !!password || !!name || !!account_status){
+                $('#dialog-cancel').html('<div class="pop_con" style="padding:12px 0 0;height:90px;"><div class="pop_con_inner"><i></i><span>是否放弃添加账号？</span></div></div><div style="text-align:center"><input id="btn_modify" class="btn btn-green" value="确定" onclick="confirmCancel()" type="button">&nbsp;&nbsp;&nbsp;&nbsp;<input class="btn" onclick="javascript:$(\'#dialog-cancel\').dialog(\'close\')" value="取消" type="button"></div>');
+                $('#dialog-cancel').dialog('open');
+            }else{
+                confirmCancel();
+            }
+        }
+
+        var rootSetting = {
+            view: {
+                showIcon: false
+            },
+            check: {
+                enable: true,
+                radioType: "all",
+                chkStyle: "radio"
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    rootPId: 0
+                }
+            },
+            callback: {
+                // onClick: zTreeOnClick,
+                onCheck: zTreeOnClick
+            }
+        };
+
+
+
+        function zTreeOnClick(event, treeId, treeNode) {
+            if (treeNode.id > 99999) {
+                $("#station").val(treeNode.name);
+                $("#stationId").val(treeNode.id);
+            }
+            $("#station").attr("disabled",true);
+        }
+        $(function(){
+            $("#station").attr("disabled",true);
+            var flag = {{.flag}};
+            if(flag){
+                $("#invitation_code").attr("disabled","disabled").css({"cursor":"not-allowed","background-color": "#e5e5e5"});
+                $("#password").attr("disabled",false);
+                $("#account").val({{.saleman.Account}});
+                $("#name").val({{.saleman.Saleman}});
+                $("#invitation_code").val({{.saleman.InviteCode}});
+                $("#account_status").val({{.saleman.IsOk}});
+                $("#station").attr({
+                    "disabled":false,
+                    "value" : {{.saleman.Name}}
+                });
+            }
+           
+            var stationId={{.saleman.StaId}};
+    
+            $('#dialog-cancel').dialog({
+                autoOpen: false,
+                modal: true,
+                width:260,
+                maxHeight: 300,
+                position: ["center", 100],
+                ok:function(){}
+            });
+            $.zpost("/system/getsalemanorganizationstation",{role_id:'all'},function(result){
+                if (!!result&&result.ret==200) {
+                    console.log(result)
+                    var treeDeptObj= $.fn.zTree.init($("#treeRoot"), rootSetting, result.organizationStationList);
+                    treeDeptObj.expandAll(true);
+                    var stationId={{.saleman.StaId}};
+                    if (stationId>0){
+                        stationId=100000+parseInt(stationId)
+                        treeDeptObj = $.fn.zTree.getZTreeObj("treeRoot");
+                        var nodes = treeDeptObj.getNodesByParam("id", stationId, null);
+                        treeDeptObj.checkNode(nodes[0], true, false);
+                        treeDeptObj.selectNode(nodes[0]);
+                        $("#station").val(nodes[0].name);
+                        $("#stationId").val(stationId);
+                    }
+                var rid = $("#rid").val();
+                    if (rid==0) {
+                        return false;
+                    }
+                } else if (!!result.msg) {
+                    alert(result.msg);
+                } else {
+                    alert('没有数据');
+                }
+            });
+        });
+    
+        
+    </script>
+    

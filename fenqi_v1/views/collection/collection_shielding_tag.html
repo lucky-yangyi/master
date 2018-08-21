@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="lock">
+    <meta name="keywords" content="现金贷">
+    <meta name="description" content="现金贷">
+    <title>入黑标记</title>
+</head>
+<body  class="sticky-header">
+<div class="wrapper">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel_border">
+                <div class="panel_heading">
+                    <form id="searchForm2" action="" method="get">
+                        <ul class="nav pull-left" style="width: 100%">
+                            <li class="pull-left">
+                                <input type="text" class="input-medium" value="" placeHolder="请输入手机号" name="account" />&nbsp;&nbsp;
+                            </li>
+                            <li class="pull-left">
+                                <input id="startDate" class="Wdate input-small" value="{{.startTime}}" type="text"
+                                       onFocus="var endDate=$dp.$('endDate');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate.focus();},maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                                       name="startTime"/> &nbsp;-&nbsp;
+                                <input id="endDate" class="Wdate input-small" type="text"
+                                       onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                                       value="{{.endTime}}" name="endTime"/>&nbsp;&nbsp;
+                            </li>
+
+                            <li class="pull-left">
+                                <select name="collectionType" id="action_type">
+                                    <option value="">催收阶段</option>
+                                    <option value="M0">M0</option>
+                                    <option value="S1">S1</option>
+                                    <option value="S2">S2</option>
+                                    <option value="S3">S3</option>
+                                    <option value="M2">M2</option>
+                                    <option value="M3">M3</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <select name="actionType" id="actionType">
+                                    <option value="">行动分类</option>
+                                    <option value="死亡">死亡</option>
+                                    <option value="盗办">盗办</option>
+                                    <option value="坐牢">坐牢</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <select name="isTag" id="handleType">
+                                    <option value="">入黑类型</option>
+                                    <option value="1">家人代偿</option>
+                                    <option value="2">本人还款意愿差</option>
+                                    <option value="3">其他</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <select name="state" id="loanTermCount">
+                                    <option value="">状态</option>
+                                    <option value="1">待审核</option>
+                                    <option value="2">已标记</option>
+                                    <option value="3">已退回</option>
+                                    <option value="4">自动退回</option>
+                                </select>
+                            </li>
+                            <li class="pull-left">
+                                <button type="submit" class="btn btn-green">搜索</button>
+                            </li>
+                            <li class="pull-left">
+                                <button type="button" id="allot" class="btn btn-green" style="margin-left: 20px;">批量处理</button>
+                            </li>
+                            <script>
+                                //确认
+                                $("#allot").click(function () {
+                                    var arr = [];
+                                    $(".trs input:checked").each(function () {
+                                        arr.push($(this).parent().siblings(".tel").text())
+                                    });
+                                    if (arr.length == 0) {
+                                        $('.a0_hint').removeClass("hide1");
+                                        return false;
+                                    }
+                                    $(".reassignment").removeClass("hide1");
+                                })
+                            </script>
+                        </ul>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <form action="" id="form2" method="post">
+                        <table class="table table-hover table-striped table_thead_fixed">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>手机号</th>
+                                <th>催收阶段</th>
+                                <th>提交人</th>
+                                <th>提交时间</th>
+                                <th>行动分类</th>
+                                <th>入黑类型</th>
+                                <th>备注</th>
+                                <th>状态</th>
+                                <th>审核人</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $k,$v := .blackSignList}}
+                            <tr class="trs">
+                                <td class="tds"><input style="width: 17px;height: 17px; margin: 0" class="px subCheckbox" type="checkbox"/></td>
+                                <td class="tel" style="display: none" data-LoanId="{{$v.Uid}}">{{$v.Uid}}</td>
+                                <td>{{$v.Account}}</td>
+                                <td>{{$v.CollectionType}}</td>
+                                <td>{{$v.SubmitMan}}</td>
+                                <td>{{$v.SubmitTime}}</td>
+                                <td>{{$v.ActionType}}</td>
+                                {{if eq $v.ActionType ""}}
+                                {{if eq $v.IsTag 0}}
+                                <td>未标记欺诈</td>
+                                {{else if eq $v.IsTag 1}}
+                                <td>家人代偿</td>
+                                {{else if eq $v.IsTag 2}}
+                                <td>本人还款意愿差</td>
+                                {{else if eq $v.IsTag 3}}
+                                <td>其他</td>
+                                {{end}}
+                                {{else}}
+                                <td></td>
+                                {{end}}
+                                <td>{{$v.Remark}}</td>
+                                {{if eq $v.State 1}}<td class="state_content" style="color:#63C4A0"><span style="display: inline-block;width: 60px;height: 25px;border: 1px solid #63C4A0;text-align: center;line-height: 25px;border-radius: 4px">待审核</span></td>
+                               {{else if eq $v.State 2}}<td class="state_content">已标记</td>
+                               {{else if eq $v.State 3}}<td class="state_content">已退回</td>
+                               {{else if eq $v.State 4}}<td class="state_content">自动退回</td>
+                               {{end}}
+                               <td>{{$v.CheckMan}}</td>
+                                <td>
+                                   <a href="/usersmanage/usersmetadatalook?uid={{IdUidEncrypt $v.Uid}}" style='margin-right: 15px;' target="_blank">查看</a>
+                                {{if eq $v.State 1}}
+                                <a style="cursor: pointer;" onclick="intoBlacks({{$v.Uid}})" >处理</a>
+                                {{end}}
+                                </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="14">
+                                    <div class="fl f2" style="margin-right: 50px;">
+                                        <div class="pagination"><input style="position:relative;top:-2px;width: 18px;height: 18px; margin: 0;" type="checkbox" id="checkAll" class="px"/>&nbsp;&nbsp;<span style="vertical-align: 5px">全选</span></div>
+                                    </div>
+                                    <div class="fl f2" style="margin-right: 50px">
+                                        <div class="pagination"> 已选<span id="checkNum"></span>条&nbsp;&nbsp;</span></div>
+                                    </div>
+                                     <div class="pagination"> 每页
+                                                    <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                        <option value="15">15</option>
+                                                        <option value="20">20</option>
+                                                        <option value="30">30</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> 条，共{{.pageCount}}条&nbsp;&nbsp;
+                                                </div>
+                                    <div class="fl">
+                                        <div class="pagination" id="pagination2" data-url="" currentPage={{.currentPage}} pageCount={{.pageNum}} pageSize='{{.pageSize}}'></div>
+                                        <script type="text/javascript">
+                                            $(function(){
+                                                $("#pagination2").my_page("#searchForm2");
+
+                                            });
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="intoBlack boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header"><span class="pop_header_txt">提示</span><span onclick="closeIntoBlack()" class="pop_close">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <select name="black_tag" id="black_tag" class="set form-control">
+                        <option value="">请选择审核结果</option>
+                        <option value="2">标记</option>
+                        <option value="3">退回</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a onclick="closeIntoBlack()" class="btn allow_btn hintBtn1">取消</a>
+                <a class="btn allow_btn hintBtn2" id="submit_tag">确认</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="reassignment boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="closePopup($('.reassignment'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <div>
+                        <label class="indent" for="selCollectionUser">
+                            <select class="form-control set" name="" id="selCollectionUser">
+                                <option value="">请选择审核结果</option>
+                                <option value="2">标记</option>
+                                <option value="3">退回</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn btn-green allow_btn hintBtn1" onclick="closePopup($('.reassignment'))">取消</a>
+                <a class="btn btn-green allow_btn hintBtn2" id="subBtn">确认</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="a0_hint boxShade hide1">
+        <div class="loan_pop wet">
+            <div class="pop_header"><span class="pop_header_txt">提示</span><span class="pop_close" onclick="closePopup($('.a0_hint'))">×</span></div>
+            <div class="pop_con het">
+                <div class="pop_con_inner">
+                    <div>
+                        请选择需要标记入黑的订单
+                    </div>
+                </div>
+            </div>
+            <div class="pop_footer hintFoot">
+                <a class="btn allow_btn hintBtn2" onclick="closePopup($('.a0_hint'))">确认</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function isContains(str,substr) {
+        return new RegExp(substr).test(str)
+    }
+    Array.prototype.indexOf = function(val) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == val) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function(val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+    function closeIntoBlack() {
+        $(".intoBlack").hide();
+    }
+    function intoBlacks(id) {
+        $(".intoBlack").show();
+        $("#submit_tag").click(function () {
+            var black_tag = $("#black_tag option:selected").val();
+            if(black_tag==""){
+                alert("请选择审核结果");
+                return;
+            }
+            $.ajax({
+                url:"/black/handlerblacksign",
+                type:"post",
+                data:{BlackUserId:id, State:black_tag},
+                success:function (result) {
+                    if(result.ret==200){
+                        getpage(window.location.href);
+                    }else {
+                        alert(result.msg);
+                    }
+                }
+            })
+        })
+    }
+    $(function () {
+        $("#checkNum").html(window.sessionStorage.checked)
+        var arr = [];
+        if(sessionStorage.rememberSel){
+            var arr1 = sessionStorage.rememberSel.split(',');
+            for(var i = 0 ; i<arr1.length;i++){
+                arr.push(arr1[i])
+            }
+        }
+        //全选全不选
+        $("#checkAll").off().click(function () {
+            var num = 0;
+            var isChecked = $(this).prop("checked");
+            if(isChecked==true){
+                $.each($('.subCheckbox'),function(){
+                    if(!this.checked){
+                        num += 1;
+                    }
+                });
+                $(".subCheckbox").prop("checked", isChecked);
+                InitChecked(num);
+                $(".trs .subCheckbox:checked").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                    sessionStorage.rememberSel=arr;
+                    var checkedTest =sessionStorage.rememberSel ;
+                    if(isContains(checkedTest,$(this).parent().siblings(".tel").text())==false){
+                        arr.push($(this).parent().siblings(".tel").text())
+                    }
+                });
+                sessionStorage.rememberSel=arr;
+            }else {
+                $(".subCheckbox").prop("checked", isChecked);
+                InitChecked1(num)
+                $(".trs .subCheckbox").each(function () {//遍历所有的checked状态的checkbox，找到loanID，直接存入sessionStorage中
+                    arr.remove($(this).parent().siblings(".tel").text());
+                });
+                sessionStorage.rememberSel= arr;
+            }
+        })
+
+
+        //实现单选全选
+        $(".subCheckbox").off().click(function () {
+            if(this.checked){
+                if($('#checkNum').text()==''){
+                    $('#checkNum').text('0')
+                }
+                $("#checkNum").text((parseInt($("#checkNum").text())+1))
+                arr.push($(this).parent().siblings(".tel").text())
+            }else {
+                $("#checkNum").text((parseInt($("#checkNum").text())-1))
+                arr.remove($(this).parent().siblings(".tel").text());
+            }
+            if ($("#checkAll").prop('checked')) {
+                $(".subCheckbox").each(function (i, ck) {
+                    if (!$(ck).prop('checked')) {
+                        $("#checkAll").prop("checked", false);
+                    }
+                });
+
+            } else {
+                var i = 0;
+                $(".subCheckbox").each(function () {
+                    if ($(this).prop('checked')) {
+                        i++;
+                    }
+                });
+                if ($(".subCheckbox").length == i) {
+                    $("#checkAll").prop("checked", true);
+                }
+
+            }
+            sessionStorage.rememberSel = arr;
+        });
+
+        if(!sessionStorage.rememberSel){
+            sessionStorage.rememberSel = "";
+        }
+        var isAllSel = false;
+        var nowList = sessionStorage.rememberSel.split(',');
+        for(var i = 0,len=nowList.length;i< len;i++){
+            if(nowList[i] == " ")break;
+            $(".trs").find("td[data-loanId="+nowList[i]+"]").prev().find("input").attr("checked","checked");
+        }
+        var checkedAll=0;
+        var checkedLen = $('.trs').length;
+        $(".trs input").each(function () {
+            if(this.checked){
+                checkedAll +=1;
+            }
+            if(checkedAll==checkedLen){
+                isAllSel = true;
+            }
+        })
+        if(isAllSel){
+            $("#checkAll").attr("checked","checked");
+        }
+        $("#pagination2 ul li a").mousedown(function(){
+            window.sessionStorage.checked = $("#checkNum").text();
+        });
+        $("#subBtn").on("click", function () {
+            //获取催收员
+            var state = $("#selCollectionUser").val();
+            if (state == "") {
+                alert("请选择审核结果")
+                return false;
+            }
+            var lastData=sessionStorage.rememberSel;
+            $.zpost("/black/batchhandlerblacksign", {"blackUids": lastData, "state": state}, function (result) {
+                if (result.ret == 200) {
+                    $(".reassignment").hide();
+                    sessionStorage.clear();
+                    window.location.reload();//刷新当前页面.
+                } else {
+                    alert(result.err);
+                    return false;
+                }
+            })
+        });
+    })
+    function InitChecked(nums) {
+        //选择条数
+        var checkItems = 0;
+        $(".trs input:checked").each(function () {
+            checkItems += 1;
+        });
+        if(window.sessionStorage.checked && parseInt(nums)> 0){
+            window.sessionStorage.checked = parseInt(nums)+parseInt($("#checkNum").text());
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else if(window.sessionStorage.checked && parseInt(nums)<1){
+            window.sessionStorage.checked = parseInt(checkItems)+parseInt($("#checkNum").text());
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else {
+            $("#checkNum").html(checkItems)
+        }
+
+    }
+    function InitChecked1(nums) {
+        //选择条数
+        var checkItems = 0;
+        $(".subCheckbox").each(function () {
+            checkItems += 1;
+        });
+        if(window.sessionStorage.checked && parseInt(nums)==0){
+            window.sessionStorage.checked = parseInt($("#checkNum").text())-checkItems;
+            $("#checkNum").html(window.sessionStorage.checked)
+        }else {
+            $("#checkNum").html('0')
+        }
+    }
+</script>
+</body>
+</html>

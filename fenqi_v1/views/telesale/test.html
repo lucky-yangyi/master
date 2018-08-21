@@ -1,0 +1,338 @@
+<style>
+    .table.table-noborder tr td {
+        height: 40px;
+        line-height: 40px;
+        font-size: 18px;
+        color: #63C4A0;
+        font-weight: bold;
+    }
+
+    .table.table-noborder {
+        margin-bottom: 15px;
+    }
+
+    .statistics {
+        cursor: pointer;
+    }
+
+    th {
+        text-align: center;
+    }
+
+    .pull-left {
+        margin-right: 10px;
+    }
+    .form-control.phone_content{
+        width:300px;
+        height: 150px
+    }
+    .import_container{
+        height: 30px;
+    }
+    .excel-file{
+        position: absolute;
+        top:0;
+        right:-8px;
+        width: 88px;
+        height: 30px;
+        padding:0 8px;
+        opacity: 0;
+        z-index:10;
+    }
+    .import_batch{
+        position: absolute;
+        top:0;
+        right:0;
+        text-align: center;
+        color:#63C4A0;
+        background-color: #fff;
+        padding:0 8px;
+        height: 30px;
+        line-height: 30px;
+        border:1px solid #63C4A0;
+        border-radius: 4px;
+        z-index:9;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel_border">
+                    <div class="panel_heading">
+                        <form id="searchForm2" action="/test/testlist" method="get">
+                            <ul class="nav pull-left" style="width: 100%;">
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="手机号" name="phone" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <input type="text" class="input-medium" value="" placeHolder="姓名" name="name" />&nbsp;&nbsp;
+                                </li>
+                                <li class="pull-left">
+                                    <select name="phone_status" id="business_type">
+                                        <option value="">号码状态</option>
+                                        <option value="no_allotment">未分配</option>
+                                        <option value="no_call">未呼叫</option>
+                                        <option value="no_answering">未接听</option>
+                                        <option value="follow">跟进</option>
+                                        <option value="refuse">拒绝</option>
+                                        <option value="registered">已注册</option>
+                                    </select>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="submit" class="btn btn-green">搜索</button>
+                                </li>
+                                <li class="pull-left">
+                                    <button type="button" class="btn btn-green import_excel" data-permission="tele_man_input_phone_number">号码导入</button>
+                                </li>
+                                {{/*<li class="pull-left">*/}}
+                                    {{/*<button type="submit" class="btn btn-green">分配</button>*/}}
+                                {{/*</li>*/}}
+                            </ul>
+                        </form>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" id="form2" method="post">
+                            <table class='table text-center'>
+                                <thead>
+                                <tr>
+                                    <th>手机号</th>
+                                    <th>姓名</th>
+                                    <th>号码状态</th>
+                                    <th>备注</th>
+                                    {{/*<th>授信状态</th>*/}}
+                                    <th>分配时间</th>
+                                    <th>最后拨打时间</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{range $k,$v := .list}}
+                                <tr>
+                                    <td>{{$v.Phone}}</td>
+                                    <td>{{$v.Name}}</td>
+                                {{if eq $v.PhoneStatus "registered"}}
+                                    <td>已注册</td>
+                                {{else if eq $v.PhoneStatus "no_allotment"}}
+                                    <td>未分配</td>
+                                {{else if eq $v.PhoneStatus "no_call"}}
+                                    <td>未呼叫</td>
+                                {{else if eq $v.PhoneStatus "no_answering"}}
+                                    <td>未接听</td>
+                                {{else if eq $v.PhoneStatus "follow"}}
+                                    <td>跟进</td>
+                                {{else if eq $v.PhoneStatus "refuse"}}
+                                    <td>拒绝</td>
+                                     {{end}}
+                                     <td>{{$v.Remark}}</td>
+                                    <td>{{if ne ($v.CreateTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}{{$v.CreateTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                    <td>{{if ne ($v.EndCallTime.Format "2006-01-02 15:04:05") "0001-01-01 00:00:00"}}{{$v.EndCallTime.Format "2006-01-02 15:04:05"}}{{end}}</td>
+                                    <td>
+                                        <span class='mainColor-text change_status f-pointer' data-id='{{IdUidEncrypt $v.Id}}'>修改状态</span>
+                                        <a href="#" class='clickToCall'>拨号</a>
+                                    </td>
+                                </tr>
+                                         {{end}}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="14">
+                                        <div class="fl">
+                                            <div class="pagination"> 每页
+                                                <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                    <option value="15">15</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                </select> 条，共{{.count}}条
+                                            </div>
+                                        </div>
+                                        <div class="fl">
+                                            <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+     {{/*// $(function () {*/}}
+     {{/*var operator_list = {{.operators }};*/}}
+     {{/*$("#pagination2").my_page("#searchForm2");*/}}
+
+         $("#pagination2").my_page("#searchForm2");
+         $(".change_status").off().click(function () {
+             var id = $(this).data("id");
+             var options = '<select id="modal_deal_result" class="form-control"><option value="">请选择状态</option><option value="no_answering">未接听</option><option value="follow">跟进</option><option value="refuse">拒绝</option></select></br><input type="text" class="remark form-control" placeholder="请输入备注">';
+             dialog.init({
+                 title: "修改状态",
+                 input: {
+                     html: options
+                 },
+                 buttons: [{
+                     text: "确认",
+                     style: "green",
+                     func: function () {
+                         var result = $('#modal_deal_result').val();
+                         var remark = $('.remark').val();
+                         if (result == '' || !result) {
+                             alert('请选择状态');
+                             return false;
+                         } else {
+                             $.ajax({
+                                 url: '/telesale/modifystatus',
+                                 type: 'POST',
+                                 data: {phone_status: result, remark: remark, id: id},
+                                 success: function (result) {
+                                     if (result.ret == 200) {
+                                         alert(result.msg);
+                                         $(".J_modal").remove();
+                                         var random = Math.random().toFixed(5)
+                                         $.zget("/telesale/testlist", {r: random}, function (back) {
+                                             if (back) {
+                                                 $("#wrapper_c").html(back);
+                                                 execjs(back);
+                                             }
+                                         })
+                                     } else {
+                                         alert(result.msg);
+                                         $('.approveBox').hide();
+                                         return false;
+                                     }
+                                 }
+                             })
+                         }
+                     }
+                 }, {
+                     text: "取消",
+                     style: "default"
+                 }]
+             })
+         });
+         var sure_btn = true;
+         $(".import_excel").off().click(function () {
+             dialog.init({
+                 title: "号码导入",
+                 textarea: {
+                     html: "<textarea class='form-control phone_content' placeholder='请输入手机号码和姓名,以英文逗号\",\"分隔;多条以换行分隔'></textarea><div class='text-right import_container pr'><div class='import_batch'>批量导入</div><form id='file-form' enctype='multipart/form-data'><input type='file' name='file' class='excel-file'><form></div>"
+                 },
+                 buttons: [{
+                     text: "确认",
+                     style: "green btn-import",
+                     func: function () {
+                         var result = $('.phone_content').val();
+                         var content = result.split(/\s+/);
+                         var len = content.length;
+                         var data = [];
+                         for (var i = 0; i < len; i++) {
+                             var item = content[i].split(",");
+                             var phone = item[0];
+                             var name = item[1];
+                             data.push({
+                                 Name: name,
+                                 Phone: phone,
+                                 btn_id: "tele_man_input_phone_number"
+                             });
+                         }
+                         if (!sure_btn) {
+                             return false;
+                         }
+                         sure_btn = false;
+                         $(".btn-import").text("请等待");
+                         if (result == '') {
+                             alert('请输入或导入号码');
+                             return false;
+                         } else if ($(".import_batch").text() == "导入中") {
+                             alert("请等待导入完成后再确认")
+                             return false;
+                         } else {
+                             $.ajax({
+                                 url: "/test/addimport",
+                                 type: 'post',
+                                 data: JSON.stringify(data),
+                                 dataType: "JSON",
+                                 success: function (result) {
+                                     if (result.ret == 200) {
+                                         alert(result.msg);
+                                         $(".J_modal").remove();
+                                         $.zget("/test/testlist", {}, function (back) {
+                                             if (back) {
+                                                 $("#wrapper_c").html(back);
+                                                 execjs(back);
+                                             }
+                                         })
+                                     } else {
+                                         alert(result.msg);
+                                         $('.approveBox').hide();
+                                         return false;
+                                     }
+                                 },
+                                 complete: function (rslt) {
+                                     sure_btn = true;
+                                     $(".btn-import").text("确认");
+                                 }
+                             })
+                         }
+                     }
+                 }, {
+                     text: "取消",
+                     style: "default"
+                 }]
+             })
+         });
+         $("body").off("change", ".excel-file").on("change", ".excel-file", function () {
+             var formData = new FormData(document.querySelector("#file-form"));
+             var file = $('.excel-file')[0].files[0];
+             var pattern = /(\.*.xls$)|(\.*.xlsx$)/;
+             var fileName = file.name;
+             var fileSize = file.size;
+             if (!pattern.test(fileName)) {
+                 alert("请选择xls或xlsx格式文件");
+                 return
+             }
+             if (fileSize > 1024 * 1024 * 2) {
+                 alert("文件不得超过2M");
+                 return;
+             }
+             formData.append('file', $('.excel-file')[0].files[0]);
+             $(".import_batch").text("导入中");
+             $.ajax({
+                 url: '/Test/Import',
+                 type: 'POST',
+                 data: formData,
+                 cache: false,
+                 processData: false,
+                 contentType: false,
+                 success: function (rslt) {
+                     if (rslt.ret == 200) {
+                         var len = rslt.data && rslt.data.length || 0;
+                         var html = "";
+                         for (var i = 0; i < len; i++) {
+                             var item = rslt.data[i];
+                             if (i == len - 1) {
+                                 html += item.Name + "," + item.Phone;
+                             } else {
+                                 html += item.Name + "," + item.Phone + "\n";
+                             }
+                         }
+                         if ($(".phone_content").val() == "" || $(".phone_content").val() == undefined) {
+                             $(".phone_content").val(html)
+                         } else {
+                             $(".phone_content").val($(".phone_content").val() + "\n" + html)
+                         }
+                     }
+                 },
+                 complete: function (rslt) {
+                     $(".import_batch").text("批量导入");
+                 }
+             })
+         })
+
+</script>

@@ -1,0 +1,293 @@
+<!-- 订单管理 -->
+<input style="display:none" type="text" name="fakeusernameremembered"/>
+<input style="display:none" type="password" name="fakepasswordremembered"/>
+<div class="sticky-header">
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel_border" style='min-height:auto;'>
+                        <div class="panel_heading">
+                            <form id="searchForm2" action="" method="get">
+                                <ul class="nav pull-left" style="width: 100%">
+                                    <li class="pull-left">
+                                        <input type="text" class="input-medium" value="" placeHolder="流水号" name="paybill" id="paybill"/>&nbsp;&nbsp;
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="input_status" id="input_status">
+                                            <option value="">状态</option>
+                                            <option value="还款成功">还款成功</option>
+                                            <option value="转出">转出</option>
+                                            <option value="已经处理过">已经处理过</option>
+                                            <option value="时间格式错误">时间格式错误</option>
+                                            <option value="该笔还款计划正在还款中">该笔还款计划正在还款中</option>
+                                            <option value="未获取到手机号">未获取到手机号</option>
+                                            <option value="转账金额大于应还金额">转账金额大于应还金额</option>
+                                            <option value="该用户有多条还款计划">该用户有多条还款计划</option>
+                                            <option value="未找到需要处理的还款计划">未找到需要处理的还款计划</option>
+                                            <option value="还款金额不能大于本期应还金额">还款金额不能大于本期应还金额</option>
+                                            <option value="获取用户详细信息失败">获取用户详细信息失败</option>
+                                            <option value="该笔还款计划已结清">该笔还款计划已结清</option>
+                                            <option value="获取还款计划信息失败">获取还款计划信息失败</option>
+                                            <option value="还款失败">还款失败</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <select name="deal_result" id="deal_result">
+                                            <option value="">处理结果</option>
+                                            <option value="处理成功">处理成功</option>
+                                            <option value="处理成功,含多余还款">处理成功,含多余还款</option>
+                                            <option value="处理成功,已退多余还款">处理成功,已退多余还款</option>
+                                            <option value="多余还款">多余还款</option>
+                                            <option value="已退款">已退款</option>
+                                        </select>
+                                    </li>
+                                    <li class="pull-left">
+                                        <input id="startDate_submit" class="Wdate input-small" value="{{.startSubmitTime}}" type="text" onFocus="var endDate_submit=$dp.$('endDate_submit');WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endDate_submit.focus();},maxDate:'#F{$dp.$D(\'endDate_submit\')}'})"
+                                            name="startDate" placeholder="起始转账时间" /> &nbsp;-&nbsp;
+                                        <input id="endDate_submit" class="Wdate input-small" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startDate_submit\')}'})"
+                                            value="{{.endSubmitTime}}" name="endDate" placeholder="截止转账时间" />&nbsp;&nbsp;
+                                    </li>
+                                    <li class="pull-left">
+                                        <button type="submit" class="btn btn-green">搜索</button>
+                                    </li>
+                                    <li class="pull-left" style="margin-left: 10px">
+                                        <button type="button" id="export" class="btn btn-green">导出数据</button>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                        <div class="panel-body">
+                            <form action="" id="form2" method="post">
+                                <table class="table table-hover table-striped table_thead_fixed">
+                                    <thead>
+                                        <tr>
+                                            <th>流水号</th>
+                                            <th>转账时间</th>
+                                            <th>转账金额</th>
+                                            <th>备注</th>
+                                            <th>状态</th>
+                                            <th>处理结果</th>
+                                            <th>多余还款</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{range $k,$v := .list}}
+                                        <tr class="trs">
+                                            <td style="width: 289px;">{{$v.OidPaybill}}</td>
+                                            <td>{{$v.ReturnTime.Format "2006-01-02 15:04:05"}}</td>
+                                            <td>{{$v.AmountIncome}}</td>
+                                            <td>{{$v.Remark}}</td>
+                                            <td>{{$v.Remark1}}</td>
+                                            <td>{{$v.Remark2}}</td>
+                                            <td>{{if eq $v.ExtraRepayment 0.00 }} {{""}} {{else}}{{$v.ExtraRepayment}} {{end}}</td>
+                                            <td>
+                                                {{if eq $v.IsDeal 1}}
+                                                    <span class='mainColor-text ali_deal f-pointer' data-id='{{IdUidEncrypt $v.Id}}' data-amountincome='{{$v.AmountIncome}}'>处理</span>&nbsp;&nbsp;
+                                                {{else if eq $v.IsDeal 3}}
+                                                    <span class='mainColor-text ali_deal f-pointer' data-id='{{IdUidEncrypt $v.Id}}' data-amountincome='{{$v.AmountIncome}}'>处理</span>&nbsp;&nbsp;
+                                                {{else if eq $v.IsDeal 0}}
+                                                    <span class='mainColor-text ali_deal f-pointer' data-id='{{IdUidEncrypt $v.Id}}' data-amountincome='{{$v.AmountIncome}}'>处理</span>&nbsp;&nbsp;
+                                                {{end}}
+                                                {{if ne $v.Remark2 ""}}
+                                                    <span class='mainColor-text ali_revise f-pointer' data-id='{{IdUidEncrypt $v.Id}}'>修改结果</span>
+                                                {{end}}
+                                                {{if eq $v.Remark1 "未获取到手机号"}}
+                                                    {{if eq $v.Remark2 ""}}
+                                                       <span class='mainColor-text ali_repay f-pointer' data-id='{{IdUidEncrypt $v.Id}}'  data-amountincome='{{$v.AmountIncome}}' data-oidPaybill='{{ $v.OidPaybill}}'>还款</span>
+                                                    {{end}}
+                                                {{end}}
+                                            </td>
+                                        </tr>
+                                        {{end}}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="8">
+                                                <div class="fl">
+                                                    <div class="pagination"> 每页
+                                                        <select name="" id="" class='form-control pageSize' style='display:inline-block;width:auto;'>
+                                                            <option value="15">15</option>
+                                                            <option value="20">20</option>
+                                                            <option value="30">30</option>
+                                                            <option value="50">50</option>
+                                                            <option value="100">100</option>
+                                                        </select> 条，总共{{.count}}条 转账金额 {{.sumAmountIncome}}元 共有多余还款 {{.sumExtraRepayment}}元
+                                                    </div>
+                                                </div>
+                                                <div class="fl">
+                                                    <div class="pagination" id="pagination2" data-url="" pageSize='{{.pageSize}}' currentPage="{{.currPage}}" pageCount="{{.pageCount}}"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                $("#pagination2").my_page("#searchForm2");
+                $("body").on("change","#modal_deal_result",function(){
+                    var value = $(this).val();
+                    if($("#approveMoney").length == 0){
+                        if(value == "处理成功,含多余还款" || value== '处理成功,已退多余还款'){
+                            $(this).after('<br><input type="number" id="approveMoney" class="loan_pop_inp form-control" min="0" placeholder="请输入多余还款金额">')
+                        }
+                    }else{
+                        if(value != "处理成功,含多余还款" && value != '处理成功,已退多余还款'){
+                            $("#approveMoney").prev("br").remove()
+                            $("#approveMoney").hide().remove();
+                        }
+                    }
+                })
+                $(".ali_revise").click(function () {
+                    var id = $(this).data("id");
+                    var options = '<select id="modal_deal_result" class="form-control"><option value="">请选择处理结果</option><option value="处理成功">处理成功</option><option value="处理成功,含多余还款">处理成功,含多余还款</option><option value="多余还款">多余还款</option><option value="已退款">已退款</option><option value="处理成功,已退多余还款">处理成功,已退多余还款</option></select>';
+                    dialog.init({
+                        title: "修改处理结果",
+                        input: {
+                            html: options
+                        },
+                        buttons: [{
+                            text: "确认",
+                            style: "green",
+                            func: function () {
+                                var result = $('#modal_deal_result').val();
+                                var approveMoney = $('#approveMoney').val();
+                                if (result == '') {
+                                    alert('请输入处理结果');
+                                    return false;
+                                } else if (approveMoney == '' && (result == "处理成功,含多余还款成功" && result == "处理成功,已退多余还款")) {
+                                    alert('请输入金额')
+                                    return false;
+                                } else {
+                                    $.ajax({
+                                        url: '/financedata/modifyremark',
+                                        type: 'post',
+                                        data: { newRemark: result, money: approveMoney, id: id},
+                                        success: function (result) {
+                                            if (result.ret == 200) {
+                                                $(".J_modal").remove();
+                                                // getpage(location.href)
+                                                location.reload();
+                                            } else {
+                                                alert(result.msg);
+                                                $('.approveBox').hide();
+                                                return false;
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        }, {
+                            text: "取消",
+                            style: "default"
+                        }]
+                    })
+                });
+                $(".ali_deal").click(function () {
+                    var id = $(this).data("id");
+                    var amountIncome = $(this).data("amountincome");
+                    var options = '<select id="modal_deal_result" class="form-control"><option value="">请选择处理结果</option><option value="处理成功">处理成功</option><option value="处理成功,含多余还款">处理成功,含多余还款</option><option value="多余还款">多余还款</option><option value="已退款">已退款</option><option value="处理成功,已退多余还款">处理成功,已退多余还款</option></select>';
+                    dialog.init({
+                        title: "提示",
+                        select: {
+                            html: options
+                        },
+                        buttons: [{
+                            text: "确认",
+                            style: "green",
+                            func: function () {
+                                var result = $('#modal_deal_result').val();
+                                var approveMoney = $('#approveMoney').val();
+                                if (result == '') {
+                                    alert('处理结果');
+                                    return false;
+                                } else if (approveMoney == '' && (result != "处理成功,含多余还款成功" && result != "处理成功,已退多余还款")) {
+                                    alert('请输入金额')
+                                    return false;
+                                } else {
+                                    $.ajax({
+                                        url: '/financedata/getremark',
+                                        type: 'post',
+                                        data: { id: id, resultCode: result, money: approveMoney, amountIncome: amountIncome },
+                                        success: function (result) {
+                                            if (result.ret == 200) {
+                                                $(".J_modal").remove();
+                                                // getpage(location.href)
+                                                location.reload();
+                                            } else {
+                                                alert(result.msg);
+                                                $('.approveBox').hide();
+                                                return false;
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        }, {
+                            text: "取消",
+                            style: "default"
+                        }]
+                    })
+                });
+                $(".ali_repay").click(function () {
+                    var id = $(this).data("id");
+                    var oidpaybill = $(this).data("oidpaybill");
+                    var amountincome = $(this).data("amountincome");
+                    dialog.init({
+                        title: "提示",
+                        input: {
+                            html: '<input type="text" class="form-control modal_user_phone" placeholder="请输入用户手机号"><br><input id="loan_date" class="Wdate form-control" value="" type="text" onFocus="var endDate_submit=$dp.$(\'endDate_submit\');WdatePicker({dateFmt:\'yyyy-MM-dd HH:mm:ss\'})" placeholder="请输入转账时间" />'
+                        },
+                        buttons: [{
+                            text: "确认",
+                            style: "green",
+                            func: function () {
+                                var alirepay_time = $('#loan_date').val();//上级id
+                                var account = $('.modal_user_phone').val();//提交原因
+
+                                if (account == '') {
+                                    alert('请填写用户手机号码');
+                                    return false;
+                                }  else {
+                                    $.ajax({
+                                        url: '/financedata/alirepay',
+                                        type: 'post',
+                                        data: {id:id,oidpaybill:oidpaybill,amountincome:amountincome,account:account,alirepay_time:alirepay_time},
+                                        success: function (result) {
+                                            if (result.ret == 200) {
+                                                $(".J_modal").remove();
+                                                // getpage(location.href)
+                                                location.reload();
+                                            } else {
+                                                alert(result.msg);
+                                                location.reload();
+                                                $('.approveBox').hide();
+                                                return false;
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        }, {
+                            text: "取消",
+                            style: "default"
+                        }]
+                    })
+                });
+            });
+            $('#export').on('click', function () {
+                var paybill = $("#paybill").val();      //流水号
+                var input_status = $('#input_status').val();      //状态
+                var deal_result = $('#deal_result').val();      //处理结果
+                var startDate_submit = $('#startDate_submit').val();      //起始转账时间
+                var endDate_submit = $('#endDate_submit').val();      //截止转账时间
+                var url = '/financedata/ailirepaymenttoexcel?paybill=' + paybill + '&input_status=' + input_status + '&deal_result=' + deal_result + '&startDate=' + startDate_submit+ '&endDate=' + endDate_submit;
+                window.location.href = url;
+            });
+        </script>

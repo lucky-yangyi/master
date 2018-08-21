@@ -1,0 +1,85 @@
+
+<!-- 注册用户查看 -->
+<style>
+    .panel {
+        min-height: 405px;
+    }
+
+    .itemContent .item-left {
+        width: 120px;
+    }
+</style>
+<div class="sticky-header">
+    <div class="wrapper">
+        <div class='panel col-md-12' style="min-height:405px;">
+            <!-- 基本信息 -->
+            <form class='form-inline'>
+                <div class="panel-title">
+                    <b class='panel-line'></b> 基本信息
+                </div>
+                <div class="panel-body" id='basic_body'>
+                    <table class='table table-noborder'>
+                        <tbody>
+                        <tr>
+                            <td width='5%'>手机号</td>
+                            <td width='10%'>{{.saleman.Account}}</td>
+                            <td width='5%'>推广邀请码</td>
+                            <td width='60%'>{{.saleman.InviteCode}}</td>
+                        </tr>
+                        <tr>
+                            <td>姓名</td>
+                            <td>{{.saleman.Saleman}}</td>
+                        </tr>
+                        <tr>
+                            <td>营业部</td>
+                            <td>{{.saleman.OperaDep}}</td>
+                        </tr>
+                        <tr>
+                            <td>直辖市/省</td>
+                            <td>{{.saleman.Place}}</td>
+                        </tr>
+                        <tr>
+                            <td>大区</td>
+                            <td>{{.saleman.Region}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            </form>
+        </div>
+        <!-- 资料详情 -->
+        <div class="panel col-md-12">
+            <ul class='workplace-nav clearfix'>
+                <li class="active" data-url='/salesman/getusersisauth'>已认证客户</li>
+                <li data-url='/salesman/getusersnotisauth'>未认证客户</li>
+            </ul>
+            <div class='detail-info clearfix'>
+
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="../../static/js/permissions.js"></script>
+    <script>
+        $(function () {
+            $(".workplace-nav li").click(function () {
+                ajaxLoad($(this));
+            });
+            ajaxLoad($(".workplace-nav li").eq(0));
+        });
+        function ajaxLoad(ele) {
+            var url = ele.data("url");
+            var id ={{IdUidEncrypt .saleman.Id}};
+            if (url == "/salesman/getusersisauth") {
+                data = { id: id, is_manage: true };
+            } else {
+                data = { id: id };
+            }
+            $.zget(url, data, function (rslt) {
+                $(".workplace-nav li").removeClass("active");
+                ele.addClass("active");
+                $(".detail-info").empty().html(rslt);
+            })
+        }
+    </script>
+</div>
